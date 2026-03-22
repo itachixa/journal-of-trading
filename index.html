@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProTrade Journal - Trading Forex & Crypto</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <span>ProTrade</span>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-section="dashboard">
+                    <i class="fas fa-th-large"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-section="add-trade">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Ajouter Trade</span>
+                </a>
+                <a href="#" class="nav-item" data-section="trades">
+                    <i class="fas fa-list"></i>
+                    <span>Mes Trades</span>
+                </a>
+                <a href="#" class="nav-item" data-section="stats">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Statistiques</span>
+                </a>
+                <a href="#" class="nav-item" data-section="checklist">
+                    <i class="fas fa-check-square"></i>
+                    <span>Checklist</span>
+                </a>
+                <a href="#" class="nav-item" data-section="notes">
+                    <i class="fas fa-sticky-note"></i>
+                    <span>Notes de Marché</span>
+                </a>
+                <a href="#" class="nav-item" data-section="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Paramètres</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                    <span>Mode Sombre</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="header-title">
+                    <h1>Dashboard</h1>
+                    <p class="subtitle">Journal de Trading Professionnel</p>
+                </div>
+                <div class="header-actions">
+                    <div class="capital-display">
+                        <span class="label">Capital</span>
+                        <span class="value" id="displayCapital">$0.00</span>
+                    </div>
+                    <button class="btn-icon" id="notificationBtn">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section class="content-section active" id="dashboard">
+                <!-- Quick Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon win">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Winrate</span>
+                            <span class="stat-value" id="statWinrate">0%</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon trades">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Total Trades</span>
+                            <span class="stat-value" id="statTotalTrades">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon profit">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Profit Total</span>
+                            <span class="stat-value" id="statProfit">$0.00</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon factor">
+                            <i class="fas fa-balance-scale"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Profit Factor</span>
+                            <span class="stat-value" id="statProfitFactor">0.00</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon discipline">
+                            <i class="fas fa-medal"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Score Discipline</span>
+                            <span class="stat-value" id="statDiscipline">0/100</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon drawdown">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Drawdown Max</span>
+                            <span class="stat-value" id="statDrawdown">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Equity Curve -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h2>Courbe d'Équité</h2>
+                        <div class="chart-controls">
+                            <button class="chart-btn active" data-range="all">Tout</button>
+                            <button class="chart-btn" data-range="month">Mois</button>
+                            <button class="chart-btn" data-range="week">Semaine</button>
+                            <button class="chart-btn" data-range="day">Jour</button>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="equityChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Trades & Performance -->
+                <div class="dashboard-grid">
+                    <div class="recent-trades">
+                        <div class="section-header">
+                            <h2>Trades Récents</h2>
+                            <button class="btn-link" data-section="trades">Voir tout</button>
+                        </div>
+                        <div class="trades-list" id="recentTrades">
+                            <div class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <p>Aucun trade enregistré</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="performance-breakdown">
+                        <div class="section-header">
+                            <h2>Performance par Paire</h2>
+                        </div>
+                        <div class="performance-chart">
+                            <canvas id="pairChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trading Rules Reminder -->
+                <div class="rules-card">
+                    <div class="rules-header">
+                        <i class="fas fa-lightbulb"></i>
+                        <h3>Rappel des Règles de Trading</h3>
+                    </div>
+                    <div class="rules-list">
+                        <div class="rule-item">
+                            <i class="fas fa-check"></i>
+                            <span>Risk/Reward minimum 1:3</span>
+                        </div>
+                        <div class="rule-item">
+                            <i class="fas fa-check"></i>
+                            <span>Ne pas risquer plus de 2% par trade</span>
+                        </div>
+                        <div class="rule-item">
+                            <i class="fas fa-check"></i>
+                            <span>Respecter le plan de trading</span>
+                        </div>
+                        <div class="rule-item">
+                            <i class="fas fa-check"></i>
+                            <span>Analyser avant d'entrer en position</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Add Trade Section -->
+            <section class="content-section" id="add-trade">
+                <div class="section-header">
+                    <h2>Nouveau Trade</h2>
+                </div>
+                <form class="trade-form" id="tradeForm">
+                    <div class="form-grid">
+                        <!-- Row 1 -->
+                        <div class="form-group">
+                            <label for="tradeDate">Date & Heure</label>
+                            <input type="datetime-local" id="tradeDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pair">Paire de Trading</label>
+                            <select id="pair" required>
+                                <option value="">Sélectionner...</option>
+                                <option value="XAUUSD">XAUUSD (Or)</option>
+                                <option value="EURUSD">EURUSD</option>
+                                <option value="BTCUSD">BTCUSD</option>
+                                <option value="GBPUSD">GBPUSD</option>
+                                <option value="USDJPY">USDJPY</option>
+                                <option value="ETHUSD">ETHUSD</option>
+                                <option value="OTHER">Autre</option>
+                            </select>
+                        </div>
+                        <!-- Row 2 -->
+                        <div class="form-group">
+                            <label for="tradeType">Type de Position</label>
+                            <select id="tradeType" required>
+                                <option value="">Sélectionner...</option>
+                                <option value="Buy">Buy</option>
+                                <option value="Sell">Sell</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tradingType">Type de Trading</label>
+                            <select id="tradingType" required>
+                                <option value="">Sélectionner...</option>
+                                <option value="Scalping">Scalping</option>
+                                <option value="Intraday">Intraday</option>
+                                <option value="Swing">Swing</option>
+                            </select>
+                        </div>
+                        <!-- Row 3 -->
+                        <div class="form-group">
+                            <label for="lotSize">Taille du Lot</label>
+                            <input type="number" id="lotSize" step="0.01" min="0.01" placeholder="0.10" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="riskPercent">Risque (%)</label>
+                            <input type="number" id="riskPercent" step="0.1" min="0.1" max="100" placeholder="Auto" value="2">
+                        </div>
+                        <!-- Row 4 -->
+                        <div class="form-group">
+                            <label for="stopLoss">Stop Loss (pips)</label>
+                            <input type="number" id="stopLoss" step="0.1" min="0.1" placeholder="20" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="takeProfit">Take Profit (pips)</label>
+                            <input type="number" id="takeProfit" step="0.1" min="0.1" placeholder="60" required>
+                        </div>
+                        <!-- Row 5 -->
+                        <div class="form-group">
+                            <label>Risk/Reward Ratio</label>
+                            <input type="text" id="rrDisplay" readonly placeholder="1:0">
+                        </div>
+                        <div class="form-group">
+                            <label for="result">Résultat ($)</label>
+                            <input type="number" id="result" step="0.01" placeholder="0.00">
+                        </div>
+                        <!-- Row 6 -->
+                        <div class="form-group">
+                            <label for="resultPercent">Résultat (%)</label>
+                            <input type="number" id="resultPercent" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="screenshot">Screenshot</label>
+                            <input type="file" id="screenshot" accept="image/*">
+                        </div>
+                        <!-- Tags -->
+                        <div class="form-group full-width">
+                            <label>Tags</label>
+                            <div class="tags-container">
+                                <label class="tag-checkbox">
+                                    <input type="checkbox" name="tags" value="BOS">
+                                    <span>BOS</span>
+                                </label>
+                                <label class="tag-checkbox">
+                                    <input type="checkbox" name="tags" value="FVG">
+                                    <span>FVG</span>
+                                </label>
+                                <label class="tag-checkbox">
+                                    <input type="checkbox" name="tags" value="Liquidity Grab">
+                                    <span>Liquidity Grab</span>
+                                </label>
+                                <label class="tag-checkbox">
+                                    <input type="checkbox" name="tags" value="Trendline">
+                                    <span>Trendline</span>
+                                </label>
+                                <label class="tag-checkbox">
+                                    <input type="checkbox" name="tags" value="Fibo">
+                                    <span>Fibo</span>
+                                </label>
+                                <label class="tag-checkbox">
+                                    <input type="checkbox" name="tags" value="Support/Resistance">
+                                    <span>Support/Résistance</span>
+                                </label>
+                                <label class="tag-checkbox">
+                                    <input type="checkbox" name="tags" value="Price Action">
+                                    <span>Price Action</span>
+                                </label>
+                                <label class="tag-checkbox">
+                                    <input type="checkbox" name="tags" value="News">
+                                    <span>News</span>
+                                </label>
+                            </div>
+                        </div>
+                        <!-- Comment -->
+                        <div class="form-group full-width">
+                            <label for="comment">Commentaire</label>
+                            <textarea id="comment" rows="3" placeholder="Analyse du trade, observations..."></textarea>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="clearForm">Effacer</button>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-save"></i>
+                            Enregistrer le Trade
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Trades List Section -->
+            <section class="content-section" id="trades">
+                <div class="section-header">
+                    <h2>Mes Trades</h2>
+                    <div class="header-actions">
+                        <button class="btn-secondary" id="exportCSV">
+                            <i class="fas fa-file-csv"></i>
+                            Export CSV
+                        </button>
+                        <button class="btn-secondary" id="exportPDF">
+                            <i class="fas fa-file-pdf"></i>
+                            Export PDF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="filters-bar">
+                    <div class="filter-group">
+                        <label>Paire</label>
+                        <select id="filterPair">
+                            <option value="">Toutes</option>
+                            <option value="XAUUSD">XAUUSD</option>
+                            <option value="EURUSD">EURUSD</option>
+                            <option value="BTCUSD">BTCUSD</option>
+                            <option value="GBPUSD">GBPUSD</option>
+                            <option value="USDJPY">USDJPY</option>
+                            <option value="ETHUSD">ETHUSD</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Type</label>
+                        <select id="filterType">
+                            <option value="">Tous</option>
+                            <option value="Buy">Buy</option>
+                            <option value="Sell">Sell</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Résultat</label>
+                        <select id="filterResult">
+                            <option value="">Tous</option>
+                            <option value="win">Win</option>
+                            <option value="loss">Loss</option>
+                            <option value="breakeven">Break-even</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Date</label>
+                        <input type="date" id="filterDate">
+                    </div>
+                    <div class="filter-group">
+                        <label>Tag</label>
+                        <select id="filterTag">
+                            <option value="">Tous</option>
+                            <option value="BOS">BOS</option>
+                            <option value="FVG">FVG</option>
+                            <option value="Liquidity Grab">Liquidity Grab</option>
+                            <option value="Trendline">Trendline</option>
+                            <option value="Fibo">Fibo</option>
+                            <option value="Support/Resistance">Support/Résistance</option>
+                            <option value="Price Action">Price Action</option>
+                            <option value="News">News</option>
+                        </select>
+                    </div>
+                    <button class="btn-icon" id="clearFilters" title="Effacer les filtres">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Trades Table -->
+                <div class="trades-table-container">
+                    <table class="trades-table" id="tradesTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Paire</th>
+                                <th>Type</th>
+                                <th>Style</th>
+                                <th>Lot</th>
+                                <th>SL</th>
+                                <th>TP</th>
+                                <th>RR</th>
+                                <th>Résultat</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tradesTableBody">
+                        </tbody>
+                    </table>
+                    <div class="empty-state" id="emptyTrades">
+                        <i class="fas fa-inbox"></i>
+                        <p>Aucun trade trouvé</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Statistics Section -->
+            <section class="content-section" id="stats">
+                <div class="section-header">
+                    <h2>Statistiques Détaillées</h2>
+                    <div class="time-range-selector">
+                        <button class="time-btn active" data-time="all">Tout</button>
+                        <button class="time-btn" data-time="month">Ce Mois</button>
+                        <button class="time-btn" data-time="week">Cette Semaine</button>
+                        <button class="time-btn" data-time="day">Aujourd'hui</button>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="detailed-stats">
+                    <div class="detail-card">
+                        <h3>Winrate</h3>
+                        <div class="detail-value" id="detailWinrate">0%</div>
+                        <div class="detail-chart">
+                            <canvas id="winrateChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="detail-card">
+                        <h3>Profit Factor</h3>
+                        <div class="detail-value" id="detailProfitFactor">0.00</div>
+                        <p class="detail-info">Gross Profit / Gross Loss</p>
+                    </div>
+                    <div class="detail-card">
+                        <h3>Average Win</h3>
+                        <div class="detail-value win" id="detailAvgWin">$0.00</div>
+                    </div>
+                    <div class="detail-card">
+                        <h3>Average Loss</h3>
+                        <div class="detail-value loss" id="detailAvgLoss">$0.00</div>
+                    </div>
+                    <div class="detail-card">
+                        <h3>Risk/Reward Moyen</h3>
+                        <div class="detail-value" id="detailAvgRR">1:0</div>
+                    </div>
+                    <div class="detail-card">
+                        <h3>Consecutive Wins</h3>
+                        <div class="detail-value" id="detailConsecutiveWins">0</div>
+                    </div>
+                    <div class="detail-card">
+                        <h3>Consecutive Losses</h3>
+                        <div class="detail-value loss" id="detailConsecutiveLosses">0</div>
+                    </div>
+                    <div class="detail-card">
+                        <h3>Plus Gros Win</h3>
+                        <div class="detail-value win" id="detailMaxWin">$0.00</div>
+                    </div>
+                </div>
+
+                <!-- Stats by Category -->
+                <div class="stats-breakdown">
+                    <div class="breakdown-card">
+                        <h3>Par Paire</h3>
+                        <div class="breakdown-content" id="statsByPair">
+                            <div class="empty-state small">
+                                <p>Aucune donnée</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="breakdown-card">
+                        <h3>Par Type de Trade</h3>
+                        <div class="breakdown-content" id="statsByType">
+                            <div class="empty-state small">
+                                <p>Aucune donnée</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="breakdown-card">
+                        <h3>Par RR</h3>
+                        <div class="breakdown-content" id="statsByRR">
+                            <div class="empty-state small">
+                                <p>Aucune donnée</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Checklist Section -->
+            <section class="content-section" id="checklist">
+                <div class="section-header">
+                    <h2>Checklist Avant Trade</h2>
+                </div>
+                <div class="checklist-container">
+                    <div class="checklist-card">
+                        <h3><i class="fas fa-search"></i> Analyse du Marché</h3>
+                        <div class="checklist-items">
+                            <label class="checklist-item">
+                                <input type="checkbox" id="checkTrend">
+                                <span>Trend identifié (H1, H4, D1)</span>
+                            </label>
+                            <label class="checklist-item">
+                                <input type="checkbox" id="checkKeyLevels">
+                                <span>Key levels identifiés (S/R, Liquidity)</span>
+                            </label>
+                            <label class="checklist-item">
+                                <input type="checkbox" id="checkEntry">
+                                <span>Zone d'entrée确定</span>
+                            </label>
+                            <label class="checklist-item">
+                                <input type="checkbox" id="checkPattern">
+                                <span>Pattern price action identifié</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="checklist-card">
+                        <h3><i class="fas fa-shield-alt"></i> Gestion du Risque</h3>
+                        <div class="checklist-items">
+                            <label class="checklist-item">
+                                <input type="checkbox" id="checkRR">
+                                <span>RR ≥ 1:3</span>
+                            </label>
+                            <label class="checklist-item">
+                                <input type="checkbox" id="checkRisk">
+                                <span>Risque ≤ 2% du capital</span>
+                            </label>
+                            <label class="checklist-item">
+                                <input type="checkbox" id="checkSL">
+                                <span>Stop Loss placé</span>
+                            </label>
+                            <label class="checklist-item">
+                                <input type="checkbox" id="checkTP">
+                                <span>Take Profit défini</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="checklist-card">
+                        <h3><i class="fas fa-clock"></i> Horaires</h3>
+                        <div class="checklist-items">
+                            <label class="checklist-item">
+                                <input type="checkbox" id="checkSession">
+                                <span>Session de trading appropriée</span>
+                            </label>
+                            <label class="checklist-item">
+                                <input type="checkbox" id="checkNews">
+                                <span>Pas de news majeures dans 30min</span>
+                            </label>
+                            <label class="checklist-item">
+                                <input type="checkbox" id="checkFocus">
+                                <span>État mental optimal</span>
+                            </label>
+                            <label class="checklist-item">
+                                <input type="checkbox" id="checkPlan">
+                                <span>Plan de trade noté</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="checklist-actions">
+                        <button class="btn-secondary" id="resetChecklist">Réinitialiser</button>
+                        <button class="btn-primary" id="saveChecklist">Sauvegarder</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Notes Section -->
+            <section class="content-section" id="notes">
+                <div class="section-header">
+                    <h2>Notes de Marché</h2>
+                    <button class="btn-primary" id="addNote">
+                        <i class="fas fa-plus"></i>
+                        Nouvelle Note
+                    </button>
+                </div>
+                <div class="notes-container" id="notesContainer">
+                    <div class="empty-state" id="emptyNotes">
+                        <i class="fas fa-sticky-note"></i>
+                        <p>Aucune note</p>
+                        <button class="btn-secondary" id="addFirstNote">Ajouter une note</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section class="content-section" id="settings">
+                <div class="section-header">
+                    <h2>Paramètres du Compte</h2>
+                </div>
+                <div class="settings-container">
+                    <div class="settings-card">
+                        <h3>Capital Initial</h3>
+                        <div class="form-group">
+                            <label for="initialCapital">Montant ($)</label>
+                            <input type="number" id="initialCapital" step="0.01" placeholder="10000.00">
+                        </div>
+                        <button class="btn-primary" id="saveCapital">Sauvegarder</button>
+                    </div>
+                    <div class="settings-card">
+                        <h3>Gestion des Données</h3>
+                        <div class="settings-actions">
+                            <button class="btn-secondary" id="exportAllData">
+                                <i class="fas fa-download"></i>
+                                Exporter Toutes les Données
+                            </button>
+                            <button class="btn-danger" id="clearAllData">
+                                <i class="fas fa-trash"></i>
+                                Effacer Toutes les Données
+                            </button>
+                        </div>
+                    </div>
+                    <div class="settings-card">
+                        <h3>À Propos</h3>
+                        <div class="about-info">
+                            <p><strong>ProTrade Journal v1.0</strong></p>
+                            <p>Journal de trading professionnel pour Forex et Crypto</p>
+                            <p class="muted">Déployé sur Vercel</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Image Modal -->
+    <div class="modal" id="imageModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeModal">
+                <i class="fas fa-times"></i>
+            </button>
+            <img src="" alt="Trade Screenshot" id="modalImage">
+            <div class="modal-controls">
+                <button id="zoomOut"><i class="fas fa-minus"></i></button>
+                <span id="zoomLevel">100%</span>
+                <button id="zoomIn"><i class="fas fa-plus"></i></button>
+                <button id="resetZoom"><i class="fas fa-sync"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Note Modal -->
+    <div class="modal" id="noteModal">
+        <div class="modal-content note-modal-content">
+            <button class="modal-close" id="closeNoteModal">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3>Nouvelle Note</h3>
+            <div class="form-group">
+                <label for="noteTitle">Titre</label>
+                <input type="text" id="noteTitle" placeholder="Titre de la note">
+            </div>
+            <div class="form-group">
+                <label for="noteContent">Contenu</label>
+                <textarea id="noteContent" rows="6" placeholder="Vos observations, analyses..."></textarea>
+            </div>
+            <div class="form-actions">
+                <button class="btn-secondary" id="cancelNote">Annuler</button>
+                <button class="btn-primary" id="saveNote">Sauvegarder</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
