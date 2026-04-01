@@ -25,6 +25,10 @@
                     <i class="fas fa-th-large"></i>
                     <span>Dashboard</span>
                 </a>
+                <a href="#" class="nav-item" data-section="lot-calculator">
+                    <i class="fas fa-calculator"></i>
+                    <span>Calculateur de Lot</span>
+                </a>
                 <a href="#" class="nav-item" data-section="add-trade">
                     <i class="fas fa-plus-circle"></i>
                     <span>Ajouter Trade</span>
@@ -207,6 +211,129 @@
                 </div>
             </section>
 
+            <!-- Lot Calculator Section -->
+            <section class="content-section" id="lot-calculator">
+                <div class="section-header">
+                    <h2>Calculateur de Lot</h2>
+                    <p class="section-subtitle">Calculez la taille de position optimale pour chaque trade</p>
+                </div>
+                <div class="calculator-layout">
+                    <div class="calculator-inputs">
+                        <div class="calc-card">
+                            <h3><i class="fas fa-wallet"></i> Paramètres du Compte</h3>
+                            <div class="form-group">
+                                <label for="calcBalance">Balance du Compte ($)</label>
+                                <input type="number" id="calcBalance" step="0.01" min="0" placeholder="10000.00">
+                            </div>
+                            <div class="form-group">
+                                <label for="calcRisk">Risque (%)</label>
+                                <div class="risk-slider-container">
+                                    <input type="range" id="calcRiskSlider" min="0.1" max="10" step="0.1" value="2">
+                                    <input type="number" id="calcRisk" step="0.1" min="0.1" max="100" value="2">
+                                </div>
+                            </div>
+                            <div class="risk-amount-display">
+                                <span class="label">Montant risqué:</span>
+                                <span class="value" id="calcRiskAmount">$200.00</span>
+                            </div>
+                        </div>
+                        <div class="calc-card">
+                            <h3><i class="fas fa-chart-line"></i> Paramètres du Trade</h3>
+                            <div class="form-group">
+                                <label for="calcPair">Paire de Trading</label>
+                                <select id="calcPair">
+                                    <option value="XAUUSD">XAUUSD (Or)</option>
+                                    <option value="EURUSD">EURUSD</option>
+                                    <option value="GBPUSD">GBPUSD</option>
+                                    <option value="USDJPY">USDJPY</option>
+                                    <option value="BTCUSD">BTCUSD</option>
+                                    <option value="ETHUSD">ETHUSD</option>
+                                    <option value="AUDUSD">AUDUSD</option>
+                                    <option value="USDCAD">USDCAD</option>
+                                    <option value="NZDUSD">NZDUSD</option>
+                                    <option value="EURJPY">EURJPY</option>
+                                    <option value="GBPJPY">GBPJPY</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="calcSL">Stop Loss (pips)</label>
+                                <input type="number" id="calcSL" step="0.1" min="0.1" placeholder="20">
+                            </div>
+                            <div class="form-group">
+                                <label for="calcTP">Take Profit (pips) <span class="optional">(optionnel)</span></label>
+                                <input type="number" id="calcTP" step="0.1" min="0" placeholder="60">
+                            </div>
+                        </div>
+                        <button class="btn-primary btn-calculate" id="calculateLot">
+                            <i class="fas fa-calculator"></i>
+                            Calculer
+                        </button>
+                    </div>
+                    <div class="calculator-results">
+                        <div class="result-card main-result">
+                            <div class="result-icon"><i class="fas fa-layer-group"></i></div>
+                            <h3>Taille du Lot Recommandé</h3>
+                            <div class="result-value" id="resultLotSize">0.00</div>
+                            <div class="result-label">lots</div>
+                        </div>
+                        <div class="result-grid">
+                            <div class="result-card">
+                                <h4>Montant Risqué</h4>
+                                <div class="result-value small" id="resultRiskAmount">$0.00</div>
+                            </div>
+                            <div class="result-card">
+                                <h4>Valeur du Pip</h4>
+                                <div class="result-value small" id="resultPipValue">$0.00</div>
+                            </div>
+                            <div class="result-card">
+                                <h4>Risk/Reward</h4>
+                                <div class="result-value small" id="resultRR">1:0</div>
+                            </div>
+                            <div class="result-card">
+                                <h4>Profit Potentiel</h4>
+                                <div class="result-value small" id="resultPotentialProfit">$0.00</div>
+                            </div>
+                        </div>
+                        <div class="trade-config-summary" id="tradeConfigSummary" style="display:none;">
+                            <h3><i class="fas fa-clipboard-list"></i> Configuration du Trade</h3>
+                            <div class="config-items">
+                                <div class="config-item">
+                                    <span class="config-label">Paire</span>
+                                    <span class="config-value" id="configPair">-</span>
+                                </div>
+                                <div class="config-item">
+                                    <span class="config-label">Direction</span>
+                                    <div class="direction-toggle">
+                                        <button class="dir-btn active" data-dir="Buy" id="configBuy"><i class="fas fa-arrow-up"></i> Buy</button>
+                                        <button class="dir-btn" data-dir="Sell" id="configSell"><i class="fas fa-arrow-down"></i> Sell</button>
+                                    </div>
+                                </div>
+                                <div class="config-item">
+                                    <span class="config-label">Lot Size</span>
+                                    <span class="config-value" id="configLot">0.00</span>
+                                </div>
+                                <div class="config-item">
+                                    <span class="config-label">SL (pips)</span>
+                                    <span class="config-value" id="configSL">0</span>
+                                </div>
+                                <div class="config-item">
+                                    <span class="config-label">TP (pips)</span>
+                                    <span class="config-value" id="configTP">0</span>
+                                </div>
+                                <div class="config-item">
+                                    <span class="config-label">Risk $</span>
+                                    <span class="config-value" id="configRisk">$0.00</span>
+                                </div>
+                            </div>
+                            <button class="btn-primary btn-use-config" id="useConfig">
+                                <i class="fas fa-arrow-right"></i>
+                                Utiliser dans le formulaire
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Add Trade Section -->
             <section class="content-section" id="add-trade">
                 <div class="section-header">
@@ -288,40 +415,9 @@
                         </div>
                         <!-- Tags -->
                         <div class="form-group full-width">
-                            <label>Tags</label>
-                            <div class="tags-container">
-                                <label class="tag-checkbox">
-                                    <input type="checkbox" name="tags" value="BOS">
-                                    <span>BOS</span>
-                                </label>
-                                <label class="tag-checkbox">
-                                    <input type="checkbox" name="tags" value="FVG">
-                                    <span>FVG</span>
-                                </label>
-                                <label class="tag-checkbox">
-                                    <input type="checkbox" name="tags" value="Liquidity Grab">
-                                    <span>Liquidity Grab</span>
-                                </label>
-                                <label class="tag-checkbox">
-                                    <input type="checkbox" name="tags" value="Trendline">
-                                    <span>Trendline</span>
-                                </label>
-                                <label class="tag-checkbox">
-                                    <input type="checkbox" name="tags" value="Fibo">
-                                    <span>Fibo</span>
-                                </label>
-                                <label class="tag-checkbox">
-                                    <input type="checkbox" name="tags" value="Support/Resistance">
-                                    <span>Support/Résistance</span>
-                                </label>
-                                <label class="tag-checkbox">
-                                    <input type="checkbox" name="tags" value="Price Action">
-                                    <span>Price Action</span>
-                                </label>
-                                <label class="tag-checkbox">
-                                    <input type="checkbox" name="tags" value="News">
-                                    <span>News</span>
-                                </label>
+                            <label>Tags <button type="button" class="btn-link" id="manageTagsBtn"><i class="fas fa-cog"></i> Gérer les tags</button></label>
+                            <div class="tags-container" id="tradeTagsContainer">
+                                <!-- Tags dynamiques chargés depuis state.customTags -->
                             </div>
                         </div>
                         <!-- Comment -->
@@ -395,14 +491,6 @@
                         <label>Tag</label>
                         <select id="filterTag">
                             <option value="">Tous</option>
-                            <option value="BOS">BOS</option>
-                            <option value="FVG">FVG</option>
-                            <option value="Liquidity Grab">Liquidity Grab</option>
-                            <option value="Trendline">Trendline</option>
-                            <option value="Fibo">Fibo</option>
-                            <option value="Support/Resistance">Support/Résistance</option>
-                            <option value="Price Action">Price Action</option>
-                            <option value="News">News</option>
                         </select>
                     </div>
                     <button class="btn-icon" id="clearFilters" title="Effacer les filtres">
@@ -513,6 +601,52 @@
                             <div class="empty-state small">
                                 <p>Aucune donnée</p>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance by Tag -->
+                <div class="tag-performance-section">
+                    <div class="section-header">
+                        <h2>Performance par Tag</h2>
+                    </div>
+                    <div class="tag-performance-grid">
+                        <div class="tag-chart-container">
+                            <div class="chart-header">
+                                <h3>Winrate par Tag</h3>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="tagWinrateChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="tag-chart-container">
+                            <div class="chart-header">
+                                <h3>Profit par Tag</h3>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="tagProfitChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tag-stats-table-container">
+                        <table class="trades-table tag-stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Tag</th>
+                                    <th>Trades</th>
+                                    <th>Winrate</th>
+                                    <th>Profit Total</th>
+                                    <th>Perte Totale</th>
+                                    <th>Net</th>
+                                    <th>Ratio G/P</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tagStatsBody">
+                            </tbody>
+                        </table>
+                        <div class="empty-state" id="emptyTagStats">
+                            <i class="fas fa-tags"></i>
+                            <p>Aucune donnee par tag</p>
                         </div>
                     </div>
                 </div>
@@ -640,6 +774,17 @@
                         </div>
                     </div>
                     <div class="settings-card">
+                        <h3><i class="fas fa-tags"></i> Gestion des Tags</h3>
+                        <p class="settings-info">Créez et gérez vos tags personnalisés pour classifier vos trades.</p>
+                        <div class="settings-tags-list" id="settingsTagsList">
+                            <!-- Tags dynamiques -->
+                        </div>
+                        <button class="btn-primary" id="openTagManager">
+                            <i class="fas fa-cog"></i>
+                            Gérer les Tags
+                        </button>
+                    </div>
+                    <div class="settings-card">
                         <h3>À Propos</h3>
                         <div class="about-info">
                             <p><strong>ProTrade Journal v1.0</strong></p>
@@ -686,6 +831,52 @@
             <div class="form-actions">
                 <button class="btn-secondary" id="cancelNote">Annuler</button>
                 <button class="btn-primary" id="saveNote">Sauvegarder</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tag Management Modal -->
+    <div class="modal" id="tagModal">
+        <div class="modal-content tag-modal-content">
+            <button class="modal-close" id="closeTagModal">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3>Gérer les Tags</h3>
+            <div class="tag-manager">
+                <div class="add-tag-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="newTagName">Nom du tag</label>
+                            <input type="text" id="newTagName" placeholder="Ex: Breakout, Scalp...">
+                        </div>
+                        <div class="form-group">
+                            <label for="newTagDesc">Description <span class="optional">(optionnel)</span></label>
+                            <input type="text" id="newTagDesc" placeholder="Signification du tag">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="newTagColor">Couleur</label>
+                            <div class="color-picker-grid" id="tagColorPicker">
+                                <button type="button" class="color-option active" data-color="#2563eb" style="background:#2563eb"></button>
+                                <button type="button" class="color-option" data-color="#10b981" style="background:#10b981"></button>
+                                <button type="button" class="color-option" data-color="#f59e0b" style="background:#f59e0b"></button>
+                                <button type="button" class="color-option" data-color="#ef4444" style="background:#ef4444"></button>
+                                <button type="button" class="color-option" data-color="#8b5cf6" style="background:#8b5cf6"></button>
+                                <button type="button" class="color-option" data-color="#06b6d4" style="background:#06b6d4"></button>
+                                <button type="button" class="color-option" data-color="#ec4899" style="background:#ec4899"></button>
+                                <button type="button" class="color-option" data-color="#f97316" style="background:#f97316"></button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-primary" id="addNewTag">
+                        <i class="fas fa-plus"></i> Ajouter le Tag
+                    </button>
+                </div>
+                <div class="existing-tags-list" id="existingTagsList">
+                    <h4>Tags existants</h4>
+                    <!-- Tags dynamiques -->
+                </div>
             </div>
         </div>
     </div>
