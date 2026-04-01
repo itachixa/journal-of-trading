@@ -9,7 +9,7 @@ var STORAGE_KEYS = {
 };
 
 var DEFAULT_TAGS = [
-    { name: "BOS", description: "Break of Structure", color: "#2563eb" },
+    { name: "BOS", description: "Break of Structure", color: "#3b82f6" },
     { name: "FVG", description: "Fair Value Gap", color: "#8b5cf6" },
     { name: "Liquidity Grab", description: "Chasse aux liquidites", color: "#ef4444" },
     { name: "Trendline", description: "Cassure de tendance", color: "#10b981" },
@@ -55,7 +55,7 @@ var tagProfitChart = null;
 var zoomLevel = 100;
 var currentTimeRange = "all";
 var currentChartRange = "all";
-var selectedTagColor = "#2563eb";
+var selectedTagColor = "#3b82f6";
 
 document.addEventListener("DOMContentLoaded", function() {
     loadData();
@@ -196,8 +196,12 @@ function setupEventListeners() {
             document.querySelectorAll(".color-option").forEach(function(o) { o.classList.remove("active"); });
             opt.classList.add("active");
             selectedTagColor = opt.dataset.color;
+            updateTagPreview();
         });
     });
+
+    // Tag preview - live update
+    document.getElementById("newTagName").addEventListener("input", updateTagPreview);
 
     // Lot calculator
     document.getElementById("calculateLot").addEventListener("click", calculateLotSize);
@@ -208,6 +212,21 @@ function setupEventListeners() {
     document.getElementById("calcTP").addEventListener("input", calculateLotSize);
     document.getElementById("calcPair").addEventListener("change", calculateLotSize);
     document.getElementById("useConfig").addEventListener("click", useConfigInForm);
+
+    // Risk presets
+    document.querySelectorAll(".risk-preset").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            var risk = parseFloat(btn.dataset.risk);
+            document.querySelectorAll(".risk-preset").forEach(function(b) { b.classList.remove("active"); });
+            btn.classList.add("active");
+            document.getElementById("calcRisk").value = risk;
+            document.getElementById("calcRiskSlider").value = risk;
+            state.settings.defaultRisk = risk;
+            saveData();
+            updateRiskDisplay();
+            calculateLotSize();
+        });
+    });
 
     // Direction toggle
     document.getElementById("configBuy").addEventListener("click", function() {
@@ -291,7 +310,15 @@ function initLotCalculator() {
     document.getElementById("calcBalance").value = balance;
     document.getElementById("calcRisk").value = risk;
     document.getElementById("calcRiskSlider").value = risk;
+    updateRiskPresetActive(risk);
     updateRiskDisplay();
+}
+
+function updateRiskPresetActive(risk) {
+    document.querySelectorAll(".risk-preset").forEach(function(btn) {
+        var btnRisk = parseFloat(btn.dataset.risk);
+        btn.classList.toggle("active", Math.abs(btnRisk - risk) < 0.01);
+    });
 }
 
 function syncRiskFromSlider() {
@@ -299,6 +326,7 @@ function syncRiskFromSlider() {
     document.getElementById("calcRisk").value = val;
     state.settings.defaultRisk = parseFloat(val);
     saveData();
+    updateRiskPresetActive(parseFloat(val));
     updateRiskDisplay();
     calculateLotSize();
 }
@@ -309,6 +337,7 @@ function syncRiskFromInput() {
     document.getElementById("calcRiskSlider").value = Math.min(val, 10);
     state.settings.defaultRisk = val;
     saveData();
+    updateRiskPresetActive(val);
     updateRiskDisplay();
     calculateLotSize();
 }
@@ -438,10 +467,17 @@ function renderSettingsTags() {
     }
     var html = "";
     state.customTags.forEach(function(tag) {
-        var color = tag.color || "#2563eb";
+        var color = tag.color || "#3b82f6";
         html += '<span class="tag-badge" style="background:' + color + '">' + escapeHtml(tag.name) + '</span>';
     });
     container.innerHTML = html;
+}
+
+function updateTagPreview() {
+    var name = document.getElementById("newTagName").value.trim() || "Nouveau Tag";
+    var badge = document.getElementById("tagPreviewBadge");
+    badge.textContent = name;
+    badge.style.background = selectedTagColor;
 }
 
 function addCustomTag() {
@@ -495,6 +531,9 @@ function deleteCustomTag(index) {
 function openTagModal() {
     document.getElementById("tagModal").classList.add("active");
     renderExistingTags();
+    document.getElementById("newTagName").value = "";
+    document.getElementById("newTagDesc").value = "";
+    updateTagPreview();
     document.getElementById("newTagName").focus();
 }
 

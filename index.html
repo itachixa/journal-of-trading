@@ -214,9 +214,21 @@
             <!-- Lot Calculator Section -->
             <section class="content-section" id="lot-calculator">
                 <div class="section-header">
-                    <h2>Calculateur de Lot</h2>
-                    <p class="section-subtitle">Calculez la taille de position optimale pour chaque trade</p>
+                    <div>
+                        <h2>Calculateur de Lot</h2>
+                        <p class="section-subtitle">Calculez la taille de position optimale pour chaque trade</p>
+                    </div>
                 </div>
+
+                <!-- Formula Display -->
+                <div class="formula-banner">
+                    <div class="formula-icon"><i class="fas fa-superscript"></i></div>
+                    <div class="formula-text">
+                        <span class="formula-label">Formule</span>
+                        <span class="formula-code">Lot = (Balance x Risque%) / (SL pips x Valeur pip)</span>
+                    </div>
+                </div>
+
                 <div class="calculator-layout">
                     <div class="calculator-inputs">
                         <div class="calc-card">
@@ -227,13 +239,20 @@
                             </div>
                             <div class="form-group">
                                 <label for="calcRisk">Risque (%)</label>
+                                <div class="risk-presets">
+                                    <button class="risk-preset" data-risk="0.5">0.5%</button>
+                                    <button class="risk-preset" data-risk="1">1%</button>
+                                    <button class="risk-preset active" data-risk="2">2%</button>
+                                    <button class="risk-preset" data-risk="3">3%</button>
+                                    <button class="risk-preset" data-risk="5">5%</button>
+                                </div>
                                 <div class="risk-slider-container">
                                     <input type="range" id="calcRiskSlider" min="0.1" max="10" step="0.1" value="2">
                                     <input type="number" id="calcRisk" step="0.1" min="0.1" max="100" value="2">
                                 </div>
                             </div>
                             <div class="risk-amount-display">
-                                <span class="label">Montant risqué:</span>
+                                <span class="label"><i class="fas fa-exclamation-triangle"></i> Montant risqué</span>
                                 <span class="value" id="calcRiskAmount">$200.00</span>
                             </div>
                         </div>
@@ -255,18 +274,20 @@
                                     <option value="GBPJPY">GBPJPY</option>
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <label for="calcSL">Stop Loss (pips)</label>
-                                <input type="number" id="calcSL" step="0.1" min="0.1" placeholder="20">
-                            </div>
-                            <div class="form-group">
-                                <label for="calcTP">Take Profit (pips) <span class="optional">(optionnel)</span></label>
-                                <input type="number" id="calcTP" step="0.1" min="0" placeholder="60">
+                            <div class="form-row-inputs">
+                                <div class="form-group">
+                                    <label for="calcSL">Stop Loss (pips)</label>
+                                    <input type="number" id="calcSL" step="0.1" min="0.1" placeholder="20">
+                                </div>
+                                <div class="form-group">
+                                    <label for="calcTP">Take Profit (pips) <span class="optional">(opt.)</span></label>
+                                    <input type="number" id="calcTP" step="0.1" min="0" placeholder="60">
+                                </div>
                             </div>
                         </div>
                         <button class="btn-primary btn-calculate" id="calculateLot">
                             <i class="fas fa-calculator"></i>
-                            Calculer
+                            Calculer la taille du lot
                         </button>
                     </div>
                     <div class="calculator-results">
@@ -295,7 +316,7 @@
                             </div>
                         </div>
                         <div class="trade-config-summary" id="tradeConfigSummary" style="display:none;">
-                            <h3><i class="fas fa-clipboard-list"></i> Configuration du Trade</h3>
+                            <h3><i class="fas fa-clipboard-list"></i> Récapitulatif du Trade</h3>
                             <div class="config-items">
                                 <div class="config-item">
                                     <span class="config-label">Paire</span>
@@ -775,13 +796,13 @@
                     </div>
                     <div class="settings-card">
                         <h3><i class="fas fa-tags"></i> Gestion des Tags</h3>
-                        <p class="settings-info">Créez et gérez vos tags personnalisés pour classifier vos trades.</p>
+                        <p class="settings-info">Créez et gérez vos tags personnalisés pour classifier vos trades. Chaque tag peut avoir une couleur unique.</p>
                         <div class="settings-tags-list" id="settingsTagsList">
                             <!-- Tags dynamiques -->
                         </div>
                         <button class="btn-primary" id="openTagManager">
-                            <i class="fas fa-cog"></i>
-                            Gérer les Tags
+                            <i class="fas fa-plus-circle"></i>
+                            Créer / Gérer les Tags
                         </button>
                     </div>
                     <div class="settings-card">
@@ -841,9 +862,10 @@
             <button class="modal-close" id="closeTagModal">
                 <i class="fas fa-times"></i>
             </button>
-            <h3>Gérer les Tags</h3>
+            <h3><i class="fas fa-tags"></i> Gérer les Tags</h3>
             <div class="tag-manager">
                 <div class="add-tag-form">
+                    <h4 class="form-section-title">Créer un nouveau tag</h4>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="newTagName">Nom du tag</label>
@@ -854,20 +876,26 @@
                             <input type="text" id="newTagDesc" placeholder="Signification du tag">
                         </div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="newTagColor">Couleur</label>
-                            <div class="color-picker-grid" id="tagColorPicker">
-                                <button type="button" class="color-option active" data-color="#2563eb" style="background:#2563eb"></button>
-                                <button type="button" class="color-option" data-color="#10b981" style="background:#10b981"></button>
-                                <button type="button" class="color-option" data-color="#f59e0b" style="background:#f59e0b"></button>
-                                <button type="button" class="color-option" data-color="#ef4444" style="background:#ef4444"></button>
-                                <button type="button" class="color-option" data-color="#8b5cf6" style="background:#8b5cf6"></button>
-                                <button type="button" class="color-option" data-color="#06b6d4" style="background:#06b6d4"></button>
-                                <button type="button" class="color-option" data-color="#ec4899" style="background:#ec4899"></button>
-                                <button type="button" class="color-option" data-color="#f97316" style="background:#f97316"></button>
-                            </div>
+                    <div class="form-group">
+                        <label>Couleur</label>
+                        <div class="color-picker-grid" id="tagColorPicker">
+                            <button type="button" class="color-option active" data-color="#3b82f6" style="background:#3b82f6"></button>
+                            <button type="button" class="color-option" data-color="#10b981" style="background:#10b981"></button>
+                            <button type="button" class="color-option" data-color="#f59e0b" style="background:#f59e0b"></button>
+                            <button type="button" class="color-option" data-color="#ef4444" style="background:#ef4444"></button>
+                            <button type="button" class="color-option" data-color="#8b5cf6" style="background:#8b5cf6"></button>
+                            <button type="button" class="color-option" data-color="#06b6d4" style="background:#06b6d4"></button>
+                            <button type="button" class="color-option" data-color="#ec4899" style="background:#ec4899"></button>
+                            <button type="button" class="color-option" data-color="#f97316" style="background:#f97316"></button>
+                            <button type="button" class="color-option" data-color="#14b8a6" style="background:#14b8a6"></button>
+                            <button type="button" class="color-option" data-color="#6366f1" style="background:#6366f1"></button>
+                            <button type="button" class="color-option" data-color="#84cc16" style="background:#84cc16"></button>
+                            <button type="button" class="color-option" data-color="#f43f5e" style="background:#f43f5e"></button>
                         </div>
+                    </div>
+                    <div class="tag-preview" id="tagPreview">
+                        <span class="tag-preview-label">Aperçu:</span>
+                        <span class="tag-badge" id="tagPreviewBadge" style="background:#3b82f6">Nouveau Tag</span>
                     </div>
                     <button class="btn-primary" id="addNewTag">
                         <i class="fas fa-plus"></i> Ajouter le Tag
@@ -875,7 +903,6 @@
                 </div>
                 <div class="existing-tags-list" id="existingTagsList">
                     <h4>Tags existants</h4>
-                    <!-- Tags dynamiques -->
                 </div>
             </div>
         </div>
