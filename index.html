@@ -34,6 +34,14 @@
                     <i class="fas fa-calculator"></i>
                     <span>Calculateur de Lot</span>
                 </a>
+                <a href="#" class="nav-item" data-section="trading-tools">
+                    <i class="fas fa-tools"></i>
+                    <span>Outils Trading</span>
+                </a>
+                <a href="#" class="nav-item" data-section="tags-manager">
+                    <i class="fas fa-tags"></i>
+                    <span>Tags</span>
+                </a>
                 <a href="#" class="nav-item" data-section="add-trade">
                     <i class="fas fa-plus-circle"></i>
                     <span>Ajouter Trade</span>
@@ -356,6 +364,214 @@
                                 Utiliser dans le formulaire
                             </button>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Trading Tools Section -->
+            <section class="content-section" id="trading-tools">
+                <div class="section-header">
+                    <div>
+                        <h2>Outils de Trading</h2>
+                        <p class="section-subtitle">Calculateurs et outils pour analyser vos trades</p>
+                    </div>
+                </div>
+
+                <div class="tools-grid">
+                    <!-- Risk/Reward Calculator -->
+                    <div class="tool-card">
+                        <div class="tool-header">
+                            <i class="fas fa-balance-scale"></i>
+                            <h3>Calculateur Risk/Reward</h3>
+                        </div>
+                        <div class="tool-inputs">
+                            <div class="form-group">
+                                <label for="rrEntry">Prix d'Entrée</label>
+                                <input type="number" id="rrEntry" step="0.00001" placeholder="1.10000">
+                            </div>
+                            <div class="form-group">
+                                <label for="rrStopLoss">Stop Loss</label>
+                                <input type="number" id="rrStopLoss" step="0.00001" placeholder="1.09800">
+                            </div>
+                            <div class="form-group">
+                                <label for="rrTakeProfit">Take Profit</label>
+                                <input type="number" id="rrTakeProfit" step="0.00001" placeholder="1.10600">
+                            </div>
+                        </div>
+                        <div class="tool-result">
+                            <div class="result-label">Ratio Risk/Reward</div>
+                            <div class="result-value large" id="rrResult">1:0</div>
+                            <div class="result-quality" id="rrQuality">-</div>
+                        </div>
+                        <div class="tool-preview" id="positionPreview">
+                            <div class="preview-item">
+                                <span class="preview-label">Perte Potentielle</span>
+                                <span class="preview-value negative" id="potentialLoss">$0.00</span>
+                            </div>
+                            <div class="preview-item">
+                                <span class="preview-label">Profit Potentiel</span>
+                                <span class="preview-value positive" id="potentialProfit">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Position Size Calculator -->
+                    <div class="tool-card">
+                        <div class="tool-header">
+                            <i class="fas fa-layer-group"></i>
+                            <h3>Calculateur de Position</h3>
+                        </div>
+                        <div class="tool-inputs">
+                            <div class="form-group">
+                                <label for="posBalance">Balance ($)</label>
+                                <input type="number" id="posBalance" step="0.01" placeholder="10000">
+                            </div>
+                            <div class="form-group">
+                                <label for="posRisk">Risque (%)</label>
+                                <input type="number" id="posRisk" step="0.1" value="2" placeholder="2">
+                            </div>
+                            <div class="form-group">
+                                <label for="posPair">Paire</label>
+                                <select id="posPair">
+                                    <option value="XAUUSD">XAUUSD</option>
+                                    <option value="EURUSD">EURUSD</option>
+                                    <option value="GBPUSD">GBPUSD</option>
+                                    <option value="USDJPY">USDJPY</option>
+                                    <option value="BTCUSD">BTCUSD</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="posEntry">Prix d'Entrée</label>
+                                <input type="number" id="posEntry" step="0.00001" placeholder="2000.00">
+                            </div>
+                            <div class="form-group">
+                                <label for="posSL">Stop Loss Prix</label>
+                                <input type="number" id="posSL" step="0.00001" placeholder="1980.00">
+                            </div>
+                        </div>
+                        <div class="tool-result">
+                            <div class="result-label">Lot Size Recommandé</div>
+                            <div class="result-value large" id="posLotSize">0.00</div>
+                            <div class="result-unit">lots</div>
+                        </div>
+                        <div class="tool-result-info">
+                            <div class="result-row">
+                                <span>Montant risqué:</span>
+                                <span id="posRiskAmount">$200.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trading Session Tracker -->
+                    <div class="tool-card">
+                        <div class="tool-header">
+                            <i class="fas fa-globe"></i>
+                            <h3>Session de Trading</h3>
+                        </div>
+                        <div class="session-selector">
+                            <button class="session-btn" data-session="london">
+                                <i class="fas fa-building-columns"></i>
+                                <span>London</span>
+                                <span class="session-time">08:00-17:00</span>
+                            </button>
+                            <button class="session-btn" data-session="newyork">
+                                <i class="fas fa-building"></i>
+                                <span>New York</span>
+                                <span class="session-time">13:30-16:00</span>
+                            </button>
+                            <button class="session-btn" data-session="asia">
+                                <i class="fas fa-gate"></i>
+                                <span>Asia</span>
+                                <span class="session-time">00:00-09:00</span>
+                            </button>
+                        </div>
+                        <div class="current-session" id="currentSession">
+                            <div class="session-info">
+                                <span class="session-label">Session actuelle:</span>
+                                <span class="session-name" id="activeSessionName">-</span>
+                            </div>
+                        </div>
+                        <div class="session-status">
+                            <div class="status-dot" id="sessionStatus"></div>
+                            <span id="sessionStatusText">Vérifier la session</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tools-reset">
+                    <button class="btn-secondary" id="resetTools">
+                        <i class="fas fa-redo"></i>
+                        Réinitialiser les outils
+                    </button>
+                </div>
+            </section>
+
+            <!-- Tags Manager Section -->
+            <section class="content-section" id="tags-manager">
+                <div class="section-header">
+                    <div>
+                        <h2>Gestion des Tags</h2>
+                        <p class="section-subtitle">Créez et gérez vos tags pour classifier vos trades</p>
+                    </div>
+                    <button class="btn-primary" id="addNewTagBtn">
+                        <i class="fas fa-plus"></i>
+                        Nouveau Tag
+                    </button>
+                </div>
+
+                <!-- Create Tag Form -->
+                <div class="tag-create-card">
+                    <h3><i class="fas fa-plus-circle"></i> Créer un Nouveau Tag</h3>
+                    <div class="tag-form-grid">
+                        <div class="form-group">
+                            <label for="tagNameInput">Nom du tag</label>
+                            <input type="text" id="tagNameInput" placeholder="Ex: Breakout, Trend, Range...">
+                        </div>
+                        <div class="form-group">
+                            <label for="tagDescInput">Description</label>
+                            <input type="text" id="tagDescInput" placeholder="Signification ou description">
+                        </div>
+                        <div class="form-group">
+                            <label>Couleur</label>
+                            <div class="color-picker" id="tagFormColorPicker">
+                                <button type="button" class="color-btn active" data-color="#3b82f6" style="background:#3b82f6"></button>
+                                <button type="button" class="color-btn" data-color="#10b981" style="background:#10b981"></button>
+                                <button type="button" class="color-btn" data-color="#f59e0b" style="background:#f59e0b"></button>
+                                <button type="button" class="color-btn" data-color="#ef4444" style="background:#ef4444"></button>
+                                <button type="button" class="color-btn" data-color="#8b5cf6" style="background:#8b5cf6"></button>
+                                <button type="button" class="color-btn" data-color="#06b6d4" style="background:#06b6d4"></button>
+                                <button type="button" class="color-btn" data-color="#ec4899" style="background:#ec4899"></button>
+                                <button type="button" class="color-btn" data-color="#14b8a6" style="background:#14b8a6"></button>
+                            </div>
+                        </div>
+                        <div class="tag-preview-box">
+                            <span>Aperçu:</span>
+                            <span class="tag-badge" id="tagCreatePreview">Nouveau</span>
+                        </div>
+                    </div>
+                    <button class="btn-primary" id="createTagBtn">
+                        <i class="fas fa-plus"></i>
+                        Créer le Tag
+                    </button>
+                </div>
+
+                <!-- Tags List -->
+                <div class="tags-list-container">
+                    <h3>Tags Existants</h3>
+                    <div class="tags-grid" id="tagsGrid">
+                        <!-- Tags will be rendered here -->
+                    </div>
+                    <div class="empty-state" id="emptyTags">
+                        <i class="fas fa-tags"></i>
+                        <p>Aucun tag créé</p>
+                    </div>
+                </div>
+
+                <!-- Tag Stats -->
+                <div class="tag-stats-card">
+                    <h3>Statistiques par Tag</h3>
+                    <div class="tag-stats-grid" id="tagStatsGrid">
+                        <!-- Tag stats will be rendered here -->
                     </div>
                 </div>
             </section>

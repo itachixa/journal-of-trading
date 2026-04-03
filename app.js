@@ -108,6 +108,8 @@ function initializeApp() {
     renderTradeTags();
     renderFilterTags();
     initLotCalculator();
+    initTradingTools();
+    initTagsManager();
 }
 
 // ===== EVENT LISTENERS =====
@@ -279,6 +281,8 @@ function handleNavigation(e) {
     var titles = {
         "dashboard": "Dashboard",
         "lot-calculator": "Calculateur de Lot",
+        "trading-tools": "Outils de Trading",
+        "tags-manager": "Gestion des Tags",
         "add-trade": "Ajouter un Trade",
         "trades": "Mes Trades",
         "stats": "Statistiques",
@@ -297,6 +301,10 @@ function handleNavigation(e) {
         updateDetailedStats();
     } else if (target === "lot-calculator") {
         initLotCalculator();
+    } else if (target === "trading-tools") {
+        initTradingTools();
+    } else if (target === "tags-manager") {
+        initTagsManager();
     }
 }
 
@@ -1706,4 +1714,322 @@ function escapeHtml(str) {
     var div = document.createElement("div");
     div.appendChild(document.createTextNode(str));
     return div.innerHTML;
+}
+
+// ===== TRADING TOOLS =====
+function initTradingTools() {
+    // RR Calculator
+    document.getElementById("rrEntry").addEventListener("input", calculateRR);
+    document.getElementById("rrStopLoss").addEventListener("input", calculateRR);
+    document.getElementById("rrTakeProfit").addEventListener("input", calculateRR);
+
+    // Position Calculator
+    document.getElementById("posBalance").addEventListener("input", calculatePositionSize);
+    document.getElementById("posRisk").addEventListener("input", calculatePositionSize);
+    document.getElementById("posPair").addEventListener("change", calculatePositionSize);
+    document.getElementById("posEntry").addEventListener("input", calculatePositionSize);
+    document.getElementById("posSL").addEventListener("input", calculatePositionSize);
+
+    // Session Tracker
+    document.querySelectorAll(".session-btn").forEach(function(btn) {
+        btn.addEventListener("click", selectSession);
+    });
+
+    // Reset Tools
+    document.getElementById("resetTools").addEventListener("click", resetTradingTools);
+
+    // Initial position preview
+    calculatePositionSize();
+    updateSessionStatus();
+}
+
+function calculateRR() {
+    var entry = parseFloat(document.getElementById("rrEntry").value) || 0;
+    var sl = parseFloat(document.getElementById("rrStopLoss").value) || 0;
+    var tp = parseFloat(document.getElementById("rrTakeProfit").value) || 0;
+
+    if (entry <= 0 || sl <= 0) {
+        document.getElementById("rrResult").textContent = "1:0";
+        document.getElementById("rrQuality").textContent = "-";
+        document.getElementById("rrQuality").className = "result-quality";
+        document.getElementById("potentialLoss").textContent = "$0.00";
+        document.getElementById("potentialProfit").textContent = "$0.00";
+        return;
+    }
+
+    var risk = Math.abs(entry - sl);
+    var reward = Math.abs(tp - entry);
+
+    if (tp > 0 && sl > 0) {
+        var rr = reward / risk;
+        document.getElementById("rrResult").textContent = "1:" + rr.toFixed(2);
+
+        var qualityEl = document.getElementById("rrQuality");
+        if (rr >= 3) {
+            qualityEl.textContent = "Excellent";
+            qualityEl.className = "result-quality good";
+        } else if (rr >= 2) {
+            qualityEl.textContent = "Bon";
+            qualityEl.className = "result-quality good";
+        } else if (rr >= 1) {
+            qualityEl.textContent = "Acceptable";
+            qualityEl.className = "result-quality mediocre";
+        } else {
+            qualityEl.textContent = "Faible";
+            qualityEl.className = "result-quality bad";
+        }
+
+        // Calculate potential profit/loss using a standard lot size (0.10 lot = 1 unit per pip for forex)
+        var balance = state.settings.initialCapital || 10000;
+        var riskAmount = balance * 0.02;
+        var lotSize = riskAmount / risk;
+        var pipValue = PIP_VALUES[document.getElementById("calcPair").value] || 10;
+
+        var potentialLoss = lotSize * risk * pipValue;
+        var potentialProfit = potentialLoss * rr;
+
+        document.getElementById("potentialLoss").textContent = "-$" + potentialLoss.toFixed(2);
+        document.getElementById("potentialProfit").textContent = "+$" + potentialProfit.toFixed(2);
+    } else {
+        document.getElementById("rrResult").textContent = "1:0";
+        document.getElementById("rrQuality").textContent = "-";
+        document.getElementById("rrQuality").className = "result-quality";
+    }
+}
+
+function calculatePositionSize() {
+    var balance = parseFloat(document.getElementById("posBalance").value) || state.settings.initialCapital || 10000;
+    var risk = parseFloat(document.getElementById("posRisk").value) || 2;
+    var pair = document.getElementById("posPair").value;
+    var entry = parseFloat(document.getElementById("posEntry").value) || 0;
+    var sl = parseFloat(document.getElementById("posSL").value) || 0;
+
+    if (entry <= 0 || sl <= 0 || balance <= 0) {
+        document.getElementById("posLotSize").textContent = "0.00";
+        document.getElementById("posRiskAmount").textContent = "$0.00";
+        return;
+    }
+
+    var riskAmount = balance * (risk / 100);
+    var slDistance = Math.abs(entry - sl);
+
+    // For crypto (BTC, ETH) use point value, for forex use pip value
+    var valuePerPoint = (pair === "XAUUSD" || pair === "BTCUSD" || pair === "ETHUSD") ? 1 : 10;
+    var lotSize = riskAmount / (slDistance * valuePerPoint);
+
+    document.getElementById("posLotSize").textContent = lotSize.toFixed(2);
+    document.getElementById("posRiskAmount").textContent = "$" + riskAmount.toFixed(2);
+}
+
+function selectSession(e) {
+    var btn = e.currentTarget;
+    var session = btn.dataset.session;
+
+    document.querySelectorAll(".session-btn").forEach(function(b) {
+        b.classList.remove("active");
+    });
+    btn.classList.add("active");
+
+    var names = { london: "London", newyork: "New York", asia: "Tokyo/Asia" };
+    document.getElementById("activeSessionName").textContent = names[session] || "-";
+
+    // Save to settings
+    state.settings.lastSession = session;
+    saveData();
+}
+
+function updateSessionStatus() {
+    var now = new Date();
+    var hours = now.getUTCHours();
+
+    var session = "";
+    var statusEl = document.getElementById("sessionStatus");
+    var statusText = document.getElementById("sessionStatusText");
+
+    if (hours >= 8 && hours < 17) {
+        session = "London";
+        statusEl.className = "status-dot active";
+        statusText.textContent = "Session London active";
+    } else if (hours >= 13 && hours < 21) {
+        session = "New York";
+        statusEl.className = "status-dot active";
+        statusText.textContent = "Session New York active";
+    } else if (hours >= 0 && hours < 9) {
+        session = "Asia";
+        statusEl.className = "status-dot active";
+        statusText.textContent = "Session Asia active";
+    } else {
+        statusEl.className = "status-dot";
+        statusText.textContent = "Aucune session majeure";
+    }
+}
+
+function resetTradingTools() {
+    document.getElementById("rrEntry").value = "";
+    document.getElementById("rrStopLoss").value = "";
+    document.getElementById("rrTakeProfit").value = "";
+    document.getElementById("rrResult").textContent = "1:0";
+    document.getElementById("rrQuality").textContent = "-";
+    document.getElementById("rrQuality").className = "result-quality";
+    document.getElementById("potentialLoss").textContent = "$0.00";
+    document.getElementById("potentialProfit").textContent = "$0.00";
+
+    document.getElementById("posBalance").value = state.settings.initialCapital;
+    document.getElementById("posRisk").value = 2;
+    document.getElementById("posEntry").value = "";
+    document.getElementById("posSL").value = "";
+    document.getElementById("posLotSize").textContent = "0.00";
+    document.getElementById("posRiskAmount").textContent = "$0.00";
+
+    document.querySelectorAll(".session-btn").forEach(function(b) {
+        b.classList.remove("active");
+    });
+    document.getElementById("activeSessionName").textContent = "-";
+}
+
+// ===== TAGS MANAGER =====
+var newTagColor = "#3b82f6";
+
+function initTagsManager() {
+    document.getElementById("addNewTagBtn").addEventListener("click", function() {
+        document.getElementById("tagNameInput").focus();
+    });
+
+    document.getElementById("tagNameInput").addEventListener("input", updateTagPreview);
+    document.getElementById("createTagBtn").addEventListener("click", createTagFromManager);
+
+    document.querySelectorAll(".color-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            document.querySelectorAll(".color-btn").forEach(function(b) {
+                b.classList.remove("active");
+            });
+            btn.classList.add("active");
+            newTagColor = btn.dataset.color;
+            updateTagPreview();
+        });
+    });
+
+    document.getElementById("resetTools").addEventListener("click", function() {
+        // Also reset tools
+    });
+
+    renderTagsGrid();
+    renderTagStats();
+}
+
+function updateTagPreview() {
+    var name = document.getElementById("tagNameInput").value.trim() || "Nouveau";
+    var preview = document.getElementById("tagCreatePreview");
+    if (preview) {
+        preview.textContent = name;
+        preview.style.background = newTagColor;
+    }
+}
+
+function createTagFromManager() {
+    var nameInput = document.getElementById("tagNameInput");
+    var descInput = document.getElementById("tagDescInput");
+
+    var name = nameInput.value.trim();
+    var desc = descInput.value.trim();
+
+    if (!name) {
+        showToast("Veuillez entrer un nom de tag", "error");
+        return;
+    }
+
+    var exists = state.customTags.some(function(t) {
+        return t.name.toLowerCase() === name.toLowerCase();
+    });
+
+    if (exists) {
+        showToast("Ce tag existe déjà", "error");
+        return;
+    }
+
+    state.customTags.push({
+        name: name,
+        description: desc,
+        color: newTagColor
+    });
+
+    saveData();
+    renderTagsGrid();
+    renderTagStats();
+    renderTradeTags();
+    renderFilterTags();
+    renderSettingsTags();
+
+    nameInput.value = "";
+    descInput.value = "";
+
+    showToast("Tag créé!", "success");
+}
+
+function renderTagsGrid() {
+    var grid = document.getElementById("tagsGrid");
+    var empty = document.getElementById("emptyTags");
+
+    if (state.customTags.length === 0) {
+        grid.innerHTML = "";
+        if (empty) empty.style.display = "flex";
+        return;
+    }
+
+    if (empty) empty.style.display = "none";
+
+    var html = "";
+    state.customTags.forEach(function(tag, index) {
+        var color = tag.color || "#3b82f6";
+        html += '<div class="tag-card">';
+        html += '<div class="tag-card-info">';
+        html += '<span class="tag-card-name" style="color:' + color + '">' + escapeHtml(tag.name) + '</span>';
+        if (tag.description) {
+            html += '<span class="tag-card-desc">' + escapeHtml(tag.description) + '</span>';
+        }
+        html += '</div>';
+        html += '<div class="tag-card-actions">';
+        html += '<button class="btn-icon" onclick="editTag(' + index + ')" title="Modifier"><i class="fas fa-edit"></i></button>';
+        html += '<button class="btn-icon danger" onclick="deleteTag(' + index + ')" title="Supprimer"><i class="fas fa-trash"></i></button>';
+        html += '</div>';
+        html += '</div>';
+    });
+
+    grid.innerHTML = html;
+}
+
+function renderTagStats() {
+    var grid = document.getElementById("tagStatsGrid");
+    var tagStats = calculateStatsByTag();
+    var tagNames = Object.keys(tagStats);
+
+    if (tagNames.length === 0) {
+        grid.innerHTML = '<p class="text-muted">Aucune statistique disponible</p>';
+        return;
+    }
+
+    var html = "";
+    tagNames.forEach(function(tagName) {
+        var s = tagStats[tagName];
+        var winrate = s.trades > 0 ? ((s.wins / s.trades) * 100).toFixed(1) : "0";
+        var net = s.profit - s.loss;
+
+        var tag = state.customTags.find(function(t) {
+            return t.name === tagName;
+        });
+        var color = (tag && tag.color) || "#3b82f6";
+
+        html += '<div class="tag-stat-item">';
+        html += '<div class="tag-stat-header">';
+        html += '<span class="tag-badge" style="background:' + color + '">' + escapeHtml(tagName) + '</span>';
+        html += '</div>';
+        html += '<div class="tag-stat-values">';
+        html += '<span>Trades:</span><span>' + s.trades + '</span>';
+        html += '<span>Winrate:</span><span>' + winrate + '%</span>';
+        html += '<span>Net:</span><span class="' + (net >= 0 ? "positive" : "negative") + '">' + (net >= 0 ? "+" : "") + '$' + net.toFixed(2) + '</span>';
+        html += '</div>';
+        html += '</div>';
+    });
+
+    grid.innerHTML = html;
 }
