@@ -123,6 +123,8 @@ protrade-journal/
 
 MIT License - Free to use and modify.
 
+
 ---
 
 Built with ❤️ for ambitious traders
+
