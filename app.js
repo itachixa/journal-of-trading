@@ -182,10 +182,23 @@ function setupEventListeners() {
     });
 
     // Tag management
-    document.getElementById("manageTagsBtn").addEventListener("click", openTagModal);
-    document.getElementById("openTagManager").addEventListener("click", openTagModal);
+    var manageBtn = document.getElementById("manageTagsBtn");
+    if (manageBtn) {
+        manageBtn.addEventListener("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            openTagModal();
+        });
+    }
+    document.getElementById("openTagManager").addEventListener("click", function(e) {
+        e.preventDefault();
+        openTagModal();
+    });
     document.getElementById("closeTagModal").addEventListener("click", closeTagModal);
-    document.getElementById("addNewTag").addEventListener("click", addCustomTag);
+    document.getElementById("addNewTag").addEventListener("click", function(e) {
+        e.preventDefault();
+        addCustomTag();
+    });
     document.getElementById("tagModal").addEventListener("click", function(e) {
         if (e.target.id === "tagModal") closeTagModal();
     });
@@ -1563,11 +1576,13 @@ function clearAllData() {
     state.notes = [];
     state.checklist = {};
     state.customTags = DEFAULT_TAGS.slice();
+    state.settings = Object.assign({}, DEFAULT_SETTINGS);
     saveData();
     updateUI();
     renderTradeTags();
     renderFilterTags();
     renderSettingsTags();
+    initLotCalculator();
     showToast("Toutes les donnees ont ete effacees", "success");
 }
 
