@@ -110,6 +110,10 @@ function initializeApp() {
     initLotCalculator();
     initTradingTools();
     initTagsManager();
+    initSurveillance();
+    
+    // Setup authentication
+    setupAuth();
 }
 
 // ===== EVENT LISTENERS =====
@@ -283,6 +287,7 @@ function handleNavigation(e) {
         "lot-calculator": "Calculateur de Lot",
         "trading-tools": "Outils de Trading",
         "tags-manager": "Gestion des Tags",
+        "surveillance": "Trade Surveillance",
         "add-trade": "Ajouter un Trade",
         "trades": "Mes Trades",
         "stats": "Statistiques",
@@ -305,6 +310,10 @@ function handleNavigation(e) {
         initTradingTools();
     } else if (target === "tags-manager") {
         initTagsManager();
+    } else if (target === "surveillance") {
+        initSurveillance();
+    } else if (target === "admin-panel" && isAdmin) {
+        loadAdminData();
     }
 }
 
@@ -1426,11 +1435,665 @@ function renderRecentTrades() {
         html += '</div>';
         html += '<div class="recent-trade-result ' + resultClass + '">';
         html += (trade.result > 0 ? "+" : "") + '$' + trade.result.toFixed(2);
-        html += '</div>';
+html += '</div>';
         html += '</div>';
     });
 
+    grid.innerHTML = html;
+}
+
+// ========================================
+// AUTHENTICATION
+// ========================================
+
+function setupAuth() {
+    // Initialiser Firebase
+    if (typeof firebase !== 'undefined') {
+        initFirebase();
+    }
+    
+    //Toggle login/signup
+    document.getElementById("showSignup").addEventListener("click", function() {
+        document.getElementById("loginForm").classList.add("hidden");
+        document.getElementById("signupForm").classList.remove("hidden");
+        document.getElementById("authError").classList.remove("show");
+    });
+    
+    document.getElementById("showLogin").addEventListener("click", function() {
+        document.getElementById("signupForm").classList.add("hidden");
+        document.getElementById("loginForm").classList.remove("hidden");
+        document.getElementById("authError").classList.remove("show");
+    });
+    
+    // Login
+    document.getElementById("loginBtn").addEventListener("click", handleLogin);
+    document.getElementById("loginPassword").addEventListener("keypress", function(e) {
+        if (e.key === "Enter") handleLogin();
+    });
+    
+    // Signup
+    document.getElementById("signupBtn").addEventListener("click", handleSignup);
+    document.getElementById("signupConfirm").addEventListener("keypress", function(e) {
+        if (e.key === "Enter") handleSignup();
+    });
+    
+    // Logout
+    document.getElementById("logoutBtn").addEventListener("click", handleLogout);
+}
+
+function handleLogin() {
+    var email = document.getElementById("loginEmail").value.trim();
+    var password = document.getElementById("loginPassword").value;
+    var errorEl = document.getElementById("authError");
+    
+    if (!email || !password) {
+        errorEl.textContent = "Veuillez entrer email et mot de passe";
+        errorEl.classList.add("show");
+        return;
+    }
+    
+    if (typeof firebase === 'undefined') {
+        errorEl.textContent = "Firebase non configuré. Vérifiez firebase-config.js";
+        errorEl.classList.add("show");
+        return;
+    }
+    
+    signIn(email, password)
+        .then(function() {
+            // Succès - handleAuthChange sera appelé
+        })
+        .catch(function(error) {
+            errorEl.textContent = getErrorMessage(error.code);
+            errorEl.classList.add("show");
+        });
+}
+
+function handleSignup() {
+    var email = document.getElementById("signupEmail").value.trim();
+    var password = document.getElementById("signupPassword").value;
+    var confirm = document.getElementById("signupConfirm").value;
+    var errorEl = document.getElementById("authError");
+    
+    if (!email || !password) {
+        errorEl.textContent = "Veuillez entrer email et mot de passe";
+        errorEl.classList.add("show");
+        return;
+    }
+    
+    if (password.length < 6) {
+        errorEl.textContent = "Le mot de passe doit avoir au moins 6 caractères";
+        errorEl.classList.add("show");
+        return;
+    }
+    
+    if (password !== confirm) {
+        errorEl.textContent = "Les mots de passe ne correspondent pas";
+        errorEl.classList.add("show");
+        return;
+    }
+    
+    if (typeof firebase === 'undefined') {
+        errorEl.textContent = "Firebase non configuré. Vérifiez firebase-config.js";
+        errorEl.classList.add("show");
+        return;
+    }
+    
+    signUp(email, password)
+        .then(function() {
+            showToast("Compte créé avec succès!", "success");
+        })
+        .catch(function(error) {
+            errorEl.textContent = getErrorMessage(error.code);
+            errorEl.classList.add("show");
+        });
+}
+
+function handleLogout() {
+    if (typeof firebase !== 'undefined') {
+        signOut().then(function() {
+            showToast("Déconnexion réussie", "success");
+        });
+    }
+}
+
+function getErrorMessage(code) {
+    var messages = {
+        "auth/email-already-in-use": "Cet email est déjà utilisé",
+        "auth/invalid-email": "Email invalide",
+        "auth/operation-not-allowed": "Opération non autorisée",
+        "auth/weak-password": "Mot de passe trop faible",
+        "auth/user-disabled": "Compte désactivé",
+        "auth/user-not-found": "Aucun compte avec cet email",
+        "auth/wrong-password": "Mot de passe incorrect",
+        "auth/too-many-requests": "Trop de tentatives. Réessayez plus tard",
+        "auth/invalid-api-key": "Clé API invalide",
+        "auth/network-request-failed": "Erreur réseau"
+    };
+    return messages[code] || "Erreur: " + code;
+}
+
+function showLoginScreen() {
+    document.getElementById("authScreen").classList.remove("hidden");
+    document.getElementById("appContainer").classList.add("hidden");
+}
+
+function hideLoginScreen() {
+    document.getElementById("authScreen").classList.add("hidden");
+    document.getElementById("appContainer").classList.remove("hidden");
+}
+
+function showMainApp() {
+    hideLoginScreen();
+    
+    // Update user info
+    if (currentUser) {
+        document.getElementById("currentUserEmail").textContent = currentUser.email;
+    }
+    
+    // Show/hide admin panel
+    var adminNav = document.getElementById("adminNavItem");
+    if (isAdmin) {
+        adminNav.classList.remove("hidden");
+    } else {
+        adminNav.classList.add("hidden");
+    }
+    
+    // Load user data
+    loadUserData();
+}
+
+function loadUserData() {
+    if (!currentUser) return;
+    
+    // Charger les settings
+    loadUserSettings(function(settings) {
+        if (settings) {
+            state.settings = Object.assign({}, DEFAULT_SETTINGS, settings);
+            document.getElementById("initialCapital").value = state.settings.initialCapital;
+        }
+    });
+    
+    // Charger les trades
+    loadUserTrades(function(trades) {
+        state.trades = trades;
+        updateUI();
+    });
+}
+
+// Admin functions
+function renderAdminUsers(users) {
+    var tbody = document.getElementById("usersTableBody");
+    document.getElementById("adminTotalUsers").textContent = users.length;
+    
+    if (users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4">Aucun utilisateur</td></tr>';
+        return;
+    }
+    
+    var html = "";
+    users.forEach(function(user) {
+        var date = user.createdAt ? new Date(user.createdAt.seconds * 1000).toLocaleDateString("fr-FR") : "-";
+        html += '<tr>';
+        html += '<td>' + escapeHtml(user.email) + '</td>';
+        html += '<td>$' + (user.initialCapital || 10000) + '</td>';
+        html += '<td>' + date + '</td>';
+        html += '<td class="user-actions">';
+        html += '<button class="btn-secondary" onclick="editUser(\'' + user.id + '\')"><i class="fas fa-edit"></i></button>';
+        html += '<button class="btn-danger" onclick="deleteUserConfirm(\'' + user.id + '\')"><i class="fas fa-trash"></i></button>';
+        html += '</td>';
+        html += '</tr>';
+    });
+    
+    tbody.innerHTML = html;
+}
+
+function renderAdminTrades(trades) {
+    var tbody = document.getElementById("adminTradesBody");
+    document.getElementById("adminTotalTrades").textContent = trades.length;
+    
+    if (trades.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6">Aucun trade</td></tr>';
+        return;
+    }
+    
+    var html = "";
+    trades.forEach(function(trade) {
+        var date = trade.createdAt ? new Date(trade.createdAt.seconds * 1000).toLocaleDateString("fr-FR") : "-";
+        var resultClass = trade.result > 0 ? "positive" : (trade.result < 0 ? "negative" : "");
+        
+        html += '<tr>';
+        html += '<td>' + date + '</td>';
+        html += '<td>' + (trade.userEmail || "-") + '</td>';
+        html += '<td>' + trade.pair + '</td>';
+        html += '<td>' + trade.tradeType + '</td>';
+        html += '<td>' + trade.lotSize + '</td>';
+        html += '<td class="' + resultClass + '">$' + trade.result.toFixed(2) + '</td>';
+        html += '</tr>';
+    });
+    
+    tbody.innerHTML = html;
+}
+
+function editUser(userId) {
+    var newCapital = prompt("Nouveau capital initial:");
+    if (newCapital) {
+        updateUser(userId, { initialCapital: parseFloat(newCapital) })
+            .then(function() {
+                showToast("Utilisateur mis à jour", "success");
+            })
+            .catch(function(error) {
+                showToast("Erreur: " + error.message, "error");
+            });
+    }
+}
+
+function deleteUserConfirm(userId) {
+    if (confirm("Êtes-vous sûr? Cela supprimera tous leurs trades.")) {
+        deleteUser(userId)
+            .then(function() {
+                showToast("Utilisateur supprimé", "success");
+                loadAdminData();
+            })
+            .catch(function(error) {
+                showToast("Erreur: " + error.message, "error");
+            });
+    }
+}
+
+function loadAdminData() {
+    loadAllUsers(renderAdminUsers);
+    loadAllTrades(renderAdminTrades);
+}
+
+// ========================================
+// TRADE SURVEILLANCE / SETUP SYSTEM
+// ========================================
+
+var state = Object.assign(state, {
+    setups: [],
+    currentSetup: null,
+    editingConfirmation: null
+});
+
+function initSurveillance() {
+    loadSetups();
+    setupSurveillanceListeners();
+    renderSetupList();
+}
+
+function loadSetups() {
+    try {
+        state.setups = JSON.parse(localStorage.getItem("protrade_setups")) || [];
+    } catch(e) {
+        state.setups = [];
+    }
+}
+
+function saveSetups() {
+    try {
+        localStorage.setItem("protrade_setups", JSON.stringify(state.setups));
+    } catch(e) {}
+}
+
+function setupSurveillanceListeners() {
+    document.getElementById("newSetupBtn").addEventListener("click", showNewSetupForm);
+    document.getElementById("createFirstSetup").addEventListener("click", showNewSetupForm);
+    document.getElementById("backToList").addEventListener("click", showSetupList);
+    document.getElementById("backToListFromDetail").addEventListener("click", showSetupList);
+    
+    document.getElementById("setupBuy").addEventListener("click", function() {
+        document.getElementById("setupBuy").classList.add("active");
+        document.getElementById("setupSell").classList.remove("active");
+    });
+    
+    document.getElementById("setupSell").addEventListener("click", function() {
+        document.getElementById("setupSell").classList.add("active");
+        document.getElementById("setupBuy").classList.remove("active");
+    });
+    
+    document.getElementById("addConfirmation").addEventListener("click", showAddConfirmationModal);
+    document.getElementById("closeConfirmationModal").addEventListener("click", hideConfirmationModal);
+    document.getElementById("cancelConfirmation").addEventListener("click", hideConfirmationModal);
+    document.getElementById("saveConfirmation").addEventListener("click", saveConfirmation);
+    
+    document.getElementById("skipChecklist").addEventListener("click", goToLotCalculator);
+    document.getElementById("takeTrade").addEventListener("click", goToLotCalculator);
+    document.getElementById("takeTradeFromDetail").addEventListener("click", goToLotCalculator);
+    
+    document.getElementById("deleteSetup").addEventListener("click", deleteCurrentSetup);
+    document.getElementById("editSetup").addEventListener("click", editCurrentSetup);
+    
+    document.querySelectorAll(".star-rating .star").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            document.querySelectorAll(".star-rating .star").forEach(function(b) {
+                b.classList.remove("active");
+            });
+            btn.classList.add("active");
+        });
+    });
+}
+
+function showNewSetupForm() {
+    state.currentSetup = null;
+    document.getElementById("setupPair").value = "EURUSD";
+    document.getElementById("setupNotes").value = "";
+    document.getElementById("setupBuy").classList.add("active");
+    document.getElementById("setupSell").classList.remove("active");
+    document.getElementById("confirmationsList").innerHTML = "";
+    updateProgress();
+    showView("setupFormContainer");
+}
+
+function showSetupList() {
+    state.currentSetup = null;
+    renderSetupList();
+    showView("setupList");
+}
+
+function showSetupDetail(setupId) {
+    var setup = state.setups.find(function(s) {
+        return s.id === setupId;
+    });
+    
+    if (!setup) return;
+    state.currentSetup = setup;
+    document.getElementById("detailPair").textContent = setup.pair;
+    document.getElementById("detailType").textContent = setup.type;
+    document.getElementById("detailType").className = "setup-type-badge " + setup.type.toLowerCase();
+    document.getElementById("detailNotes").textContent = setup.notes || "-";
+    
+    var completion = calculateCompletion(setup);
+    document.getElementById("detailProgress").textContent = completion + "%";
+    document.getElementById("readyAlert").classList.toggle("hidden", completion < 85);
+    renderConfirmationsInDetail(setup.confirmations || []);
+    showView("setupDetailContainer");
+}
+
+function showView(viewId) {
+    var views = ["setupList", "setupFormContainer", "setupDetailContainer"];
+    views.forEach(function(v) {
+        var el = document.getElementById(v);
+        if (el) el.classList.add("hidden");
+    });
+    if (viewId) document.getElementById(viewId).classList.remove("hidden");
+}
+
+function renderSetupList() {
+    var container = document.getElementById("setupList");
+    var empty = document.getElementById("emptySetups");
+    
+    if (state.setups.length === 0) {
+        container.innerHTML = "";
+        if (empty) empty.style.display = "flex";
+        return;
+    }
+    
+    if (empty) empty.style.display = "none";
+    
+    var sorted = state.setups.slice().sort(function(a, b) {
+        return calculateCompletion(b) - calculateCompletion(a);
+    });
+    
+    var html = "";
+    sorted.forEach(function(setup) {
+        var completion = calculateCompletion(setup);
+        var statusClass = completion >= 85 ? "ready" : (completion >= 50 ? "medium" : "low");
+        var statusText = completion >= 85 ? "Prêt" : (completion >= 50 ? "En cours" : "En attente");
+        
+        html += '<div class="setup-card" onclick="showSetupDetail(' + setup.id + ')">';
+        html += '<div class="setup-card-info">';
+        html += '<span class="setup-card-pair">' + setup.pair + '</span>';
+        html += '<span class="setup-card-type ' + setup.type.toLowerCase() + '">' + setup.type + '</span>';
+        html += '</div>';
+        html += '<div class="setup-card-progress">';
+        html += '<div class="progress-mini"><div class="progress-fill-mini ' + (completion >= 85 ? "ready" : "") + '" style="width:' + completion + '%"></div></div>';
+        html += '<span class="progress-percent">' + completion + '%</span>';
+        html += '</div>';
+        html += '<span class="setup-card-status ' + statusClass + '">' + statusText + '</span>';
+        html += '</div>';
+    });
+    
     container.innerHTML = html;
+}
+
+function calculateCompletion(setup) {
+    var confirmations = setup.confirmations || [];
+    if (confirmations.length === 0) return 0;
+    
+    var totalWeight = 0, completedWeight = 0;
+    confirmations.forEach(function(conf) {
+        totalWeight += conf.stars || 1;
+        if (conf.completed) completedWeight += conf.stars || 1;
+    });
+    
+    return totalWeight > 0 ? Math.round((completedWeight / totalWeight) * 100) : 0;
+}
+
+function updateProgress() {
+    if (!state.currentSetup) {
+        var completion = calculateCompletion({ confirmations: getConfirmationsFromDOM() });
+        var fill = document.getElementById("progressFill");
+        var status = document.querySelector(".status-badge");
+        
+        if (fill) fill.style.width = completion + "%";
+        document.getElementById("setupProgress").textContent = completion + "%";
+        
+        if (completion >= 85) {
+            fill.classList.add("ready");
+            status.classList.add("ready");
+            status.textContent = "Prêt!";
+        } else {
+            fill.classList.remove("ready");
+            status.classList.remove("ready");
+            status.textContent = completion >= 50 ? "Almost ready" : "En attente";
+        }
+    }
+}
+
+function renderConfirmations(confirmations) {
+    var container = document.getElementById("confirmationsList");
+    var html = "";
+    
+    confirmations.forEach(function(conf, index) {
+        var stars = "";
+        for (var i = 0; i < (conf.stars || 1); i++) stars += '<i class="fas fa-star"></i>';
+        
+        html += '<div class="confirmation-item ' + (conf.completed ? "completed" : "") + '">';
+        html += '<div class="confirmation-checkbox ' + (conf.completed ? "checked" : "") + '" onclick="toggleConfirmation(' + index + ')">';
+        if (conf.completed) html += '<i class="fas fa-check"></i>';
+        html += '</div>';
+        html += '<div class="confirmation-info"><div class="confirmation-title">' + escapeHtml(conf.title) + '</div>';
+        if (conf.description) html += '<div class="confirmation-desc">' + escapeHtml(conf.description) + '</div>';
+        html += '</div>';
+        html += '<div class="confirmation-stars">' + stars + '</div>';
+        html += '<div class="confirmation-actions">';
+        html += '<button class="btn-icon" onclick="editConfirmation(' + index + ')"><i class="fas fa-edit"></i></button>';
+        html += '<button class="btn-icon danger" onclick="deleteConfirmation(' + index + ')"><i class="fas fa-trash"></i></button>';
+        html += '</div></div>';
+    });
+    
+    container.innerHTML = html;
+}
+
+function renderConfirmationsInDetail(confirmations) {
+    var container = document.getElementById("detailConfirmationsList");
+    var html = "";
+    
+    confirmations.forEach(function(conf) {
+        var stars = "";
+        for (var i = 0; i < (conf.stars || 1); i++) stars += '<i class="fas fa-star"></i>';
+        
+        html += '<div class="confirmation-item ' + (conf.completed ? "completed" : "") + '">';
+        html += '<div class="confirmation-checkbox ' + (conf.completed ? "checked" : "") + '">';
+        if (conf.completed) html += '<i class="fas fa-check"></i>';
+        html += '</div>';
+        html += '<div class="confirmation-info"><div class="confirmation-title">' + escapeHtml(conf.title) + '</div>';
+        if (conf.description) html += '<div class="confirmation-desc">' + escapeHtml(conf.description) + '</div>';
+        html += '</div>';
+        html += '<div class="confirmation-stars">' + stars + '</div></div>';
+    });
+    
+    container.innerHTML = html;
+}
+
+function getConfirmationsFromDOM() {
+    var items = document.querySelectorAll("#confirmationsList .confirmation-item");
+    var confirmations = [];
+    
+    items.forEach(function(item) {
+        var checkbox = item.querySelector(".confirmation-checkbox");
+        var title = item.querySelector(".confirmation-title").textContent;
+        var desc = item.querySelector(".confirmation-desc");
+        var stars = item.querySelectorAll(".confirmation-stars .fa-star").length;
+        
+        confirmations.push({
+            title: title,
+            description: desc ? desc.textContent : "",
+            stars: stars || 1,
+            completed: checkbox.classList.contains("checked")
+        });
+    });
+    
+    return confirmations;
+}
+
+function showAddConfirmationModal() {
+    document.getElementById("confTitle").value = "";
+    document.getElementById("confDesc").value = "";
+    document.querySelectorAll(".star-rating .star").forEach(function(b) {
+        b.classList.remove("active");
+    });
+    document.querySelector(".star-rating .star[data-star='3']").classList.add("active");
+    document.getElementById("confTitle").focus();
+    document.getElementById("confirmationModal").classList.add("active");
+}
+
+function hideConfirmationModal() {
+    document.getElementById("confirmationModal").classList.remove("active");
+}
+
+function saveConfirmation() {
+    var title = document.getElementById("confTitle").value.trim();
+    var desc = document.getElementById("confDesc").value.trim();
+    var stars = parseInt(document.querySelector(".star-rating .star.active").dataset.star) || 1;
+    
+    if (!title) {
+        showToast("Veuillez entrer un titre", "error");
+        return;
+    }
+    
+    var confirmations = getConfirmationsFromDOM();
+    
+    if (state.editingConfirmation !== null) {
+        confirmations[state.editingConfirmation] = {
+            title: title,
+            description: desc,
+            stars: stars,
+            completed: confirmations[state.editingConfirmation].completed
+        };
+        state.editingConfirmation = null;
+    } else {
+        confirmations.push({ title: title, description: desc, stars: stars, completed: false });
+    }
+    
+    renderConfirmations(confirmations);
+    updateProgress();
+    hideConfirmationModal();
+    showToast("Confirmation ajoutée", "success");
+}
+
+function toggleConfirmation(index) {
+    var confirmations = getConfirmationsFromDOM();
+    confirmations[index].completed = !confirmations[index].completed;
+    renderConfirmations(confirmations);
+    updateProgress();
+    
+    if (calculateCompletion({ confirmations: confirmations }) >= 85) {
+        showToast("Trade prêt à prendre!", "success");
+    }
+}
+
+function editConfirmation(index) {
+    var confirmations = getConfirmationsFromDOM();
+    var conf = confirmations[index];
+    
+    state.editingConfirmation = index;
+    document.getElementById("confTitle").value = conf.title;
+    document.getElementById("confDesc").value = conf.description || "";
+    
+    document.querySelectorAll(".star-rating .star").forEach(function(b) {
+        b.classList.remove("active");
+    });
+    document.querySelector(".star-rating .star[data-star='" + conf.stars + "']").classList.add("active");
+    document.getElementById("confirmationModal").classList.add("active");
+}
+
+function deleteConfirmation(index) {
+    var confirmations = getConfirmationsFromDOM();
+    confirmations.splice(index, 1);
+    renderConfirmations(confirmations);
+    updateProgress();
+    showToast("Confirmation supprimée", "success");
+}
+
+function saveSetup() {
+    var pair = document.getElementById("setupPair").value;
+    var type = document.getElementById("setupBuy").classList.contains("active") ? "Buy" : "Sell";
+    var notes = document.getElementById("setupNotes").value.trim();
+    var confirmations = getConfirmationsFromDOM();
+    
+    if (!state.currentSetup) {
+        state.setups.push({
+            id: Date.now(),
+            pair: pair,
+            type: type,
+            notes: notes,
+            confirmations: confirmations,
+            createdAt: new Date().toISOString()
+        });
+    } else {
+        state.currentSetup.pair = pair;
+        state.currentSetup.type = type;
+        state.currentSetup.notes = notes;
+        state.currentSetup.confirmations = confirmations;
+    }
+    
+    saveSetups();
+    renderSetupList();
+    showToast("Setup enregistrée!", "success");
+}
+
+function deleteCurrentSetup() {
+    if (!state.currentSetup) return;
+    if (confirm("Supprimer cette setup?")) {
+        state.setups = state.setups.filter(function(s) {
+            return s.id !== state.currentSetup.id;
+        });
+        saveSetups();
+        showSetupList();
+        showToast("Setup supprimée", "success");
+    }
+}
+
+function editCurrentSetup() {
+    if (!state.currentSetup) return;
+    document.getElementById("setupPair").value = state.currentSetup.pair;
+    if (state.currentSetup.type === "Buy") {
+        document.getElementById("setupBuy").classList.add("active");
+        document.getElementById("setupSell").classList.remove("active");
+    } else {
+        document.getElementById("setupSell").classList.add("active");
+        document.getElementById("setupBuy").classList.remove("active");
+    }
+    document.getElementById("setupNotes").value = state.currentSetup.notes || "";
+    renderConfirmations(state.currentSetup.confirmations || []);
+    updateProgress();
+    showView("setupFormContainer");
+}
+
+function goToLotCalculator() {
+    if (state.currentSetup) saveSetup();
+    document.querySelector('[data-section="lot-calculator"]').click();
 }
 
 // ===== CHECKLIST =====

@@ -2656,6 +2656,701 @@ body {
 }
 
 /* ========================================
+    Auth Screen
+    ======================================== */
+.auth-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+    padding: var(--space-lg);
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 420px;
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow-xl);
+}
+
+.auth-logo {
+    text-align: center;
+    margin-bottom: var(--space-xl);
+}
+
+.auth-logo i {
+    font-size: 3rem;
+    color: var(--accent-blue);
+    margin-bottom: var(--space-md);
+}
+
+.auth-logo h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+}
+
+.auth-form h2 {
+    margin: 0 0 var(--space-lg) 0;
+    font-size: 1.25rem;
+    text-align: center;
+    color: var(--text-primary);
+}
+
+.auth-form .form-group {
+    margin-bottom: var(--space-md);
+}
+
+.auth-form .form-group label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: var(--space-sm);
+    color: var(--text-secondary);
+}
+
+.auth-form .form-group input {
+    width: 100%;
+    padding: var(--space-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    transition: border-color var(--transition-fast);
+}
+
+.auth-form .form-group input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+}
+
+.auth-form button[type="submit"],
+.auth-form .btn-primary {
+    width: 100%;
+    padding: var(--space-md);
+    margin-top: var(--space-md);
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: var(--space-lg);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.auth-switch button {
+    background: none;
+    border: none;
+    color: var(--accent-blue);
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: var(--space-xs);
+}
+
+.auth-switch button:hover {
+    text-decoration: underline;
+}
+
+.auth-error {
+    text-align: center;
+    color: var(--danger);
+    margin-top: var(--space-md);
+    font-size: 0.9rem;
+    display: none;
+}
+
+.auth-error.show {
+    display: block;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ========================================
+    User Info & Logout
+    ======================================== */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-sm);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    overflow: hidden;
+}
+
+.user-info i {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.user-info span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-logout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--danger-bg);
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-logout:hover {
+    background: var(--danger);
+    color: white;
+}
+
+/* ========================================
+    Admin Panel
+    ======================================== */
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-lg);
+    margin-bottom: var(--space-xl);
+}
+
+.admin-users-section,
+.admin-trades-section {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    margin-bottom: var(--space-lg);
+}
+
+.admin-users-section h3,
+.admin-trades-section h3 {
+    margin: 0 0 var(--space-lg) 0;
+    font-size: 1.1rem;
+}
+
+.users-table-container {
+    overflow-x: auto;
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.users-table th,
+.users-table td {
+    padding: var(--space-md);
+    text-align: left;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.users-table th {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+.users-table td {
+    font-size: 0.9rem;
+}
+
+.user-actions {
+    display: flex;
+    gap: var(--space-xs);
+}
+
+.user-actions button {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.8rem;
+}
+
+/* ========================================
+    Trade Surveillance Section
+    ======================================== */
+.surveillance-list {
+    display: grid;
+    gap: var(--space-md);
+}
+
+.setup-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-lg);
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.setup-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.setup-card-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+}
+
+.setup-card-pair {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.setup-card-type {
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.setup-card-type.buy {
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+.setup-card-type.sell {
+    background: var(--danger-bg);
+    color: var(--danger);
+}
+
+.setup-card-progress {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    min-width: 150px;
+}
+
+.progress-mini {
+    flex: 1;
+    height: 6px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.progress-fill-mini {
+    height: 100%;
+    background: var(--accent-blue);
+    border-radius: var(--radius-full);
+    transition: width var(--transition-normal);
+}
+
+.progress-fill-mini.ready {
+    background: var(--success);
+}
+
+.progress-percent {
+    font-weight: 600;
+    min-width: 45px;
+    text-align: right;
+}
+
+.setup-card-status {
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.setup-card-status.low {
+    background: var(--danger-bg);
+    color: var(--danger);
+}
+
+.setup-card-status.medium {
+    background: var(--warning-bg);
+    color: var(--warning);
+}
+
+.setup-card-status.ready {
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+.setup-card-actions {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+/* Setup Form */
+.setup-form-container,
+.setup-detail-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.setup-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.setup-header h3 {
+    margin: 0;
+}
+
+.setup-title-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.setup-type-badge {
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.setup-type-badge.buy {
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+.setup-type-badge.sell {
+    background: var(--danger-bg);
+    color: var(--danger);
+}
+
+.setup-config {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    margin-bottom: var(--space-lg);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+}
+
+.direction-selector {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.dir-option {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+}
+
+.dir-option:hover {
+    border-color: var(--accent-blue);
+}
+
+.dir-option.active[data-dir="Buy"] {
+    background: var(--success-bg);
+    border-color: var(--success);
+    color: var(--success);
+}
+
+.dir-option.active[data-dir="Sell"] {
+    background: var(--danger-bg);
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+/* Confirmations */
+.confirmations-section {
+    margin-bottom: var(--space-lg);
+}
+
+.confirmations-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.confirmations-header h4 {
+    margin: 0;
+}
+
+.confirmations-list {
+    display: grid;
+    gap: var(--space-sm);
+}
+
+.confirmation-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.confirmation-item.completed {
+    background: var(--success-bg);
+    border-color: var(--success);
+}
+
+.confirmation-checkbox {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.confirmation-checkbox:hover {
+    border-color: var(--accent-blue);
+}
+
+.confirmation-checkbox.checked {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+}
+
+.confirmation-info {
+    flex: 1;
+}
+
+.confirmation-title {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.confirmation-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: var(--space-xs);
+}
+
+.confirmation-stars {
+    color: var(--warning);
+    font-size: 0.9rem;
+}
+
+.confirmation-actions {
+    display: flex;
+    gap: var(--space-xs);
+}
+
+.confirmation-actions button {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    font-size: 0.8rem;
+}
+
+/* Progress */
+.setup-progress {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    margin-bottom: var(--space-lg);
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--space-sm);
+}
+
+.progress-percent {
+    font-weight: 700;
+    color: var(--accent-blue);
+}
+
+.progress-bar {
+    height: 8px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: var(--space-md);
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--accent-blue);
+    border-radius: var(--radius-full);
+    transition: width var(--transition-normal);
+}
+
+.progress-fill.ready {
+    background: var(--success);
+}
+
+.progress-status {
+    text-align: center;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+}
+
+.status-badge.ready {
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+/* Setup Actions */
+.setup-actions {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: flex-end;
+}
+
+/* Setup Detail */
+.setup-detail-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md);
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-lg);
+    border: 1px solid var(--border-color);
+}
+
+.status-progress {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.status-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.status-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.status-alert {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--success-bg);
+    color: var(--success);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+.setup-detail-notes {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+    border: 1px solid var(--border-color);
+}
+
+.setup-detail-notes h4 {
+    margin: 0 0 var(--space-sm) 0;
+}
+
+.detail-confirmations {
+    margin-bottom: var(--space-lg);
+}
+
+.detail-confirmations h4 {
+    margin: 0 0 var(--space-md) 0;
+}
+
+/* Star Rating */
+.star-rating {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.star-rating .star {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.star-rating .star span {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.star-rating .star i {
+    color: var(--text-muted);
+}
+
+.star-rating .star:hover {
+    border-color: var(--warning);
+}
+
+.star-rating .star.active,
+.star-rating .star.active i {
+    border-color: var(--warning);
+    color: var(--warning);
+    background: rgba(245, 158, 11, 0.1);
+}
+
+/* ========================================
     Scrollbar
     ======================================== */
 ::-webkit-scrollbar { width: 6px; height: 6px; }

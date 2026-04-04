@@ -16,9 +16,70 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="styles.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
 </head>
 <body>
-    <div class="app-container">
+    <!-- Auth Screen -->
+    <div class="auth-screen" id="authScreen">
+        <div class="auth-container">
+            <div class="auth-logo">
+                <i class="fas fa-chart-line"></i>
+                <h1>ProTrade Journal</h1>
+            </div>
+            
+            <!-- Login Form -->
+            <div class="auth-form" id="loginForm">
+                <h2>Connexion</h2>
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" placeholder="votre@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Mot de passe</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••">
+                </div>
+                <button class="btn-primary" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Se connecter
+                </button>
+                <p class="auth-switch">
+                    Pas de compte? <button type="button" id="showSignup">S'inscrire</button>
+                </p>
+            </div>
+            
+            <!-- Signup Form -->
+            <div class="auth-form hidden" id="signupForm">
+                <h2>Inscription</h2>
+                <div class="form-group">
+                    <label for="signupEmail">Email</label>
+                    <input type="email" id="signupEmail" placeholder="votre@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">Mot de passe</label>
+                    <input type="password" id="signupPassword" placeholder="••••••••">
+                </div>
+                <div class="form-group">
+                    <label for="signupConfirm">Confirmer le mot de passe</label>
+                    <input type="password" id="signupConfirm" placeholder="••••••••">
+                </div>
+                <button class="btn-primary" id="signupBtn">
+                    <i class="fas fa-user-plus"></i>
+                    Créer un compte
+                </button>
+                <p class="auth-switch">
+                    Déjà un compte? <button type="button" id="showLogin">Se connecter</button>
+                </p>
+            </div>
+            
+            <p class="auth-error" id="authError"></p>
+        </div>
+    </div>
+    
+    <div class="app-container hidden" id="appContainer">
         <!-- Sidebar Navigation -->
         <aside class="sidebar" id="sidebar">
             <div class="logo">
@@ -41,6 +102,10 @@
                 <a href="#" class="nav-item" data-section="tags-manager">
                     <i class="fas fa-tags"></i>
                     <span>Tags</span>
+                </a>
+                <a href="#" class="nav-item" data-section="surveillance">
+                    <i class="fas fa-eye"></i>
+                    <span>Surveillance</span>
                 </a>
                 <a href="#" class="nav-item" data-section="add-trade">
                     <i class="fas fa-plus-circle"></i>
@@ -67,11 +132,24 @@
                     <i class="fas fa-cog"></i>
                     <span>Paramètres</span>
                 </a>
+                <!-- Admin Panel (visible only for admin) -->
+                <a href="#" class="nav-item hidden" data-section="admin-panel" id="adminNavItem">
+                    <i class="fas fa-users-cog"></i>
+                    <span>Admin</span>
+                </a>
             </nav>
             <div class="sidebar-footer">
+                <div class="user-info" id="userInfo">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="currentUserEmail">-</span>
+                </div>
                 <button class="theme-toggle" id="themeToggle">
                     <i class="fas fa-moon"></i>
                     <span>Mode Sombre</span>
+                </button>
+                <button class="btn-logout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Déconnexion</span>
                 </button>
             </div>
         </aside>
@@ -577,6 +655,200 @@
                 </div>
             </section>
 
+            <!-- Surveillance / Trade Setup Section -->
+            <section class="content-section" id="surveillance">
+                <div class="section-header">
+                    <div>
+                        <h2>Trade Surveillance</h2>
+                        <p class="section-subtitle">Préparez vos trades avant exécution</p>
+                    </div>
+                    <button class="btn-primary" id="newSetupBtn">
+                        <i class="fas fa-plus"></i>
+                        Nouvelle Setup
+                    </button>
+                </div>
+
+                <!-- Setup List -->
+                <div class="surveillance-list" id="setupList">
+                    <div class="empty-state" id="emptySetups">
+                        <i class="fas fa-binoculars"></i>
+                        <p>Aucune setup en surveillance</p>
+                        <button class="btn-secondary" id="createFirstSetup">Créer une setup</button>
+                    </div>
+                </div>
+
+                <!-- Setup Form (Hidden by default) -->
+                <div class="setup-form-container hidden" id="setupFormContainer">
+                    <div class="setup-header">
+                        <button class="btn-icon" id="backToList">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <h3>Nouvelle Setup</h3>
+                    </div>
+                    
+                    <div class="setup-config">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="setupPair">Paire</label>
+                                <select id="setupPair">
+                                    <option value="XAUUSD">XAUUSD (Or)</option>
+                                    <option value="EURUSD">EURUSD</option>
+                                    <option value="GBPUSD">GBPUSD</option>
+                                    <option value="USDJPY">USDJPY</option>
+                                    <option value="BTCUSD">BTCUSD</option>
+                                    <option value="ETHUSD">ETHUSD</option>
+                                    <option value="AUDUSD">AUDUSD</option>
+                                    <option value="USDCAD">USDCAD</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="setupType">Direction</label>
+                                <div class="direction-selector">
+                                    <button class="dir-option active" data-dir="Buy" id="setupBuy">
+                                        <i class="fas fa-arrow-up"></i> Buy
+                                    </button>
+                                    <button class="dir-option" data-dir="Sell" id="setupSell">
+                                        <i class="fas fa-arrow-down"></i> Sell
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="setupNotes">Notes</label>
+                            <textarea id="setupNotes" rows="2" placeholder="Analyse, observation..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Confirmations -->
+                    <div class="confirmations-section">
+                        <div class="confirmations-header">
+                            <h4>Confirmations</h4>
+                            <button class="btn-link" id="addConfirmation">
+                                <i class="fas fa-plus"></i> Ajouter
+                            </button>
+                        </div>
+                        <div class="confirmations-list" id="confirmationsList">
+                            <!-- Confirmations will be rendered here -->
+                        </div>
+                    </div>
+
+                    <!-- Progress -->
+                    <div class="setup-progress">
+                        <div class="progress-info">
+                            <span>Progression</span>
+                            <span class="progress-percent" id="setupProgress">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="progress-status" id="progressStatus">
+                            <span class="status-badge">En attente</span>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="setup-actions">
+                        <button class="btn-secondary" id="skipChecklist">
+                            <i class="fas fa-forward"></i>
+                            Passer
+                        </button>
+                        <button class="btn-primary" id="takeTrade">
+                            <i class="fas fa-play"></i>
+                            Prendre le Trade
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Setup Detail View -->
+                <div class="setup-detail-container hidden" id="setupDetailContainer">
+                    <div class="setup-header">
+                        <button class="btn-icon" id="backToListFromDetail">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div class="setup-title-info">
+                            <h3 id="detailPair">EURUSD</h3>
+                            <span class="setup-type-badge" id="detailType">Buy</span>
+                        </div>
+                    </div>
+                    
+                    <div class="setup-detail-status">
+                        <div class="status-progress">
+                            <span class="status-label">Completion</span>
+                            <span class="status-value" id="detailProgress">0%</span>
+                        </div>
+                        <div class="status-alert hidden" id="readyAlert">
+                            <i class="fas fa-check-circle"></i>
+                            Trade prêt à prendre!
+                        </div>
+                    </div>
+
+                    <div class="setup-detail-notes">
+                        <h4>Notes</h4>
+                        <p id="detailNotes">-</p>
+                    </div>
+
+                    <div class="detail-confirmations">
+                        <h4>Confirmations</h4>
+                        <div class="confirmations-list" id="detailConfirmationsList">
+                        </div>
+                    </div>
+
+                    <div class="setup-actions">
+                        <button class="btn-danger" id="deleteSetup">
+                            <i class="fas fa-trash"></i>
+                            Supprimer
+                        </button>
+                        <button class="btn-secondary" id="editSetup">
+                            <i class="fas fa-edit"></i>
+                            Modifier
+                        </button>
+                        <button class="btn-primary" id="takeTradeFromDetail">
+                            <i class="fas fa-play"></i>
+                            Prendre le Trade
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Add Confirmation Modal -->
+                <div class="modal" id="confirmationModal">
+                    <div class="modal-content">
+                        <button class="modal-close" id="closeConfirmationModal">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <h3>Ajouter Confirmation</h3>
+                        <div class="form-group">
+                            <label for="confTitle">Titre</label>
+                            <input type="text" id="confTitle" placeholder="Ex: Break of Structure">
+                        </div>
+                        <div class="form-group">
+                            <label for="confDesc">Description <span class="optional">(optionnel)</span></label>
+                            <textarea id="confDesc" rows="2" placeholder="Détails..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Importance</label>
+                            <div class="star-rating" id="starRating">
+                                <button type="button" class="star" data-star="1">
+                                    <i class="fas fa-star"></i>
+                                    <span>1</span>
+                                </button>
+                                <button type="button" class="star" data-star="2">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                    <span>2</span>
+                                </button>
+                                <button type="button" class="star active" data-star="3">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                    <span>3</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn-secondary" id="cancelConfirmation">Annuler</button>
+                            <button class="btn-primary" id="saveConfirmation">Ajouter</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Add Trade Section -->
             <section class="content-section" id="add-trade">
                 <div class="section-header">
@@ -985,6 +1257,75 @@
                         <i class="fas fa-sticky-note"></i>
                         <p>Aucune note</p>
                         <button class="btn-secondary" id="addFirstNote">Ajouter une note</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Admin Panel Section -->
+            <section class="content-section" id="admin-panel">
+                <div class="section-header">
+                    <div>
+                        <h2>Panel d'Administration</h2>
+                        <p class="section-subtitle">Gérer les utilisateurs</p>
+                    </div>
+                </div>
+                
+                <div class="admin-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Total Utilisateurs</span>
+                            <span class="stat-value" id="adminTotalUsers">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Total Trades</span>
+                            <span class="stat-value" id="adminTotalTrades">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="admin-users-section">
+                    <h3>Utilisateurs</h3>
+                    <div class="users-table-container">
+                        <table class="users-table">
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Capital Initial</th>
+                                    <th>Date d'inscription</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="admin-trades-section">
+                    <h3>Tous les Trades</h3>
+                    <div class="trades-table-container">
+                        <table class="trades-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Utilisateur</th>
+                                    <th>Paire</th>
+                                    <th>Type</th>
+                                    <th>Lot</th>
+                                    <th>Résultat</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminTradesBody">
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>

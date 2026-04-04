@@ -63,8 +63,64 @@ Professional trading journal for Forex and Crypto. Track, analyze, and improve y
 - **CSS3** - Responsive design with CSS Variables
 - **JavaScript (Vanilla)** - Business logic without framework
 - **Chart.js** - Interactive charts
-- **jsPDF** - PDF export
-- **LocalStorage** - Local data persistence
+- **Firebase** - Authentication et base de données cloud
+- **Cloud Firestore** - Base de données temps réel
+
+## Firebase Setup (Requis pour multi-utilisateurs)
+
+### Configuration Firebase
+
+1. Créez un projet sur [Firebase Console](https://console.firebase.google.com)
+
+2. Activez l'authentification:
+   - Authentication → Méthode de connexion
+   - Activer "Email/Password"
+
+3. Créez une base de données Firestore:
+   - Firestore Database → Créer une base de données
+   - Mode: Production
+   - Règles:
+   ```
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /users/{userId} {
+         allow read, write: if request.auth != null && request.auth.uid == userId;
+         allow read: if request.auth != null;
+       }
+       match /trades/{tradeId} {
+         allow read, write: if request.auth != null;
+       }
+       match /admins/{userId} {
+         allow read, write: if request.auth != null;
+       }
+     }
+   }
+   ```
+
+4. Obtenez vos identifiants:
+   - Paramètres du projet → Vos apps → Web app (</>)
+   - Copiez la configuration
+
+5. Modifiez `firebase-config.js`:
+   ```javascript
+   const firebaseConfig = {
+       apiKey: "VOTRE_API_KEY",
+       authDomain: "votre-projet.firebaseapp.com",
+       projectId: "votre-projet",
+       storageBucket: "votre-projet.appspot.com",
+       messagingSenderId: "VOTRE_SENDER_ID",
+       appId: "VOTRE_APP_ID"
+   };
+   ```
+
+6. Pour rendre un utilisateur admin:
+   - Dans Firestore, collection `admins`
+   - Ajouter un document avec l'UID de l'utilisateur
+
+## UtilisationS sans Firebase (Mode local)
+
+Pour tester sans Firebase, l'application fonctionne avec localStorage en mode hors-ligne.
 
 ## Installation
 
