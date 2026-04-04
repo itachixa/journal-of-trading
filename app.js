@@ -1948,15 +1948,16 @@ function showView(viewId) {
 
 function renderSetupList() {
     var container = document.getElementById("setupList");
-    var empty = document.getElementById("emptySetups");
     
     if (state.setups.length === 0) {
-        container.innerHTML = "";
-        if (empty) empty.style.display = "flex";
+        container.innerHTML = '<div class="surveillance-grid"><div class="empty-state" id="emptySetups">' +
+            '<div class="empty-icon"><i class="fas fa-binoculars"></i></div>' +
+            '<p>Aucune surveillance en cours</p>' +
+            '<span class="empty-hint">Créez votre première idée de trade</span>' +
+            '<button class="btn-primary" id="createFirstSetup"><i class="fas fa-plus"></i> Créer une surveillance</button></div></div>';
+        document.getElementById("createFirstSetup").addEventListener("click", showNewSetupForm);
         return;
     }
-    
-    if (empty) empty.style.display = "none";
     
     var sorted = state.setups.slice().sort(function(a, b) {
         return calculateCompletion(b) - calculateCompletion(a);
