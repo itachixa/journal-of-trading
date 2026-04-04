@@ -1779,9 +1779,15 @@ function setupSurveillanceListeners() {
         })(i);
     }
     
-    document.getElementById("skipChecklist").addEventListener("click", goToLotCalculator);
-    document.getElementById("takeTrade").addEventListener("click", saveSetup);
-    document.getElementById("takeTradeFromDetail").addEventListener("click", goToLotCalculator);
+    document.getElementById("saveSurveillanceBtn").addEventListener("click", saveSetup);
+    document.getElementById("takeTrade").addEventListener("click", function() {
+        saveSetup();
+        document.querySelector('[data-section="lot-calculator"]').click();
+    });
+    document.getElementById("takeTradeFromDetail").addEventListener("click", function() {
+        saveSetup();
+        document.querySelector('[data-section="lot-calculator"]').click();
+    });
     
     document.getElementById("deleteSetup").addEventListener("click", deleteCurrentSetup);
     document.getElementById("editSetup").addEventListener("click", editCurrentSetup);
