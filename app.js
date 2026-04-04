@@ -1492,6 +1492,14 @@ function handleLogin() {
         return;
     }
     
+    // Demo credentials
+    if (email === "demo@trading.com" && password === "demo123") {
+        currentUser = { uid: "demo-user-001", email: "demo@trading.com" };
+        isAdmin = true;
+        showMainApp();
+        return;
+    }
+    
     if (typeof firebase === 'undefined') {
         errorEl.textContent = "Firebase non configuré. Vérifiez firebase-config.js";
         errorEl.classList.add("show");
