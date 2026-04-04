@@ -1768,16 +1768,7 @@ function setupSurveillanceListeners() {
     document.getElementById("saveConfirmation").addEventListener("click", saveConfirmation);
     document.getElementById("closeTagModal").addEventListener("click", hideTagSelectionModal);
     
-    for (var i = 0; i < 3; i++) {
-        (function(index) {
-            var input = document.getElementById("screenshot" + index);
-            if (input) {
-                input.addEventListener("change", function(e) {
-                    handleScreenshotUpload(index, e);
-                });
-            }
-        })(i);
-    }
+    setupScreenshotListeners();
     
     document.getElementById("saveSurveillanceBtn").addEventListener("click", saveSetup);
     document.getElementById("takeTrade").addEventListener("click", function() {
@@ -1829,6 +1820,18 @@ function resetScreenshotSlots() {
                     return function(e) { handleScreenshotUpload(index, e); };
                 })(i));
             }
+        }
+    }
+    setupScreenshotListeners();
+}
+
+function setupScreenshotListeners() {
+    for (var i = 0; i < 3; i++) {
+        var input = document.getElementById("screenshot" + i);
+        if (input) {
+            input.onchange = (function(index) {
+                return function(e) { handleScreenshotUpload(index, e); };
+            })(i);
         }
     }
 }
