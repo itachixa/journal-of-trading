@@ -662,18 +662,26 @@
                         <h2>Trade Surveillance</h2>
                         <p class="section-subtitle">Préparez vos trades avant exécution</p>
                     </div>
-                    <button class="btn-primary" id="newSetupBtn">
-                        <i class="fas fa-plus"></i>
-                        Nouvelle Setup
-                    </button>
                 </div>
 
+                <!-- Floating Add Button -->
+                <button class="floating-add-btn" id="newSetupBtn">
+                    <i class="fas fa-plus"></i>
+                    <span>Ajouter</span>
+                </button>
+
                 <!-- Setup List -->
-                <div class="surveillance-list" id="setupList">
+                <div class="surveillance-grid" id="setupList">
                     <div class="empty-state" id="emptySetups">
-                        <i class="fas fa-binoculars"></i>
-                        <p>Aucune setup en surveillance</p>
-                        <button class="btn-secondary" id="createFirstSetup">Créer une setup</button>
+                        <div class="empty-icon">
+                            <i class="fas fa-binoculars"></i>
+                        </div>
+                        <p>Aucune surveillance en cours</p>
+                        <span class="empty-hint">Créez votre première idée de trade</span>
+                        <button class="btn-primary" id="createFirstSetup">
+                            <i class="fas fa-plus"></i>
+                            Créer une surveillance
+                        </button>
                     </div>
                 </div>
 
@@ -683,7 +691,7 @@
                         <button class="btn-icon" id="backToList">
                             <i class="fas fa-arrow-left"></i>
                         </button>
-                        <h3>Nouvelle Setup</h3>
+                        <h3>Nouvelle Surveillance</h3>
                     </div>
                     
                     <div class="setup-config">
@@ -695,10 +703,13 @@
                                     <option value="EURUSD">EURUSD</option>
                                     <option value="GBPUSD">GBPUSD</option>
                                     <option value="USDJPY">USDJPY</option>
-                                    <option value="BTCUSD">BTCUSD</option>
-                                    <option value="ETHUSD">ETHUSD</option>
+                                    <option value="BTCUSDT">BTCUSDT</option>
+                                    <option value="ETHUSDT">ETHUSDT</option>
+                                    <option value="SOLUSDT">SOLUSDT</option>
                                     <option value="AUDUSD">AUDUSD</option>
                                     <option value="USDCAD">USDCAD</option>
+                                    <option value="EURJPY">EURJPY</option>
+                                    <option value="GBPJPY">GBPJPY</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -714,21 +725,70 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="setupNotes">Notes</label>
-                            <textarea id="setupNotes" rows="2" placeholder="Analyse, observation..."></textarea>
+                            <label for="setupNotes">Notes d'analyse</label>
+                            <textarea id="setupNotes" rows="3" placeholder="Analyse, niveaux clés, raison du trade..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Screenshot Upload Section -->
+                    <div class="screenshot-section">
+                        <div class="section-label">
+                            <i class="fas fa-image"></i>
+                            <span>Captures d'écran (3 max)</span>
+                        </div>
+                        <div class="screenshot-grid" id="screenshotGrid">
+                            <div class="screenshot-slot" data-slot="0">
+                                <input type="file" class="screenshot-input" id="screenshot0" accept="image/*" hidden>
+                                <div class="screenshot-placeholder" onclick="document.getElementById('screenshot0').click()">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Ajouter</span>
+                                </div>
+                            </div>
+                            <div class="screenshot-slot" data-slot="1">
+                                <input type="file" class="screenshot-input" id="screenshot1" accept="image/*" hidden>
+                                <div class="screenshot-placeholder" onclick="document.getElementById('screenshot1').click()">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Ajouter</span>
+                                </div>
+                            </div>
+                            <div class="screenshot-slot" data-slot="2">
+                                <input type="file" class="screenshot-input" id="screenshot2" accept="image/*" hidden>
+                                <div class="screenshot-placeholder" onclick="document.getElementById('screenshot2').click()">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Ajouter</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Confirmations -->
                     <div class="confirmations-section">
                         <div class="confirmations-header">
-                            <h4>Confirmations</h4>
-                            <button class="btn-link" id="addConfirmation">
-                                <i class="fas fa-plus"></i> Ajouter
-                            </button>
+                            <h4><i class="fas fa-check-circle"></i> Confirmations</h4>
+                            <div class="conf-actions">
+                                <button class="btn-link" id="addTagConfirmation">
+                                    <i class="fas fa-tag"></i> Tag
+                                </button>
+                                <button class="btn-link" id="addConfirmation">
+                                    <i class="fas fa-plus"></i> Manual
+                                </button>
+                            </div>
                         </div>
                         <div class="confirmations-list" id="confirmationsList">
                             <!-- Confirmations will be rendered here -->
+                        </div>
+                    </div>
+
+                    <!-- Tag Selection Modal -->
+                    <div class="modal" id="tagSelectionModal">
+                        <div class="modal-content">
+                            <button class="modal-close" id="closeTagModal">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <h3><i class="fas fa-tag"></i> Ajouter un Tag</h3>
+                            <p class="modal-subtitle">Sélectionnez un tag comme confirmation</p>
+                            <div class="tag-selection-list" id="tagSelectionList">
+                            </div>
                         </div>
                     </div>
 
@@ -769,6 +829,11 @@
                             <h3 id="detailPair">EURUSD</h3>
                             <span class="setup-type-badge" id="detailType">Buy</span>
                         </div>
+                    </div>
+                    
+                    <!-- Screenshots in Detail -->
+                    <div class="detail-screenshots" id="detailScreenshots">
+                        <!-- Screenshots will be rendered here -->
                     </div>
                     
                     <div class="setup-detail-status">

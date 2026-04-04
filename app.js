@@ -45,6 +45,8 @@ var state = {
     notes: [],
     checklist: {},
     customTags: [],
+    setups: [],
+    currentSetup: null,
     currentSection: "dashboard"
 };
 
@@ -1760,12 +1762,25 @@ function setupSurveillanceListeners() {
     });
     
     document.getElementById("addConfirmation").addEventListener("click", showAddConfirmationModal);
+    document.getElementById("addTagConfirmation").addEventListener("click", showTagSelectionModal);
     document.getElementById("closeConfirmationModal").addEventListener("click", hideConfirmationModal);
     document.getElementById("cancelConfirmation").addEventListener("click", hideConfirmationModal);
     document.getElementById("saveConfirmation").addEventListener("click", saveConfirmation);
+    document.getElementById("closeTagModal").addEventListener("click", hideTagSelectionModal);
+    
+    for (var i = 0; i < 3; i++) {
+        (function(index) {
+            var input = document.getElementById("screenshot" + index);
+            if (input) {
+                input.addEventListener("change", function(e) {
+                    handleScreenshotUpload(index, e);
+                });
+            }
+        })(i);
+    }
     
     document.getElementById("skipChecklist").addEventListener("click", goToLotCalculator);
-    document.getElementById("takeTrade").addEventListener("click", goToLotCalculator);
+    document.getElementById("takeTrade").addEventListener("click", saveSetup);
     document.getElementById("takeTradeFromDetail").addEventListener("click", goToLotCalculator);
     
     document.getElementById("deleteSetup").addEventListener("click", deleteCurrentSetup);
@@ -1789,7 +1804,95 @@ function showNewSetupForm() {
     document.getElementById("setupSell").classList.remove("active");
     document.getElementById("confirmationsList").innerHTML = "";
     updateProgress();
+    resetScreenshotSlots();
     showView("setupFormContainer");
+}
+
+function resetScreenshotSlots() {
+    for (var i = 0; i < 3; i++) {
+        var slot = document.querySelector(".screenshot-slot[data-slot='" + i + "']");
+        if (slot) {
+            slot.classList.remove("has-image");
+            slot.innerHTML = '<input type="file" class="screenshot-input" id="screenshot' + i + '" accept="image/*" hidden>' +
+                '<div class="screenshot-placeholder" onclick="document.getElementById(\'screenshot' + i + '\').click()">' +
+                '<i class="fas fa-plus"></i><span>Ajouter</span></div>';
+            
+            var input = document.getElementById("screenshot" + i);
+            if (input) {
+                input.addEventListener("change", (function(index) {
+                    return function(e) { handleScreenshotUpload(index, e); };
+                })(i));
+            }
+        }
+    }
+}
+
+function handleScreenshotUpload(index, e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    
+    var reader = new FileReader();
+    reader.onload = function(event) {
+        var slot = document.querySelector(".screenshot-slot[data-slot='" + index + "']");
+        slot.classList.add("has-image");
+        slot.innerHTML = '<img class="screenshot-preview" src="' + event.target.result + '" onclick="document.getElementById(\'screenshot' + index + '\').click()">' +
+            '<button class="screenshot-remove" onclick="event.stopPropagation(); removeScreenshot(' + index + ')"><i class="fas fa-times"></i></button>';
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeScreenshot(index) {
+    var slot = document.querySelector(".screenshot-slot[data-slot='" + index + "']");
+    slot.classList.remove("has-image");
+    slot.innerHTML = '<input type="file" class="screenshot-input" id="screenshot' + index + '" accept="image/*" hidden>' +
+        '<div class="screenshot-placeholder" onclick="document.getElementById(\'screenshot' + index + '\').click()">' +
+        '<i class="fas fa-plus"></i><span>Ajouter</span></div>';
+    
+    var input = document.getElementById("screenshot" + index);
+    if (input) {
+        input.value = "";
+        input.addEventListener("change", (function(idx) {
+            return function(e) { handleScreenshotUpload(idx, e); };
+        })(index));
+    }
+}
+
+function showTagSelectionModal() {
+    var container = document.getElementById("tagSelectionList");
+    var html = "";
+    
+    state.customTags.forEach(function(tag) {
+        html += '<div class="tag-selection-item" onclick="addTagAsConfirmation(\'' + escapeHtml(tag.name) + '\', \'' + (tag.color || "#3b82f6") + '\')">';
+        html += '<span class="tag-badge" style="background:' + (tag.color || "#3b82f6") + '">' + escapeHtml(tag.name) + '</span>';
+        if (tag.description) {
+            html += '<span style="color:var(--text-secondary);font-size:0.85rem;">' + escapeHtml(tag.description) + '</span>';
+        }
+        html += '</div>';
+    });
+    
+    container.innerHTML = html;
+    document.getElementById("tagSelectionModal").classList.add("active");
+}
+
+function hideTagSelectionModal() {
+    document.getElementById("tagSelectionModal").classList.remove("active");
+}
+
+function addTagAsConfirmation(tagName, tagColor) {
+    var confirmations = getConfirmationsFromDOM();
+    confirmations.push({ 
+        title: tagName, 
+        description: "", 
+        stars: 2, 
+        completed: false,
+        isTag: true,
+        color: tagColor
+    });
+    
+    renderConfirmations(confirmations);
+    updateProgress();
+    hideTagSelectionModal();
+    showToast("Tag ajouté comme confirmation", "success");
 }
 
 function showSetupList() {
@@ -1813,8 +1916,25 @@ function showSetupDetail(setupId) {
     var completion = calculateCompletion(setup);
     document.getElementById("detailProgress").textContent = completion + "%";
     document.getElementById("readyAlert").classList.toggle("hidden", completion < 85);
+    
+    renderScreenshotsInDetail(setup.screenshots || []);
     renderConfirmationsInDetail(setup.confirmations || []);
     showView("setupDetailContainer");
+}
+
+function renderScreenshotsInDetail(screenshots) {
+    var container = document.getElementById("detailScreenshots");
+    var html = "";
+    
+    for (var i = 0; i < 3; i++) {
+        if (screenshots[i]) {
+            html += '<div class="detail-screenshot"><img src="' + screenshots[i] + '" alt="Screenshot ' + (i+1) + '"></div>';
+        } else {
+            html += '<div class="detail-screenshot"><div class="detail-screenshot-placeholder"><i class="fas fa-chart-line"></i></div></div>';
+        }
+    }
+    
+    container.innerHTML = html;
 }
 
 function showView(viewId) {
@@ -1842,24 +1962,69 @@ function renderSetupList() {
         return calculateCompletion(b) - calculateCompletion(a);
     });
     
-    var html = "";
+    var html = '<div class="surveillance-grid">';
+    
     sorted.forEach(function(setup) {
         var completion = calculateCompletion(setup);
-        var statusClass = completion >= 85 ? "ready" : (completion >= 50 ? "medium" : "low");
+        var statusClass = completion >= 85 ? "high" : (completion >= 50 ? "medium" : "low");
         var statusText = completion >= 85 ? "Prêt" : (completion >= 50 ? "En cours" : "En attente");
         
-        html += '<div class="setup-card" onclick="showSetupDetail(' + setup.id + ')">';
-        html += '<div class="setup-card-info">';
-        html += '<span class="setup-card-pair">' + setup.pair + '</span>';
-        html += '<span class="setup-card-type ' + setup.type.toLowerCase() + '">' + setup.type + '</span>';
+        var screenshots = setup.screenshots || [];
+        var dateStr = setup.createdAt ? new Date(setup.createdAt).toLocaleDateString("fr-FR") : "";
+        
+        html += '<div class="surveillance-card" onclick="showSetupDetail(' + setup.id + ')">';
+        html += '<div class="surveillance-card-header">';
+        html += '<span class="surveillance-card-pair">' + setup.pair + '</span>';
+        html += '<span class="surveillance-card-direction ' + setup.type.toLowerCase() + '">' + setup.type + '</span>';
         html += '</div>';
-        html += '<div class="setup-card-progress">';
-        html += '<div class="progress-mini"><div class="progress-fill-mini ' + (completion >= 85 ? "ready" : "") + '" style="width:' + completion + '%"></div></div>';
-        html += '<span class="progress-percent">' + completion + '%</span>';
+        
+        html += '<div class="surveillance-card-screenshots">';
+        for (var i = 0; i < 3; i++) {
+            if (screenshots[i]) {
+                html += '<div class="screenshot-thumb"><img src="' + screenshots[i] + '" alt="Screenshot"></div>';
+            } else {
+                html += '<div class="screenshot-thumb"><div class="screenshot-thumb-placeholder"><i class="fas fa-chart-line"></i></div></div>';
+            }
+        }
         html += '</div>';
-        html += '<span class="setup-card-status ' + statusClass + '">' + statusText + '</span>';
+        
+        html += '<div class="surveillance-card-progress">';
+        html += '<div class="progress-header">';
+        html += '<span class="progress-label">Completion</span>';
+        html += '<span class="progress-value ' + statusClass + '">' + completion + '%</span>';
+        html += '</div>';
+        html += '<div class="progress-bar-container">';
+        html += '<div class="progress-bar-fill ' + statusClass + '" style="width: ' + completion + '%"></div>';
+        html += '</div>';
+        html += '</div>';
+        
+        html += '<span class="surveillance-card-status ' + statusClass + '"><i class="fas fa-circle"></i> ' + statusText + '</span>';
+        
+        html += '<div class="surveillance-card-footer">';
+        html += '<div class="surveillance-card-confirmations">';
+        var confirmations = setup.confirmations || [];
+        confirmations.slice(0, 3).forEach(function(conf) {
+            var chipClass = conf.isTag ? "tag" : "";
+            var chipStyle = conf.isTag && conf.color ? "border-color:" + conf.color + ";color:" + conf.color : "";
+            html += '<span class="confirmation-chip ' + chipClass + '" style="' + chipStyle + '">';
+            if (conf.isTag) {
+                html += '<i class="fas fa-tag"></i>';
+            } else {
+                html += '<i class="fas fa-check"></i>';
+            }
+            html += conf.title + '</span>';
+        });
+        if (confirmations.length > 3) {
+            html += '<span class="confirmation-chip">+' + (confirmations.length - 3) + '</span>';
+        }
+        html += '</div>';
+        html += '<span class="surveillance-card-date">' + dateStr + '</span>';
+        html += '</div>';
+        
         html += '</div>';
     });
+    
+    html += '</div>';
     
     container.innerHTML = html;
 }
@@ -1906,11 +2071,14 @@ function renderConfirmations(confirmations) {
         var stars = "";
         for (var i = 0; i < (conf.stars || 1); i++) stars += '<i class="fas fa-star"></i>';
         
-        html += '<div class="confirmation-item ' + (conf.completed ? "completed" : "") + '">';
+        var tagStyle = conf.isTag && conf.color ? "border-left:3px solid " + conf.color : "";
+        var tagIcon = conf.isTag ? '<i class="fas fa-tag"></i>' : '<i class="fas fa-check"></i>';
+        
+        html += '<div class="confirmation-item ' + (conf.completed ? "completed" : "") + '" style="' + tagStyle + '">';
         html += '<div class="confirmation-checkbox ' + (conf.completed ? "checked" : "") + '" onclick="toggleConfirmation(' + index + ')">';
         if (conf.completed) html += '<i class="fas fa-check"></i>';
         html += '</div>';
-        html += '<div class="confirmation-info"><div class="confirmation-title">' + escapeHtml(conf.title) + '</div>';
+        html += '<div class="confirmation-info"><div class="confirmation-title">' + tagIcon + ' ' + escapeHtml(conf.title) + '</div>';
         if (conf.description) html += '<div class="confirmation-desc">' + escapeHtml(conf.description) + '</div>';
         html += '</div>';
         html += '<div class="confirmation-stars">' + stars + '</div>';
@@ -2050,6 +2218,13 @@ function saveSetup() {
     var notes = document.getElementById("setupNotes").value.trim();
     var confirmations = getConfirmationsFromDOM();
     
+    var screenshots = [];
+    for (var i = 0; i < 3; i++) {
+        var slot = document.querySelector(".screenshot-slot[data-slot='" + i + "']");
+        var img = slot.querySelector("img");
+        if (img) screenshots.push(img.src);
+    }
+    
     if (!state.currentSetup) {
         state.setups.push({
             id: Date.now(),
@@ -2057,6 +2232,7 @@ function saveSetup() {
             type: type,
             notes: notes,
             confirmations: confirmations,
+            screenshots: screenshots,
             createdAt: new Date().toISOString()
         });
     } else {
@@ -2064,11 +2240,13 @@ function saveSetup() {
         state.currentSetup.type = type;
         state.currentSetup.notes = notes;
         state.currentSetup.confirmations = confirmations;
+        state.currentSetup.screenshots = screenshots;
     }
     
     saveSetups();
     renderSetupList();
-    showToast("Setup enregistrée!", "success");
+    showSetupList();
+    showToast("Surveillance enregistrée!", "success");
 }
 
 function deleteCurrentSetup() {
@@ -2096,7 +2274,32 @@ function editCurrentSetup() {
     document.getElementById("setupNotes").value = state.currentSetup.notes || "";
     renderConfirmations(state.currentSetup.confirmations || []);
     updateProgress();
+    loadScreenshotsInForm(state.currentSetup.screenshots || []);
     showView("setupFormContainer");
+}
+
+function loadScreenshotsInForm(screenshots) {
+    for (var i = 0; i < 3; i++) {
+        var slot = document.querySelector(".screenshot-slot[data-slot='" + i + "']");
+        if (screenshots[i]) {
+            slot.classList.add("has-image");
+            slot.innerHTML = '<img class="screenshot-preview" src="' + screenshots[i] + '" onclick="document.getElementById(\'screenshot' + i + '\').click()">' +
+                '<button class="screenshot-remove" onclick="event.stopPropagation(); removeScreenshot(' + i + ')"><i class="fas fa-times"></i></button>';
+        } else {
+            slot.classList.remove("has-image");
+            slot.innerHTML = '<input type="file" class="screenshot-input" id="screenshot' + i + '" accept="image/*" hidden>' +
+                '<div class="screenshot-placeholder" onclick="document.getElementById(\'screenshot' + i + '\').click()">' +
+                '<i class="fas fa-plus"></i><span>Ajouter</span></div>';
+        }
+        
+        var input = document.getElementById("screenshot" + i);
+        if (input) {
+            input.value = "";
+            input.addEventListener("change", (function(idx) {
+                return function(e) { handleScreenshotUpload(idx, e); };
+            })(i));
+        }
+    }
 }
 
 function goToLotCalculator() {
