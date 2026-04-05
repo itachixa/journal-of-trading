@@ -659,8 +659,16 @@
             <section class="content-section" id="surveillance">
                 <div class="section-header">
                     <div>
-                        <h2>Trade Surveillance</h2>
+                        <h2><span>Trade</span> Surveillance</h2>
                         <p class="section-subtitle">Préparez vos trades avant exécution</p>
+                    </div>
+                    <div class="view-toggle">
+                        <button class="view-toggle-btn active" data-view="grid" id="gridViewBtn">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                        <button class="view-toggle-btn" data-view="list" id="listViewBtn">
+                            <i class="fas fa-list"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -672,9 +680,6 @@
 
                 <!-- Setup List -->
                 <div class="surveillance-grid" id="setupList">
-                    <div class="empty-state" id="emptySetups">
-                        <div class="empty-icon">
-                            <i class="fas fa-binoculars"></i>
                         </div>
                         <p>Aucune surveillance en cours</p>
                         <span class="empty-hint">Créez votre première idée de trade</span>

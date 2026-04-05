@@ -58,6 +58,7 @@ var zoomLevel = 100;
 var currentTimeRange = "all";
 var currentChartRange = "all";
 var selectedTagColor = "#3b82f6";
+var surveillanceViewMode = "grid";
 
 document.addEventListener("DOMContentLoaded", function() {
     loadData();
@@ -1751,6 +1752,20 @@ function setupSurveillanceListeners() {
     document.getElementById("backToList").addEventListener("click", showSetupList);
     document.getElementById("backToListFromDetail").addEventListener("click", showSetupList);
     
+    document.getElementById("gridViewBtn").addEventListener("click", function() {
+        surveillanceViewMode = "grid";
+        document.getElementById("gridViewBtn").classList.add("active");
+        document.getElementById("listViewBtn").classList.remove("active");
+        renderSetupList();
+    });
+    
+    document.getElementById("listViewBtn").addEventListener("click", function() {
+        surveillanceViewMode = "list";
+        document.getElementById("listViewBtn").classList.add("active");
+        document.getElementById("gridViewBtn").classList.remove("active");
+        renderSetupList();
+    });
+    
     document.getElementById("setupBuy").addEventListener("click", function() {
         document.getElementById("setupBuy").classList.add("active");
         document.getElementById("setupSell").classList.remove("active");
@@ -1972,7 +1987,8 @@ function renderSetupList() {
         return calculateCompletion(b) - calculateCompletion(a);
     });
     
-    var html = '<div class="surveillance-grid">';
+    var gridClass = surveillanceViewMode === "list" ? "surveillance-grid list-view" : "surveillance-grid";
+    var html = '<div class="' + gridClass + '">';
     
     sorted.forEach(function(setup) {
         var completion = calculateCompletion(setup);
@@ -1982,7 +1998,9 @@ function renderSetupList() {
         var screenshots = setup.screenshots || [];
         var dateStr = setup.createdAt ? new Date(setup.createdAt).toLocaleDateString("fr-FR") : "";
         
-        html += '<div class="surveillance-card" onclick="showSetupDetail(' + setup.id + ')">';
+        var readyClass = completion >= 85 ? " ready" : "";
+        
+        html += '<div class="surveillance-card' + readyClass + '" onclick="showSetupDetail(' + setup.id + ')">';
         html += '<div class="surveillance-card-header">';
         html += '<span class="surveillance-card-pair">' + setup.pair + '</span>';
         html += '<span class="surveillance-card-direction ' + setup.type.toLowerCase() + '">' + setup.type + '</span>';
