@@ -5,8 +5,277 @@ var STORAGE_KEYS = {
     SETTINGS: "protrade_settings",
     NOTES: "protrade_notes",
     CHECKLIST: "protrade_checklist",
-    CUSTOM_TAGS: "protrade_custom_tags"
+    CUSTOM_TAGS: "protrade_custom_tags",
+    LANGUAGE: "protrade_language"
 };
+
+var translations = {
+    fr: {
+        login: "Connexion",
+        password: "Mot de passe",
+        loginBtn: "Se connecter",
+        noAccount: "Pas de compte?",
+        signup: "S'inscrire",
+        register: "Inscription",
+        registerBtn: "Créer un compte",
+        hasAccount: "Déjà un compte?",
+        confirmPassword: "Confirmer",
+        dashboard: "Dashboard",
+        trades: "Trades",
+        surveillance: "Surveillance",
+        addTrade: "Ajouter Trade",
+        calculator: "Calculateur",
+        stats: "Statistiques",
+        checklist: "Checklist",
+        notes: "Notes",
+        tags: "Tags",
+        settings: "Paramètres",
+        logout: "Déconnexion",
+        capital: "Capital",
+        winrate: "Winrate",
+        totalTrades: "Total Trades",
+        totalProfit: "Profit Total",
+        profitFactor: "Profit Factor",
+        equityCurve: "Courbe d'Équité",
+        all: "Tout",
+        month: "Mois",
+        week: "Semaine",
+        recentTrades: "Trades Récents",
+        seeAll: "Voir tout",
+        noTrades: "Aucun trade",
+        byPair: "Par Paire",
+        my: "Mes",
+        allPairs: "Toutes les paires",
+        allTypes: "Tous les types",
+        allResults: "Tous résultats",
+        clear: "Effacer",
+        trade: "Trade",
+        newTrade: "Nouveau Trade",
+        dateTime: "Date & Heure",
+        pair: "Paire",
+        direction: "Direction",
+        style: "Type",
+        lotSize: "Taille du Lot",
+        stopLoss: "Stop Loss (pips)",
+        takeProfit: "Take Profit (pips)",
+        result: "Résultat ($)",
+        tags: "Tags",
+        comment: "Commentaire",
+        screenshot: "Screenshot",
+        uploadImage: "Télécharger une image",
+        saveTrade: "Enregistrer",
+        newSurveillance: "Nouvelle Surveillance",
+        screenshots: "Captures (3 max)",
+        confirmations: "Confirmations",
+        tag: "Tag",
+        manual: "Manual",
+        completion: "Completion",
+        save: "Enregistrer",
+        takeTrade: "Prendre le Trade",
+        readyToTrade: "Trade prêt!",
+        edit: "Modifier",
+        addConfirmation: "Ajouter Confirmation",
+        title: "Titre",
+        description: "Description",
+        importance: "Importance",
+        cancel: "Annuler",
+        add: "Ajouter",
+        addTagAsConfirmation: "Ajouter un Tag",
+        newNote: "Nouvelle Note",
+        category: "Catégorie",
+        content: "Contenu",
+        analysis: "Analyse",
+        journal: "Journal",
+        mistakes: "Erreurs",
+        allCategories: "Toutes catégories",
+        noNotes: "Aucune note",
+        tagManager: "Gestion des Tags",
+        newTag: "Nouveau Tag",
+        createTag: "Créer un Tag",
+        tagName: "Nom du tag",
+        color: "Couleur",
+        create: "Créer",
+        existingTags: "Tags Existants",
+        capitalSettings: "Capital",
+        initialCapital: "Capital Initial ($)",
+        exportData: "Exporter les données",
+        exportAll: "Tout exporter",
+        dangerZone: "Zone Dangereuse",
+        clearAllData: "Effacer toutes les données",
+        lotCalculator: "Calculateur de Lot",
+        formula: "Formule",
+        accountParams: "Paramètres du Compte",
+        balance: "Balance ($)",
+        risk: "Risque (%)",
+        riskAmount: "Montant risqué",
+        tradeParams: "Paramètres du Trade",
+        calculate: "Calculer",
+        recommendedLot: "Taille du Lot",
+        pipValue: "Valeur du Pip",
+        potentialProfit: "Profit Potentiel",
+        statistics: "Statistiques",
+        bestTrade: "Meilleur Trade",
+        worstTrade: "Pire Trade",
+        winLoss: "Win / Loss",
+        preTradeChecklist: "Checklist Avant Trade",
+        riskManagement: "Gestion du Risque",
+        psychology: "Psychologie",
+        check1: "Tendance confirmée",
+        check2: "Zone clés identifiées",
+        check3: "Confluence trouvé",
+        check4: "Risk < 2%",
+        check5: "RR ≥ 1:3",
+        check6: "SL défini",
+        check7: "Pas de revenge trading",
+        check8: "Concentration OK",
+        check9: "Plan respecté",
+        marketNotes: "Notes de Marché",
+        addNote: "Ajouter Note"
+    },
+    en: {
+        login: "Login",
+        password: "Password",
+        loginBtn: "Sign In",
+        noAccount: "Don't have an account?",
+        signup: "Sign Up",
+        register: "Register",
+        registerBtn: "Create Account",
+        hasAccount: "Already have an account?",
+        confirmPassword: "Confirm",
+        dashboard: "Dashboard",
+        trades: "Trades",
+        surveillance: "Surveillance",
+        addTrade: "Add Trade",
+        calculator: "Calculator",
+        stats: "Statistics",
+        checklist: "Checklist",
+        notes: "Notes",
+        tags: "Tags",
+        settings: "Settings",
+        logout: "Logout",
+        capital: "Capital",
+        winrate: "Winrate",
+        totalTrades: "Total Trades",
+        totalProfit: "Total Profit",
+        profitFactor: "Profit Factor",
+        equityCurve: "Equity Curve",
+        all: "All",
+        month: "Month",
+        week: "Week",
+        recentTrades: "Recent Trades",
+        seeAll: "See All",
+        noTrades: "No trades",
+        byPair: "By Pair",
+        my: "My",
+        allPairs: "All pairs",
+        allTypes: "All types",
+        allResults: "All results",
+        clear: "Clear",
+        trade: "Trade",
+        newTrade: "New Trade",
+        dateTime: "Date & Time",
+        pair: "Pair",
+        direction: "Direction",
+        style: "Style",
+        lotSize: "Lot Size",
+        stopLoss: "Stop Loss (pips)",
+        takeProfit: "Take Profit (pips)",
+        result: "Result ($)",
+        tags: "Tags",
+        comment: "Comment",
+        screenshot: "Screenshot",
+        uploadImage: "Upload image",
+        saveTrade: "Save",
+        newSurveillance: "New Surveillance",
+        screenshots: "Screenshots (3 max)",
+        confirmations: "Confirmations",
+        tag: "Tag",
+        manual: "Manual",
+        completion: "Completion",
+        save: "Save",
+        takeTrade: "Take Trade",
+        readyToTrade: "Ready to trade!",
+        edit: "Edit",
+        addConfirmation: "Add Confirmation",
+        title: "Title",
+        description: "Description",
+        importance: "Importance",
+        cancel: "Cancel",
+        add: "Add",
+        addTagAsConfirmation: "Add a Tag",
+        newNote: "New Note",
+        category: "Category",
+        content: "Content",
+        analysis: "Analysis",
+        journal: "Journal",
+        mistakes: "Mistakes",
+        allCategories: "All categories",
+        noNotes: "No notes",
+        tagManager: "Tag Manager",
+        newTag: "New Tag",
+        createTag: "Create a Tag",
+        tagName: "Tag name",
+        color: "Color",
+        create: "Create",
+        existingTags: "Existing Tags",
+        capitalSettings: "Capital",
+        initialCapital: "Initial Capital ($)",
+        exportData: "Export Data",
+        exportAll: "Export All",
+        dangerZone: "Danger Zone",
+        clearAllData: "Clear All Data",
+        lotCalculator: "Lot Calculator",
+        formula: "Formula",
+        accountParams: "Account Parameters",
+        balance: "Balance ($)",
+        risk: "Risk (%)",
+        riskAmount: "Risk Amount",
+        tradeParams: "Trade Parameters",
+        calculate: "Calculate",
+        recommendedLot: "Lot Size",
+        pipValue: "Pip Value",
+        potentialProfit: "Potential Profit",
+        statistics: "Statistics",
+        bestTrade: "Best Trade",
+        worstTrade: "Worst Trade",
+        winLoss: "Win / Loss",
+        preTradeChecklist: "Pre-Trade Checklist",
+        riskManagement: "Risk Management",
+        psychology: "Psychology",
+        check1: "Trend confirmed",
+        check2: "Key levels identified",
+        check3: "Confluence found",
+        check4: "Risk < 2%",
+        check5: "RR ≥ 1:3",
+        check6: "SL defined",
+        check7: "No revenge trading",
+        check8: "Concentration OK",
+        check9: "Plan respected",
+        marketNotes: "Market Notes",
+        addNote: "Add Note"
+    }
+};
+
+var currentLang = localStorage.getItem(STORAGE_KEYS.LANGUAGE) || "fr";
+
+function t(key) {
+    return translations[currentLang][key] || key;
+}
+
+function updateLanguage() {
+    document.querySelectorAll("[data-i18n]").forEach(function(el) {
+        var key = el.getAttribute("data-i18n");
+        el.textContent = t(key);
+    });
+    document.getElementById("langLabel").textContent = currentLang.toUpperCase();
+}
+
+function switchLanguage() {
+    currentLang = currentLang === "fr" ? "en" : "fr";
+    localStorage.setItem(STORAGE_KEYS.LANGUAGE, currentLang);
+    updateLanguage();
+    showToast(currentLang === "fr" ? "Langue changée" : "Language changed", "success");
+}
 
 var DEFAULT_TAGS = [
     { name: "BOS", description: "Break of Structure", color: "#3b82f6" },
@@ -59,6 +328,7 @@ var currentTimeRange = "all";
 var currentChartRange = "all";
 var selectedTagColor = "#3b82f6";
 var surveillanceViewMode = "grid";
+var tradesViewMode = "grid";
 
 document.addEventListener("DOMContentLoaded", function() {
     loadData();
@@ -128,6 +398,12 @@ function setupEventListeners() {
 
     // Theme toggle
     document.getElementById("themeToggle").addEventListener("click", toggleTheme);
+    
+    // Language toggle
+    document.getElementById("langToggle").addEventListener("click", switchLanguage);
+    
+    // Update language on load
+    updateLanguage();
 
     // Mobile menu
     document.getElementById("menuToggle").addEventListener("click", function() {
@@ -166,6 +442,22 @@ function setupEventListeners() {
     document.getElementById("saveCapital").addEventListener("click", saveCapital);
     document.getElementById("exportAllData").addEventListener("click", exportAllData);
     document.getElementById("clearAllData").addEventListener("click", clearAllData);
+    
+    // Trades view toggle
+    document.querySelectorAll("#trades .view-toggle-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            var view = btn.dataset.view;
+            tradesViewMode = view;
+            document.querySelectorAll("#trades .view-toggle-btn").forEach(function(b) {
+                b.classList.remove("active");
+            });
+            btn.classList.add("active");
+            renderTradesGrid();
+        });
+    });
+    
+    // Render trades
+    renderTradesGrid();
 
     // Checklist
     document.getElementById("resetChecklist").addEventListener("click", resetChecklist);
@@ -1416,6 +1708,72 @@ function renderTradesTable() {
     });
 
     tbody.innerHTML = html;
+}
+
+function renderTradesGrid() {
+    var trades = getFilteredTrades();
+    var container = document.getElementById("tradesList");
+    
+    if (trades.length === 0) {
+        container.innerHTML = '<div class="empty-state small"><i class="fas fa-inbox"></i><p data-i18n="noTrades">Aucun trade</p></div>';
+        return;
+    }
+    
+    trades.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+    
+    var gridClass = tradesViewMode === "list" ? "trades-grid list-view" : "trades-grid";
+    var html = '<div class="' + gridClass + '">';
+    
+    trades.forEach(function(trade) {
+        var resultClass = trade.result > 0 ? "profit" : (trade.result < 0 ? "loss" : "");
+        var resultPrefix = trade.result > 0 ? "+" : "";
+        
+        html += '<div class="trade-card">';
+        html += '<div class="trade-card-header">';
+        html += '<span class="trade-pair">' + trade.pair + '</span>';
+        html += '<span class="trade-type ' + trade.tradeType.toLowerCase() + '">' + trade.tradeType + '</span>';
+        html += '</div>';
+        
+        if (trade.screenshot) {
+            html += '<div class="trade-screenshot"><img src="' + trade.screenshot + '" alt="Trade"></div>';
+        }
+        
+        html += '<div class="trade-info">';
+        html += '<div class="trade-detail"><span class="label">Date</span><span>' + new Date(trade.date).toLocaleDateString("fr-FR") + '</span></div>';
+        html += '<div class="trade-detail"><span class="label">Type</span><span>' + trade.tradingType + '</span></div>';
+        html += '<div class="trade-detail"><span class="label">Lot</span><span>' + trade.lotSize + '</span></div>';
+        html += '<div class="trade-detail"><span class="label">SL/TP</span><span>' + trade.stopLoss + '/' + trade.takeProfit + '</span></div>';
+        html += '</div>';
+        
+        html += '<div class="trade-result ' + resultClass + '">';
+        html += resultPrefix + '$' + trade.result.toFixed(2);
+        html += '</div>';
+        
+        if (trade.tags && trade.tags.length > 0) {
+            html += '<div class="trade-tags">';
+            trade.tags.slice(0, 3).forEach(function(tag) {
+                var tagObj = state.customTags.find(function(t) { return t.name === tag; });
+                var color = tagObj && tagObj.color ? tagObj.color : "#2563eb";
+                html += '<span class="tag-badge" style="background:' + color + '">' + escapeHtml(tag) + '</span>';
+            });
+            if (trade.tags.length > 3) {
+                html += '<span class="tag-badge">+' + (trade.tags.length - 3) + '</span>';
+            }
+            html += '</div>';
+        }
+        
+        html += '<div class="trade-actions">';
+        if (trade.screenshot) {
+            html += '<button class="btn-icon" onclick="viewTradeScreenshot(' + trade.id + ')"><i class="fas fa-image"></i></button>';
+        }
+        html += '<button class="btn-icon danger" onclick="deleteTrade(' + trade.id + ')"><i class="fas fa-trash"></i></button>';
+        html += '</div>';
+        
+        html += '</div>';
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
 }
 
 function renderRecentTrades() {
