@@ -1,15 +1,23 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import './Surveillance.css';
 
 const DIRECTIONS = ['Buy', 'Sell'];
 
+const DEFAULT_CONFIRMATIONS = [
+  { id: '1', title: 'Trend confirmed', stars: 3 },
+  { id: '2', title: 'Key levels', stars: 2 },
+  { id: '3', title: 'Confluence', stars: 3 },
+  { id: '4', title: 'Risk < 2%', stars: 3 },
+  { id: '5', title: 'RR >= 1:3', stars: 2 }
+];
+
 export default function Surveillance() {
-  const { t, surveillances, addSurveillance, deleteSurveillance, updateSurveillance, tags, SETUP_PAIRS, defaultConfirmations } = useApp();
+  const { t, surveillances, addSurveillance, deleteSurveillance, updateSurveillance, tags, SETUP_PAIRS, isLoading } = useApp();
   const [viewMode, setViewMode] = useState('grid');
   const [showForm, setShowForm] = useState(false);
-  const [showConfModal, setShowConfModal] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [screenshots, setScreenshots] = useState([]);
   const [formData, setFormData] = useState({
     pair: 'EURUSD',
@@ -19,7 +27,22 @@ export default function Surveillance() {
     customConfirmations: []
   });
 
+  useEffect(() => {
+    if (!isLoading) {
+      setLoading(false);
+    }
+  }, [isLoading]);
+
+  const getCompletion = (surveillance) => {
+    const allItems = [...DEFAULT_CONFIRMATIONS, ...tags];
+    const completed = surveillance.confirmations?.length || 0;
+    const customCompleted = surveillance.customConfirmations?.length || 0;
+    if (allItems.length === 0) return 0;
+    return Math.min(100, ((completed + customCompleted) / allItems.length) * 100);
+  };
+
   const sortedSurveillances = useMemo(() => {
+    if (!surveillances || surveillances.length === 0) return [];
     return [...surveillances].sort((a, b) => {
       const aCompletion = getCompletion(a);
       const bCompletion = getCompletion(b);
@@ -75,18 +98,22 @@ export default function Surveillance() {
     updateSurveillance(id, { [key]: newItems });
   };
 
-  const getCompletion = (surveillance) => {
-    const allItems = [...defaultConfirmations, ...tags];
-    const completed = surveillance.confirmations?.length || 0;
-    const customCompleted = surveillance.customConfirmations?.length || 0;
-    return Math.min(100, ((completed + customCompleted) / allItems.length) * 100);
-  };
-
   const isConfirmed = (surveillance, item) => {
     const isTag = typeof item === 'string';
     const list = isTag ? surveillance.confirmations : surveillance.customConfirmations;
     return list?.includes(isTag ? item : item.id);
   };
+
+  if (loading) {
+    return (
+      <div className="surveillance-page">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div 
@@ -97,17 +124,22 @@ export default function Surveillance() {
       <div className="page-header">
         <div className="header-left">
           <h2>{t('trade')} {t('surveillance')}</h2>
+          <span className="header-count">{sortedSurveillances.length} setups</span>
         </div>
         <div className="header-controls">
           <div className="view-toggle">
             <button 
               className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
               onClick={() => setViewMode('grid')}
-            >▦</button>
+            >
+              ▦
+            </button>
             <button 
               className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
               onClick={() => setViewMode('list')}
-            >☰</button>
+            >
+              ☰
+            </button>
           </div>
         </div>
       </div>
@@ -152,6 +184,7 @@ export default function Surveillance() {
                   {DIRECTIONS.map(dir => (
                     <button
                       key={dir}
+                      type="button"
                       className={`dir-option ${formData.direction === dir ? 'active' : ''} ${dir.toLowerCase()}`}
                       onClick={() => setFormData(f => ({ ...f, direction: dir }))}
                     >
@@ -190,10 +223,10 @@ export default function Surveillance() {
               </div>
 
               <div className="form-actions">
-                <button className="btn-secondary" onClick={() => setShowForm(false)}>
+                <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>
                   {t('cancel')}
                 </button>
-                <button className="btn-primary" onClick={handleAdd}>
+                <button type="button" className="btn-primary" onClick={handleAdd}>
                   {t('save')}
                 </button>
               </div>
@@ -247,9 +280,10 @@ export default function Surveillance() {
                 <div className="confirmations-section">
                   <div className="conf-section-title">{t('confirmations')}</div>
                   <div className="confirmations-list">
-                    {defaultConfirmations.map((conf, i) => (
+                    {DEFAULT_CONFIRMATIONS.map((conf, i) => (
                       <button
                         key={conf.id}
+                        type="button"
                         className={`conf-chip ${isConfirmed(surveillance, conf) ? 'active' : ''}`}
                         onClick={() => toggleConfirmation(surveillance.id, conf)}
                       >
@@ -257,9 +291,10 @@ export default function Surveillance() {
                         {conf.title}
                       </button>
                     ))}
-                    {tags.map(tag => (
+                    {tags && tags.map(tag => (
                       <button
                         key={tag.id}
+                        type="button"
                         className={`conf-chip ${isConfirmed(surveillance, tag.name) ? 'active' : ''}`}
                         style={{ borderColor: tag.color, color: isConfirmed(surveillance, tag.name) ? tag.color : 'var(--text-muted)' }}
                         onClick={() => toggleConfirmation(surveillance.id, tag.name)}
@@ -272,6 +307,7 @@ export default function Surveillance() {
 
                 <div className="card-footer">
                   <button 
+                    type="button"
                     className="delete-btn"
                     onClick={() => deleteSurveillance(surveillance.id)}
                   >
@@ -286,7 +322,11 @@ export default function Surveillance() {
           })
         ) : (
           <div className="empty-state">
+            <div className="empty-icon">📊</div>
             <p>Aucun setup en surveillance</p>
+            <button className="btn-primary" onClick={() => setShowForm(true)}>
+              + {t('add')}
+            </button>
           </div>
         )}
       </div>
