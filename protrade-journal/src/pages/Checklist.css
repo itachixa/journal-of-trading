@@ -8,6 +8,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  flex-wrap: wrap;
   gap: var(--space-lg);
 }
 
@@ -21,26 +22,42 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
+  min-width: 250px;
 }
 
-.overall-progress span {
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progress-label {
   font-size: 0.9rem;
   color: var(--text-muted);
 }
 
-.overall-progress .progress-bar {
-  width: 200px;
+.progress-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
+}
+
+.progress-bar-container {
   height: 8px;
   background: var(--bg-tertiary);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
 
-.overall-progress .progress-fill {
+.progress-bar-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
   border-radius: var(--radius-full);
-  transition: width 0.3s ease;
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--space-sm);
 }
 
 .btn-secondary {
@@ -76,37 +93,53 @@
   border: 1px solid var(--bg-glass-border);
   border-radius: var(--radius-xl);
   padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
 }
 
 .card-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: var(--space-md);
   margin-bottom: var(--space-lg);
   padding-bottom: var(--space-md);
   border-bottom: 1px solid var(--bg-glass-border);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
 }
 
 .category-icon {
   font-size: 1.5rem;
 }
 
-.card-header h3 {
-  flex: 1;
+.card-title h3 {
   font-size: 1.1rem;
   font-weight: 600;
 }
 
-.category-progress {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--accent-cyan);
+.category-badge {
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.category-badge.complete {
+  background: var(--success-glow);
+  color: var(--success);
 }
 
 .checklist-items {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
+  flex: 1;
 }
 
 .checklist-item {
@@ -116,7 +149,6 @@
   padding: var(--space-md);
   background: var(--bg-glass-light);
   border-radius: var(--radius-md);
-  cursor: pointer;
   transition: all var(--transition-fast);
 }
 
@@ -124,13 +156,34 @@
   background: var(--bg-tertiary);
 }
 
-.checklist-item input {
-  display: none;
+.checklist-item.checked {
+  opacity: 0.6;
+}
+
+.checklist-item.checked .item-text {
+  text-decoration: line-through;
+}
+
+.item-checkbox {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.item-checkbox input {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 1;
 }
 
 .checkmark {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -138,24 +191,206 @@
   border: 2px solid var(--bg-glass-border);
   border-radius: var(--radius-sm);
   color: transparent;
+  font-size: 12px;
   font-weight: 700;
   transition: all var(--transition-fast);
 }
 
-.checklist-item.checked .checkmark {
+.item-checkbox input:checked + .checkmark {
   background: var(--success);
   border-color: var(--success);
   color: white;
 }
 
-.checklist-text {
+.item-text {
+  flex: 1;
   font-size: 0.95rem;
   transition: all var(--transition-fast);
 }
 
-.checklist-item.checked .checklist-text {
+.item-edit {
+  flex: 1;
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.item-edit input {
+  flex: 1;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--accent-cyan);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.edit-actions {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.btn-save, .btn-cancel {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-save {
+  background: var(--success);
+  color: white;
+}
+
+.btn-save:hover {
+  transform: scale(1.1);
+}
+
+.btn-cancel {
+  background: var(--danger);
+  color: white;
+}
+
+.btn-cancel:hover {
+  transform: scale(1.1);
+}
+
+.item-actions {
+  display: flex;
+  gap: var(--space-xs);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.checklist-item:hover .item-actions {
+  opacity: 1;
+}
+
+.btn-edit, .btn-delete {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--bg-glass-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-edit {
   color: var(--text-muted);
-  text-decoration: line-through;
+}
+
+.btn-edit:hover {
+  color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+}
+
+.btn-delete {
+  color: var(--text-muted);
+}
+
+.btn-delete:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.add-item-btn {
+  margin-top: var(--space-md);
+  padding: var(--space-sm);
+  background: transparent;
+  border: 1px dashed var(--bg-glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.add-item-btn:hover {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+/* Add Form Modal */
+.add-form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.add-form-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--bg-glass-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+  width: 90%;
+  max-width: 400px;
+}
+
+.add-form-modal h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: var(--space-lg);
+}
+
+.add-form-modal .form-group {
+  margin-bottom: var(--space-md);
+}
+
+.add-form-modal label {
+  display: block;
+  margin-bottom: var(--space-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.add-form-modal input,
+.add-form-modal select {
+  width: 100%;
+  padding: var(--space-md);
+  background: var(--bg-glass-light);
+  border: 1px solid var(--bg-glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.add-form-modal .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--gradient-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
 }
 
 @media (max-width: 768px) {
@@ -163,7 +398,15 @@
     flex-direction: column;
   }
 
-  .overall-progress .progress-bar {
+  .overall-progress {
     width: 100%;
+  }
+
+  .checklist-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .item-actions {
+    opacity: 1;
   }
 }
