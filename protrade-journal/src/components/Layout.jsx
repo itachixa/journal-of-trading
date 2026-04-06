@@ -24,7 +24,7 @@ const navItems = [
 ];
 
 export default function Layout({ children }) {
-  const { t, language, toggleLanguage, settings } = useApp();
+  const { t, language, toggleLanguage, toggleTheme, theme, settings } = useApp();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
@@ -72,6 +72,10 @@ export default function Layout({ children }) {
             <button className="action-btn" onClick={toggleLanguage} title={language === 'fr' ? 'Switch to English' : 'Passer en français'}>
               <FaGlobe />
               <span>{language.toUpperCase()}</span>
+            </button>
+            <button className="action-btn" onClick={toggleTheme} title={theme === 'dark' ? t('lightMode') : t('darkMode')}>
+              {theme === 'dark' ? <FaMoon /> : <FaSun />}
+              <span>{theme === 'dark' ? '🌙' : '☀️'}</span>
             </button>
           </div>
         </div>

@@ -4,54 +4,88 @@ import { useApp } from '../context/AppContext';
 import './Surveillance.css';
 
 const DIRECTIONS = ['Buy', 'Sell'];
-const PAIRS_FOR_SETUP = ['XAUUSD', 'EURUSD', 'GBPUSD', 'BTCUSDT', 'ETHUSDT'];
 
 export default function Surveillance() {
-  const { t, surveillances, addSurveillance, deleteSurveillance, updateSurveillance, tags } = useApp();
+  const { t, surveillances, addSurveillance, deleteSurveillance, updateSurveillance, tags, SETUP_PAIRS, defaultConfirmations } = useApp();
   const [viewMode, setViewMode] = useState('grid');
   const [showForm, setShowForm] = useState(false);
+  const [showConfModal, setShowConfModal] = useState(null);
+  const [screenshots, setScreenshots] = useState([]);
   const [formData, setFormData] = useState({
     pair: 'EURUSD',
     direction: 'Buy',
     notes: '',
-    confirmations: []
+    confirmations: [],
+    customConfirmations: []
   });
 
   const sortedSurveillances = useMemo(() => {
     return [...surveillances].sort((a, b) => {
-      const aCompletion = (a.confirmations?.length || 0) / 5 * 100;
-      const bCompletion = (b.confirmations?.length || 0) / 5 * 100;
+      const aCompletion = getCompletion(a);
+      const bCompletion = getCompletion(b);
       return bCompletion - aCompletion;
     });
   }, [surveillances]);
 
   const handleAdd = () => {
     if (!formData.pair) return;
-    addSurveillance(formData);
+    addSurveillance({
+      ...formData,
+      screenshots
+    });
     setFormData({
       pair: 'EURUSD',
       direction: 'Buy',
       notes: '',
-      confirmations: []
+      confirmations: [],
+      customConfirmations: []
     });
+    setScreenshots([]);
     setShowForm(false);
   };
 
-  const toggleConfirmation = (id, tagName) => {
+  const handleScreenshotUpload = (e) => {
+    const file = e.target.files[0];
+    if (file && screenshots.length < 3) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setScreenshots(prev => [...prev, reader.result]);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeScreenshot = (index) => {
+    setScreenshots(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const toggleConfirmation = (id, item) => {
     const surveillance = surveillances.find(s => s.id === id);
     if (!surveillance) return;
     
-    const confirmations = surveillance.confirmations || [];
-    const newConfirmations = confirmations.includes(tagName)
-      ? confirmations.filter(c => c !== tagName)
-      : [...confirmations, tagName];
+    const isTag = typeof item === 'string';
+    const key = isTag ? 'confirmations' : 'customConfirmations';
+    const currentItems = surveillance[key] || [];
+    const itemKey = isTag ? item : item.id;
     
-    updateSurveillance(id, { confirmations: newConfirmations });
+    const newItems = currentItems.includes(itemKey)
+      ? currentItems.filter(c => c !== itemKey)
+      : [...currentItems, itemKey];
+    
+    updateSurveillance(id, { [key]: newItems });
   };
 
   const getCompletion = (surveillance) => {
-    const count = surveillance.confirmations?.length || 0;
-    return Math.min(100, (count / 5) * 100);
+    const allItems = [...defaultConfirmations, ...tags];
+    const completed = surveillance.confirmations?.length || 0;
+    const customCompleted = surveillance.customConfirmations?.length || 0;
+    return Math.min(100, ((completed + customCompleted) / allItems.length) * 100);
+  };
+
+  const isConfirmed = (surveillance, item) => {
+    const isTag = typeof item === 'string';
+    const list = isTag ? surveillance.confirmations : surveillance.customConfirmations;
+    return list?.includes(isTag ? item : item.id);
   };
 
   return (
@@ -106,7 +140,7 @@ export default function Surveillance() {
                   value={formData.pair}
                   onChange={(e) => setFormData(f => ({ ...f, pair: e.target.value }))}
                 >
-                  {PAIRS_FOR_SETUP.map(p => (
+                  {SETUP_PAIRS.map(p => (
                     <option key={p} value={p}>{p}</option>
                   ))}
                 </select>
@@ -135,6 +169,24 @@ export default function Surveillance() {
                   rows={3}
                   placeholder="Notes sur le setup..."
                 />
+              </div>
+
+              <div className="form-group">
+                <label>{t('screenshots')} ({screenshots.length}/3)</label>
+                <div className="screenshot-upload-grid">
+                  {screenshots.map((img, i) => (
+                    <div key={i} className="screenshot-thumb">
+                      <img src={img} alt="" />
+                      <button type="button" onClick={() => removeScreenshot(i)}>×</button>
+                    </div>
+                  ))}
+                  {screenshots.length < 3 && (
+                    <label className="screenshot-add">
+                      <input type="file" accept="image/*" onChange={handleScreenshotUpload} />
+                      + {t('addScreenshot')}
+                    </label>
+                  )}
+                </div>
               </div>
 
               <div className="form-actions">
@@ -169,6 +221,16 @@ export default function Surveillance() {
                   </span>
                 </div>
 
+                {surveillance.screenshots?.length > 0 && (
+                  <div className="card-screenshots">
+                    {surveillance.screenshots.slice(0, 3).map((img, i) => (
+                      <div key={i} className="screenshot-preview">
+                        <img src={img} alt="" />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 <div className="card-progress">
                   <div className="progress-header">
                     <span className="progress-label">{t('completion')}</span>
@@ -182,17 +244,30 @@ export default function Surveillance() {
                   </div>
                 </div>
 
-                <div className="confirmations-list">
-                  {tags.slice(0, 5).map(tag => (
-                    <button
-                      key={tag.id}
-                      className={`confirmation-chip ${surveillance.confirmations?.includes(tag.name) ? 'active' : ''}`}
-                      style={{ borderColor: tag.color, color: surveillance.confirmations?.includes(tag.name) ? tag.color : 'var(--text-muted)' }}
-                      onClick={() => toggleConfirmation(surveillance.id, tag.name)}
-                    >
-                      {tag.name}
-                    </button>
-                  ))}
+                <div className="confirmations-section">
+                  <div className="conf-section-title">{t('confirmations')}</div>
+                  <div className="confirmations-list">
+                    {defaultConfirmations.map((conf, i) => (
+                      <button
+                        key={conf.id}
+                        className={`conf-chip ${isConfirmed(surveillance, conf) ? 'active' : ''}`}
+                        onClick={() => toggleConfirmation(surveillance.id, conf)}
+                      >
+                        <span className="stars">{'⭐'.repeat(conf.stars)}</span>
+                        {conf.title}
+                      </button>
+                    ))}
+                    {tags.map(tag => (
+                      <button
+                        key={tag.id}
+                        className={`conf-chip ${isConfirmed(surveillance, tag.name) ? 'active' : ''}`}
+                        style={{ borderColor: tag.color, color: isConfirmed(surveillance, tag.name) ? tag.color : 'var(--text-muted)' }}
+                        onClick={() => toggleConfirmation(surveillance.id, tag.name)}
+                      >
+                        {tag.name}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="card-footer">

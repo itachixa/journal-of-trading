@@ -8,7 +8,8 @@ const STORAGE_KEYS = {
   NOTES: 'protrade_notes',
   TAGS: 'protrade_tags',
   SURVEILLANCE: 'protrade_surveillance',
-  LANGUAGE: 'protrade_language'
+  LANGUAGE: 'protrade_language',
+  THEME: 'protrade_theme'
 };
 
 const DEFAULT_TAGS = [
@@ -27,6 +28,14 @@ const DEFAULT_SETTINGS = {
   theme: 'dark',
   defaultRisk: 2
 };
+
+const defaultConfirmations = [
+  { id: '1', title: 'Trend confirmed', stars: 3 },
+  { id: '2', title: 'Key levels identified', stars: 2 },
+  { id: '3', title: 'Confluence found', stars: 3 },
+  { id: '4', title: 'Risk < 2%', stars: 3 },
+  { id: '5', title: 'RR >= 1:3', stars: 2 }
+];
 
 const translations = {
   fr: {
@@ -73,6 +82,7 @@ const translations = {
     comment: 'Commentaire',
     screenshot: 'Screenshot',
     uploadImage: 'Télécharger une image',
+    removeImage: 'Supprimer',
     saveTrade: 'Enregistrer',
     save: 'Enregistrer',
     cancel: 'Annuler',
@@ -119,7 +129,24 @@ const translations = {
     riskManagement: 'Gestion du Risque',
     psychology: 'Psychologie',
     riskReward: 'Risk/Reward',
-    takeTheTrade: 'Prendre le Trade'
+    takeTheTrade: 'Prendre le Trade',
+    completion: 'Completion',
+    win: 'Gagnant',
+    loss: 'Perdant',
+    breakeven: 'Break Even',
+    newSurveillance: 'Nouvelle Surveillance',
+    screenshots: 'Captures (3 max)',
+    addScreenshot: 'Ajouter capture',
+    confirmations: 'Confirmations',
+    addConfirmation: 'Ajouter confirmation',
+    title: 'Titre',
+    importance: 'Importance',
+    preTradeChecklist: 'Checklist Avant Trade',
+    marketNotes: 'Notes de Marché',
+    addNote: 'Ajouter Note',
+    darkMode: 'Mode Sombre',
+    lightMode: 'Mode Clair',
+    theme: 'Thème'
   },
   en: {
     dashboard: 'Dashboard',
@@ -165,6 +192,7 @@ const translations = {
     comment: 'Comment',
     screenshot: 'Screenshot',
     uploadImage: 'Upload image',
+    removeImage: 'Remove',
     saveTrade: 'Save',
     save: 'Save',
     cancel: 'Cancel',
@@ -211,7 +239,24 @@ const translations = {
     riskManagement: 'Risk Management',
     psychology: 'Psychology',
     riskReward: 'Risk/Reward',
-    takeTheTrade: 'Take Trade'
+    takeTheTrade: 'Take Trade',
+    completion: 'Completion',
+    win: 'Win',
+    loss: 'Loss',
+    breakeven: 'Break Even',
+    newSurveillance: 'New Surveillance',
+    screenshots: 'Screenshots (3 max)',
+    addScreenshot: 'Add screenshot',
+    confirmations: 'Confirmations',
+    addConfirmation: 'Add confirmation',
+    title: 'Title',
+    importance: 'Importance',
+    preTradeChecklist: 'Pre-Trade Checklist',
+    marketNotes: 'Market Notes',
+    addNote: 'Add Note',
+    darkMode: 'Dark Mode',
+    lightMode: 'Light Mode',
+    theme: 'Theme'
   }
 };
 
@@ -236,8 +281,10 @@ export const PAIRS = [
   { value: 'GBPUSD', label: 'GBPUSD' },
   { value: 'USDJPY', label: 'USDJPY' },
   { value: 'ETHUSD', label: 'ETHUSD' },
-  { value: 'OTHER', label: 'Autre' }
+  { value: 'OTHER', label: 'Other' }
 ];
+
+export const SETUP_PAIRS = ['XAUUSD', 'EURUSD', 'GBPUSD', 'BTCUSDT', 'ETHUSDT', 'USDJPY'];
 
 export function AppProvider({ children }) {
   const [trades, setTrades] = useState([]);
@@ -246,11 +293,18 @@ export function AppProvider({ children }) {
   const [tags, setTags] = useState(DEFAULT_TAGS);
   const [surveillances, setSurveillances] = useState([]);
   const [language, setLanguage] = useState('fr');
+  const [theme, setTheme] = useState('dark');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (!isLoading) {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+  }, [theme, isLoading]);
 
   const loadData = () => {
     try {
@@ -260,6 +314,7 @@ export function AppProvider({ children }) {
       const storedTags = JSON.parse(localStorage.getItem(STORAGE_KEYS.TAGS)) || DEFAULT_TAGS;
       const storedSurveillances = JSON.parse(localStorage.getItem(STORAGE_KEYS.SURVEILLANCE)) || [];
       const storedLanguage = localStorage.getItem(STORAGE_KEYS.LANGUAGE) || 'fr';
+      const storedTheme = localStorage.getItem(STORAGE_KEYS.THEME) || 'dark';
 
       setTrades(storedTrades);
       setSettings(storedSettings);
@@ -267,6 +322,7 @@ export function AppProvider({ children }) {
       setTags(storedTags);
       setSurveillances(storedSurveillances);
       setLanguage(storedLanguage);
+      setTheme(storedTheme);
     } catch (e) {
       console.error('Error loading data:', e);
     } finally {
@@ -282,6 +338,7 @@ export function AppProvider({ children }) {
       localStorage.setItem(STORAGE_KEYS.TAGS, JSON.stringify(tags));
       localStorage.setItem(STORAGE_KEYS.SURVEILLANCE, JSON.stringify(surveillances));
       localStorage.setItem(STORAGE_KEYS.LANGUAGE, language);
+      localStorage.setItem(STORAGE_KEYS.THEME, theme);
     } catch (e) {
       console.error('Error saving data:', e);
     }
@@ -291,10 +348,14 @@ export function AppProvider({ children }) {
     if (!isLoading) {
       saveData();
     }
-  }, [trades, settings, notes, tags, surveillances, language]);
+  }, [trades, settings, notes, tags, surveillances, language, theme]);
 
   const toggleLanguage = () => {
     setLanguage(prev => prev === 'fr' ? 'en' : 'fr');
+  };
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
 
   const t = (key) => translations[language][key] || key;
@@ -354,8 +415,9 @@ export function AppProvider({ children }) {
       ...surveillance,
       id: Date.now(),
       createdAt: new Date().toISOString(),
-      confirmations: [],
-      screenshots: []
+      confirmations: surveillance.confirmations || [],
+      screenshots: surveillance.screenshots || [],
+      customConfirmations: surveillance.customConfirmations || []
     };
     setSurveillances(prev => [...prev, newSurveillance]);
   };
@@ -437,8 +499,10 @@ export function AppProvider({ children }) {
     tags,
     surveillances,
     language,
+    theme,
     isLoading,
     toggleLanguage,
+    toggleTheme,
     t,
     addTrade,
     updateTrade,
@@ -456,7 +520,9 @@ export function AppProvider({ children }) {
     calculateStats,
     calculateLotSize,
     PIP_VALUES,
-    PAIRS
+    PAIRS,
+    SETUP_PAIRS,
+    defaultConfirmations
   };
 
   return (
