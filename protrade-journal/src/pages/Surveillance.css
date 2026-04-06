@@ -1,0 +1,340 @@
+.surveillance-page {
+  position: relative;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-xl);
+}
+
+.page-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.header-controls {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.view-toggle {
+  display: flex;
+  gap: 2px;
+  background: var(--bg-glass-light);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--bg-glass-border);
+}
+
+.view-toggle-btn {
+  padding: var(--space-sm) var(--space-md);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.view-toggle-btn.active {
+  background: var(--gradient-primary);
+  color: white;
+}
+
+.floating-add-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-xl);
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+  transition: all var(--transition-normal);
+  z-index: 50;
+}
+
+.floating-add-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5);
+}
+
+.setup-form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.setup-form-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--bg-glass-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+  width: 90%;
+  max-width: 450px;
+}
+
+.setup-form-modal h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: var(--space-lg);
+}
+
+.setup-form-modal .form-group {
+  margin-bottom: var(--space-md);
+}
+
+.setup-form-modal label {
+  display: block;
+  margin-bottom: var(--space-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.setup-form-modal select,
+.setup-form-modal textarea {
+  width: 100%;
+  padding: var(--space-md);
+  background: var(--bg-glass-light);
+  border: 1px solid var(--bg-glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+}
+
+.direction-selector {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.dir-option {
+  flex: 1;
+  padding: var(--space-md);
+  background: var(--bg-glass-light);
+  border: 1px solid var(--bg-glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.dir-option.active.buy {
+  background: var(--success-glow);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.dir-option.active.sell {
+  background: var(--danger-glow);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
+.surveillance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--space-lg);
+  padding-bottom: 100px;
+}
+
+.surveillance-grid.list {
+  grid-template-columns: 1fr;
+}
+
+.surveillance-card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--bg-glass-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.surveillance-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.surveillance-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl), var(--shadow-glow);
+  border-color: var(--accent-cyan);
+}
+
+.surveillance-card.ready {
+  border-color: var(--success);
+  box-shadow: 0 0 30px var(--success-glow);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.card-pair {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.card-direction {
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.card-direction.buy {
+  background: var(--success-glow);
+  color: var(--success);
+}
+
+.card-direction.sell {
+  background: var(--danger-glow);
+  color: var(--danger);
+}
+
+.card-progress {
+  margin-bottom: var(--space-md);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-sm);
+}
+
+.progress-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.progress-value {
+  font-weight: 700;
+}
+
+.progress-bar {
+  height: 8px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progress-fill.low {
+  background: linear-gradient(90deg, var(--danger), #f87171);
+}
+
+.progress-fill.medium {
+  background: linear-gradient(90deg, var(--warning), #fbbf24);
+}
+
+.progress-fill.high {
+  background: linear-gradient(90deg, var(--success), #34d399);
+}
+
+.confirmations-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+}
+
+.confirmation-chip {
+  padding: var(--space-xs) var(--space-sm);
+  background: transparent;
+  border: 1px solid;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.confirmation-chip.active {
+  background: currentColor;
+}
+
+.confirmation-chip.active span {
+  color: white;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--bg-glass-border);
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity var(--transition-fast);
+}
+
+.delete-btn:hover {
+  opacity: 1;
+}
+
+.ready-badge {
+  padding: var(--space-xs) var(--space-md);
+  background: var(--success-glow);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--success);
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl);
+  color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+  .surveillance-grid {
+    grid-template-columns: 1fr;
+  }
+}
