@@ -41,13 +41,14 @@
 .form-group input,
 .form-group select,
 .form-group textarea {
-  padding: var(--space-md);
+  padding: 12px 14px;
   background: var(--bg-glass-light);
   border: 1px solid var(--bg-glass-border);
   border-radius: var(--radius-md);
   color: var(--text-primary);
   font-size: 0.95rem;
   transition: all var(--transition-fast);
+  min-height: 44px;
 }
 
 .form-group input:focus,
@@ -86,6 +87,7 @@
 
 .rr-value.good {
   color: var(--success);
+  text-shadow: 0 0 10px var(--success-glow);
 }
 
 .rr-value.neutral {
@@ -110,6 +112,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-fast);
+  background: transparent;
 }
 
 .tag-toggle:hover {
@@ -132,24 +135,30 @@
 
 .file-upload-label {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
-  padding: var(--space-lg);
+  padding: var(--space-xl);
   background: var(--bg-glass-light);
   border: 2px dashed var(--bg-glass-border);
   border-radius: var(--radius-lg);
+  color: var(--text-muted);
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-normal);
+  min-height: 100px;
 }
 
 .file-upload-label:hover {
   border-color: var(--accent-cyan);
   background: var(--bg-tertiary);
+  color: var(--accent-cyan);
+  transform: translateY(-2px);
 }
 
 .upload-icon {
-  font-size: 1.5rem;
+  font-size: 2rem;
 }
 
 .screenshot-preview {
@@ -162,23 +171,29 @@
   max-height: 150px;
   border-radius: var(--radius-md);
   border: 1px solid var(--bg-glass-border);
+  object-fit: cover;
 }
 
 .remove-preview {
   position: absolute;
   top: -10px;
   right: -10px;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   background: var(--danger);
   border: none;
   border-radius: 50%;
   color: white;
-  font-size: 1rem;
+  font-size: 1.2rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform var(--transition-fast);
+}
+
+.remove-preview:hover {
+  transform: scale(1.1);
 }
 
 .form-actions {
@@ -194,7 +209,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-sm);
-  padding: var(--space-md) var(--space-xl);
+  padding: 12px 24px;
   background: var(--gradient-primary);
   border: none;
   border-radius: var(--radius-md);
@@ -214,7 +229,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-sm);
-  padding: var(--space-md) var(--space-xl);
+  padding: 12px 24px;
   background: var(--bg-glass-light);
   border: 1px solid var(--bg-glass-border);
   border-radius: var(--radius-md);
