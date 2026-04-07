@@ -1,31 +1,45 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import './Surveillance.css';
 
 const DIRECTIONS = ['Buy', 'Sell'];
 
-const DEFAULT_CONFIRMATIONS = [
-  { id: '1', title: 'Trend confirmed', stars: 3 },
-  { id: '2', title: 'Key levels', stars: 2 },
-  { id: '3', title: 'Confluence', stars: 3 },
-  { id: '4', title: 'Risk < 2%', stars: 3 },
-  { id: '5', title: 'RR >= 1:3', stars: 2 }
+const IMPORTANCE_STARS = [
+  { value: 1, label: '⭐', desc: 'Bas' },
+  { value: 2, label: '⭐⭐', desc: 'Moyen' },
+  { value: 3, label: '⭐⭐⭐', desc: 'Élevé' }
+];
+
+const DEFAULT_CONDITIONS = [
+  { id: 1, title: 'Structure du marché', note: '', importance: 3 },
+  { id: 2, title: 'Niveau clé identifié', note: '', importance: 3 },
+  { id: 3, title: 'FVG identifié', note: '', importance: 2 },
+  { id: 4, title: 'Confluence trouvée', note: '', importance: 2 },
+  { id: 5, title: 'Risk < 2%', note: '', importance: 3 },
+  { id: 6, title: 'RR >= 1:3', note: '', importance: 3 }
 ];
 
 export default function Surveillance() {
+  const navigate = useNavigate();
   const { t, surveillances, addSurveillance, deleteSurveillance, updateSurveillance, tags, SETUP_PAIRS, isLoading } = useApp();
   const [viewMode, setViewMode] = useState('grid');
-  const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [screenshots, setScreenshots] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+
+  // Form state
   const [formData, setFormData] = useState({
     pair: 'EURUSD',
     direction: 'Buy',
-    notes: '',
-    confirmations: [],
-    customConfirmations: []
+    note: '',
+    conditions: [],
+    screenshots: []
   });
+
+  // New condition state
+  const [newCondition, setNewCondition] = useState({ title: '', note: '', importance: 2 });
 
   useEffect(() => {
     if (!isLoading) {
@@ -34,11 +48,14 @@ export default function Surveillance() {
   }, [isLoading]);
 
   const getCompletion = (surveillance) => {
-    const allItems = [...DEFAULT_CONFIRMATIONS, ...tags];
-    const completed = surveillance.confirmations?.length || 0;
-    const customCompleted = surveillance.customConfirmations?.length || 0;
-    if (allItems.length === 0) return 0;
-    return Math.min(100, ((completed + customCompleted) / allItems.length) * 100);
+    const allConditions = surveillance.conditions || [];
+    if (allConditions.length === 0) return 0;
+    
+    const checkedConditions = allConditions.filter(c => c.checked);
+    const totalWeight = allConditions.reduce((sum, c) => sum + (c.importance || 1), 0);
+    const checkedWeight = checkedConditions.reduce((sum, c) => sum + (c.importance || 1), 0);
+    
+    return Math.min(100, (checkedWeight / totalWeight) * 100);
   };
 
   const sortedSurveillances = useMemo(() => {
@@ -50,58 +67,131 @@ export default function Surveillance() {
     });
   }, [surveillances]);
 
+  // Open edit modal
+  const openEdit = (surveillance) => {
+    setEditingId(surveillance.id);
+    setFormData({
+      pair: surveillance.pair || 'EURUSD',
+      direction: surveillance.direction || 'Buy',
+      note: surveillance.note || '',
+      conditions: surveillance.conditions || [],
+      screenshots: surveillance.screenshots || []
+    });
+    setShowForm(true);
+  };
+
+  // Add new surveillance
   const handleAdd = () => {
     if (!formData.pair) return;
-    addSurveillance({
-      ...formData,
-      screenshots
-    });
+    
+    if (editingId) {
+      updateSurveillance(editingId, formData);
+    } else {
+      addSurveillance(formData);
+    }
+    
+    resetForm();
+  };
+
+  const resetForm = () => {
     setFormData({
       pair: 'EURUSD',
       direction: 'Buy',
-      notes: '',
-      confirmations: [],
-      customConfirmations: []
+      note: '',
+      conditions: [...DEFAULT_CONDITIONS],
+      screenshots: []
     });
-    setScreenshots([]);
+    setNewCondition({ title: '', note: '', importance: 2 });
     setShowForm(false);
+    setEditingId(null);
   };
 
+  // Add custom condition
+  const addCondition = () => {
+    if (!newCondition.title.trim()) return;
+    if (formData.conditions.length >= 10) return;
+    
+    const condition = {
+      id: Date.now(),
+      title: newCondition.title.trim(),
+      note: newCondition.note || '',
+      importance: newCondition.importance,
+      checked: false
+    };
+    
+    setFormData(prev => ({
+      ...prev,
+      conditions: [...prev.conditions, condition]
+    }));
+    setNewCondition({ title: '', note: '', importance: 2 });
+  };
+
+  // Remove condition
+  const removeCondition = (conditionId) => {
+    setFormData(prev => ({
+      ...prev,
+      conditions: prev.conditions.filter(c => c.id !== conditionId)
+    }));
+  };
+
+  // Toggle condition checkbox
+  const toggleCondition = (conditionId) => {
+    setFormData(prev => ({
+      ...prev,
+      conditions: prev.conditions.map(c => 
+        c.id === conditionId ? { ...c, checked: !c.checked } : c
+      )
+    }));
+  };
+
+  // Add tag as condition
+  const addTagAsCondition = (tag) => {
+    if (formData.conditions.length >= 10) return;
+    
+    const existingIndex = formData.conditions.findIndex(c => c.title === tag.name);
+    if (existingIndex >= 0) return;
+    
+    const condition = {
+      id: Date.now(),
+      title: tag.name,
+      note: tag.description || '',
+      importance: 2, // Tags = 2 stars
+      checked: false,
+      isTag: true,
+      tagColor: tag.color
+    };
+    
+    setFormData(prev => ({
+      ...prev,
+      conditions: [...prev.conditions, condition]
+    }));
+  };
+
+  // Screenshot handling
   const handleScreenshotUpload = (e) => {
     const file = e.target.files[0];
-    if (file && screenshots.length < 3) {
+    if (file && formData.screenshots.length < 3) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setScreenshots(prev => [...prev, reader.result]);
+        setFormData(prev => ({
+          ...prev,
+          screenshots: [...prev.screenshots, reader.result]
+        }));
       };
       reader.readAsDataURL(file);
     }
   };
 
   const removeScreenshot = (index) => {
-    setScreenshots(prev => prev.filter((_, i) => i !== index));
+    setFormData(prev => ({
+      ...prev,
+      screenshots: prev.screenshots.filter((_, i) => i !== index)
+    }));
   };
 
-  const toggleConfirmation = (id, item) => {
-    const surveillance = surveillances.find(s => s.id === id);
-    if (!surveillance) return;
-    
-    const isTag = typeof item === 'string';
-    const key = isTag ? 'confirmations' : 'customConfirmations';
-    const currentItems = surveillance[key] || [];
-    const itemKey = isTag ? item : item.id;
-    
-    const newItems = currentItems.includes(itemKey)
-      ? currentItems.filter(c => c !== itemKey)
-      : [...currentItems, itemKey];
-    
-    updateSurveillance(id, { [key]: newItems });
-  };
-
-  const isConfirmed = (surveillance, item) => {
-    const isTag = typeof item === 'string';
-    const list = isTag ? surveillance.confirmations : surveillance.customConfirmations;
-    return list?.includes(isTag ? item : item.id);
+  // Take trade - convert to Add Trade
+  const takeTrade = (surveillance) => {
+    navigate(`/add-trade?pair=${surveillance.pair}&direction=${surveillance.direction}&note=${encodeURIComponent(surveillance.note || '')}`);
   };
 
   if (loading) {
@@ -144,7 +234,7 @@ export default function Surveillance() {
         </div>
       </div>
 
-      <button className="floating-add-btn" onClick={() => setShowForm(true)}>
+      <button className="floating-add-btn" onClick={() => { resetForm(); setShowForm(true); }}>
         + {t('add')}
       </button>
 
@@ -155,7 +245,7 @@ export default function Surveillance() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setShowForm(false)}
+            onClick={() => { resetForm(); }}
           >
             <motion.div 
               className="setup-form-modal"
@@ -164,66 +254,161 @@ export default function Surveillance() {
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={e => e.stopPropagation()}
             >
-              <h3>{t('newSurveillance')}</h3>
-              
-              <div className="form-group">
-                <label>{t('pair')}</label>
-                <select 
-                  value={formData.pair}
-                  onChange={(e) => setFormData(f => ({ ...f, pair: e.target.value }))}
-                >
-                  {SETUP_PAIRS.map(p => (
-                    <option key={p} value={p}>{p}</option>
-                  ))}
-                </select>
+              <div className="modal-header">
+                <h3>{editingId ? 'Modifier' : 'Nouvelle'} Surveillance</h3>
+                <span className="conditions-count">{formData.conditions.length}/10 conditions</span>
               </div>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label>{t('pair')}</label>
+                  <select 
+                    value={formData.pair}
+                    onChange={(e) => setFormData(f => ({ ...f, pair: e.target.value }))}
+                  >
+                    {SETUP_PAIRS.map(p => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                </div>
 
-              <div className="form-group">
-                <label>{t('direction')}</label>
-                <div className="direction-selector">
-                  {DIRECTIONS.map(dir => (
-                    <button
-                      key={dir}
-                      type="button"
-                      className={`dir-option ${formData.direction === dir ? 'active' : ''} ${dir.toLowerCase()}`}
-                      onClick={() => setFormData(f => ({ ...f, direction: dir }))}
-                    >
-                      {dir === 'Buy' ? '↑' : '↓'} {dir}
-                    </button>
-                  ))}
+                <div className="form-group">
+                  <label>{t('direction')}</label>
+                  <div className="direction-selector">
+                    {DIRECTIONS.map(dir => (
+                      <button
+                        key={dir}
+                        type="button"
+                        className={`dir-option ${formData.direction === dir ? 'active' : ''} ${dir.toLowerCase()}`}
+                        onClick={() => setFormData(f => ({ ...f, direction: dir }))}
+                      >
+                        {dir === 'Buy' ? '↑' : '↓'} {dir}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
               <div className="form-group">
-                <label>{t('notes')}</label>
+                <label>Note / Idée de trade</label>
                 <textarea 
-                  value={formData.notes}
-                  onChange={(e) => setFormData(f => ({ ...f, notes: e.target.value }))}
-                  rows={3}
-                  placeholder="Notes sur le setup..."
+                  value={formData.note}
+                  onChange={(e) => setFormData(f => ({ ...f, note: e.target.value }))}
+                  rows={2}
+                  placeholder="Décrivez votre idée de trade..."
                 />
               </div>
 
-              <div className="form-group">
-                <label>{t('screenshots')} ({screenshots.length}/3)</label>
-                <div className="screenshot-upload-grid">
-                  {screenshots.map((img, i) => (
+              <div className="conditions-section">
+                <label>Conditions ({formData.conditions.length}/10)</label>
+                
+                <div className="conditions-list">
+                  {formData.conditions.map((condition, index) => (
+                    <motion.div 
+                      key={condition.id}
+                      className="condition-item"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                    >
+                      <label className="condition-checkbox">
+                        <input 
+                          type="checkbox"
+                          checked={condition.checked || false}
+                          onChange={() => toggleCondition(condition.id)}
+                        />
+                        <span className="checkmark">{condition.checked ? '✓' : ''}</span>
+                      </label>
+                      
+                      <div className="condition-content">
+                        <span className="condition-title">{condition.title}</span>
+                        {condition.note && (
+                          <span className="condition-note">{condition.note}</span>
+                        )}
+                      </div>
+                      
+                      <div className="condition-stars">
+                        {condition.isTag && condition.tagColor && (
+                          <span className="tag-badge" style={{ background: condition.tagColor }}>{condition.title[0]}</span>
+                        )}
+                        <span className="stars">{'⭐'.repeat(condition.importance)}</span>
+                      </div>
+                      
+                      <button 
+                        type="button"
+                        className="btn-remove"
+                        onClick={() => removeCondition(condition.id)}
+                      >
+                        ×
+                      </button>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {formData.conditions.length < 10 && (
+                  <div className="add-condition-section">
+                    <input
+                      type="text"
+                      value={newCondition.title}
+                      onChange={(e) => setNewCondition(c => ({ ...c, title: e.target.value }))}
+                      placeholder="Nouvelle condition..."
+                      onKeyDown={(e) => e.key === 'Enter' && addCondition()}
+                    />
+                    <select 
+                      value={newCondition.importance}
+                      onChange={(e) => setNewCondition(c => ({ ...c, importance: parseInt(e.target.value) }))}
+                    >
+                      {IMPORTANCE_STARS.map(star => (
+                        <option key={star.value} value={star.value}>{star.label}</option>
+                      ))}
+                    </select>
+                    <button type="button" className="btn-add-condition" onClick={addCondition}>+</button>
+                  </div>
+                )}
+
+                {tags && tags.length > 0 && (
+                  <div className="tags-section">
+                    <label>Ajouter depuis les tags:</label>
+                    <div className="tags-list">
+                      {tags.map(tag => {
+                        const exists = formData.conditions.some(c => c.title === tag.name);
+                        return (
+                          <button
+                            key={tag.id}
+                            type="button"
+                            className={`tag-chip ${exists ? 'used' : ''}`}
+                            style={{ borderColor: tag.color, color: tag.color }}
+                            onClick={() => !exists && addTagAsCondition(tag)}
+                            disabled={exists}
+                          >
+                            {tag.name} ⭐⭐
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="screenshots-section">
+                <label>{t('screenshots')} ({formData.screenshots.length}/3)</label>
+                <div className="screenshot-grid">
+                  {formData.screenshots.map((img, i) => (
                     <div key={i} className="screenshot-thumb">
                       <img src={img} alt="" />
                       <button type="button" onClick={() => removeScreenshot(i)}>×</button>
                     </div>
                   ))}
-                  {screenshots.length < 3 && (
+                  {formData.screenshots.length < 3 && (
                     <label className="screenshot-add">
                       <input type="file" accept="image/*" onChange={handleScreenshotUpload} />
-                      + {t('addScreenshot')}
+                      +
                     </label>
                   )}
                 </div>
               </div>
 
               <div className="form-actions">
-                <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>
+                <button type="button" className="btn-secondary" onClick={() => { resetForm(); }}>
                   {t('cancel')}
                 </button>
                 <button type="button" className="btn-primary" onClick={handleAdd}>
@@ -254,6 +439,12 @@ export default function Surveillance() {
                   </span>
                 </div>
 
+                {surveillance.note && (
+                  <div className="card-note">
+                    {surveillance.note}
+                  </div>
+                )}
+
                 {surveillance.screenshots?.length > 0 && (
                   <div className="card-screenshots">
                     {surveillance.screenshots.slice(0, 3).map((img, i) => (
@@ -270,52 +461,50 @@ export default function Surveillance() {
                     <span className="progress-value">{completion.toFixed(0)}%</span>
                   </div>
                   <div className="progress-bar">
-                    <div 
+                    <motion.div 
                       className={`progress-fill ${completion < 40 ? 'low' : completion < 80 ? 'medium' : 'high'}`}
-                      style={{ width: `${completion}%` }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${completion}%` }}
                     />
                   </div>
                 </div>
 
-                <div className="confirmations-section">
-                  <div className="conf-section-title">{t('confirmations')}</div>
-                  <div className="confirmations-list">
-                    {DEFAULT_CONFIRMATIONS.map((conf, i) => (
-                      <button
-                        key={conf.id}
-                        type="button"
-                        className={`conf-chip ${isConfirmed(surveillance, conf) ? 'active' : ''}`}
-                        onClick={() => toggleConfirmation(surveillance.id, conf)}
-                      >
-                        <span className="stars">{'⭐'.repeat(conf.stars)}</span>
-                        {conf.title}
-                      </button>
-                    ))}
-                    {tags && tags.map(tag => (
-                      <button
-                        key={tag.id}
-                        type="button"
-                        className={`conf-chip ${isConfirmed(surveillance, tag.name) ? 'active' : ''}`}
-                        style={{ borderColor: tag.color, color: isConfirmed(surveillance, tag.name) ? tag.color : 'var(--text-muted)' }}
-                        onClick={() => toggleConfirmation(surveillance.id, tag.name)}
-                      >
-                        {tag.name}
-                      </button>
-                    ))}
-                  </div>
+                <div className="conditions-display">
+                  {(surveillance.conditions || []).map(condition => (
+                    <div 
+                      key={condition.id}
+                      className={`condition-chip ${condition.checked ? 'checked' : ''}`}
+                    >
+                      <span className="cond-check">{condition.checked ? '✓' : ''}</span>
+                      <span className="cond-title">{condition.title}</span>
+                      <span className="cond-stars">{'⭐'.repeat(condition.importance)}</span>
+                    </div>
+                  ))}
                 </div>
 
-                <div className="card-footer">
+                <div className="card-actions">
                   <button 
                     type="button"
-                    className="delete-btn"
+                    className="btn-action take-trade"
+                    onClick={() => takeTrade(surveillance)}
+                    disabled={completion < 80}
+                  >
+                    🎯 Prendre le Trade
+                  </button>
+                  <button 
+                    type="button"
+                    className="btn-action edit"
+                    onClick={() => openEdit(surveillance)}
+                  >
+                    ✏️
+                  </button>
+                  <button 
+                    type="button"
+                    className="btn-action delete"
                     onClick={() => deleteSurveillance(surveillance.id)}
                   >
                     🗑️
                   </button>
-                  {completion >= 80 && (
-                    <span className="ready-badge">{t('takeTheTrade')}</span>
-                  )}
                 </div>
               </motion.div>
             );
@@ -324,8 +513,8 @@ export default function Surveillance() {
           <div className="empty-state">
             <div className="empty-icon">📊</div>
             <p>Aucun setup en surveillance</p>
-            <button className="btn-primary" onClick={() => setShowForm(true)}>
-              + {t('add')}
+            <button className="btn-primary" onClick={() => { resetForm(); setShowForm(true); }}>
+              + Créer une surveillance
             </button>
           </div>
         )}
