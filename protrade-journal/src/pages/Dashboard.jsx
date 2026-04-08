@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { FaTrophy, FaExchangeAlt, FaArrowUp, FaBalanceScale, FaExternalLinkAlt } from 'react-icons/fa';
+import { FaTrophy, FaExchangeAlt, FaArrowUp, FaBalanceScale, FaExternalLinkAlt, FaPlus } from 'react-icons/fa';
 import { useApp } from '../context/AppContext';
 import './Dashboard.css';
 
@@ -72,6 +72,12 @@ export default function Dashboard() {
       initial="hidden"
       animate="visible"
     >
+      <div className="dashboard-header">
+        <button className="btn-primary add-trade-btn" onClick={() => navigate('/add-trade')}>
+          <FaPlus /> {t('addTrade')}
+        </button>
+      </div>
+
       <motion.div className="stats-grid" variants={itemVariants}>
         <div className="stat-card">
           <div className="stat-icon win">

@@ -264,3 +264,128 @@
     justify-content: center;
   }
 }
+
+/* Step Indicator */
+.step-indicator {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xl);
+}
+
+.step-btn {
+  flex: 1;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-glass-light);
+  border: 1px solid var(--bg-glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.step-btn:hover {
+  border-color: var(--accent-cyan);
+}
+
+.step-btn.active {
+  background: var(--gradient-primary);
+  border-color: transparent;
+  color: white;
+  box-shadow: var(--shadow-glow);
+}
+
+/* Calculator Section */
+.calculator-section {
+  max-width: 600px;
+}
+
+.calc-card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--bg-glass-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+}
+
+.calc-card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: var(--space-lg);
+}
+
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.calc-result {
+  display: flex;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.result-item {
+  flex: 1;
+  padding: var(--space-lg);
+  background: var(--bg-glass-light);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.result-item .result-label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: var(--space-sm);
+}
+
+.result-item .result-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
+}
+
+.result-item .result-value.risk {
+  color: var(--danger);
+}
+
+.btn-calc {
+  padding: var(--space-sm) var(--space-md);
+  background: transparent;
+  border: 1px solid var(--bg-glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btn-calc:hover {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+.dashboard-header {
+  margin-bottom: var(--space-xl);
+}
+
+.add-trade-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-xl);
+  background: var(--gradient-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.add-trade-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+}
