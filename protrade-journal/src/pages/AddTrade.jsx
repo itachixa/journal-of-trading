@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import './AddTrade.css';
 
+const CALCULATOR_STORAGE_KEY = 'protrade_calculator_data';
+
 export default function AddTrade() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -13,6 +15,7 @@ export default function AddTrade() {
   const prefillPair = searchParams.get('pair');
   const prefillDirection = searchParams.get('direction');
   const prefillNote = searchParams.get('note');
+  const fromCalculator = searchParams.get('fromCalculator');
   
   const existingTrade = editId ? trades.find(t => t.id === parseInt(editId)) : null;
 
@@ -53,7 +56,35 @@ export default function AddTrade() {
     if (prefillPair) {
       setCalculatorData(prev => ({ ...prev, pair: prefillPair }));
     }
-  }, [existingTrade, prefillPair, prefillDirection, prefillNote]);
+    if (prefillDirection) {
+      setFormData(prev => ({ ...prev, tradeType: prefillDirection }));
+    }
+    if (fromCalculator) {
+      const calcData = localStorage.getItem(CALCULATOR_STORAGE_KEY);
+      if (calcData) {
+        try {
+          const parsed = JSON.parse(calcData);
+          setFormData(prev => ({
+            ...prev,
+            pair: parsed.pair || prefillPair || '',
+            lotSize: parsed.lotSize || '',
+            stopLoss: parsed.stopLoss || '',
+            takeProfit: parsed.takeProfit || '',
+            comment: `Risk: ${parsed.risk}% | Balance: $${parsed.balance}`
+          }));
+          setCalculatorData(prev => ({
+            ...prev,
+            balance: parsed.balance || prev.balance,
+            risk: parsed.risk || prev.risk,
+            pair: parsed.pair || prev.pair
+          }));
+          localStorage.removeItem(CALCULATOR_STORAGE_KEY);
+        } catch (e) {
+          console.error('Error parsing calculator data:', e);
+        }
+      }
+    }
+  }, [existingTrade, prefillPair, prefillDirection, prefillNote, fromCalculator]);
 
   useEffect(() => {
     const calcResult = calculateLotSize(calculatorData.balance, calculatorData.risk, parseFloat(formData.stopLoss) || 0, calculatorData.pair);

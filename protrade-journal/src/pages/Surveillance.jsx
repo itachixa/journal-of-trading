@@ -28,6 +28,7 @@ export default function Surveillance() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [expandedCards, setExpandedCards] = useState({});
 
   const [formData, setFormData] = useState({
     pair: 'EURUSD',
@@ -62,6 +63,10 @@ export default function Surveillance() {
     );
     
     updateSurveillance(surveillanceId, { conditions: updatedConditions });
+  };
+
+  const toggleExpandCard = (id) => {
+    setExpandedCards(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
   const sortedSurveillances = useMemo(() => {
@@ -291,7 +296,12 @@ export default function Surveillance() {
                 <span className={`card-direction ${surveillance.direction?.toLowerCase()}`}>{surveillance.direction}</span>
               </div>
 
-              {surveillance.note && <div className="card-note">{surveillance.note}</div>}
+              {surveillance.note && (
+                <div className="card-notes-section">
+                  <span className="notes-label">📝</span>
+                  <p className="notes-text">{surveillance.note}</p>
+                </div>
+              )}
 
               {surveillance.screenshots?.length > 0 && (
                 <div className="card-screenshots">
@@ -310,7 +320,7 @@ export default function Surveillance() {
               </div>
 
               <div className="inline-conditions">
-                {visibleConditions.map(condition => (
+                {(expandedCards[surveillance.id] ? conditions : visibleConditions).map(condition => (
                   <motion.div key={condition.id} className={`inline-condition ${condition.checked ? 'checked' : ''}`} whileTap={{ scale: 0.95 }}>
                     <label className="inline-checkbox">
                       <input type="checkbox" checked={condition.checked || false} onChange={() => toggleConditionFromCard(surveillance.id, condition.id)} />
@@ -320,7 +330,15 @@ export default function Surveillance() {
                     <span className="inline-stars">{'⭐'.repeat(condition.importance)}</span>
                   </motion.div>
                 ))}
-                {hiddenCount > 0 && <span className="more-conditions">+{hiddenCount} plus</span>}
+                {hiddenCount > 0 && (
+                  <button 
+                    type="button" 
+                    className="expand-conditions-btn"
+                    onClick={() => toggleExpandCard(surveillance.id)}
+                  >
+                    {expandedCards[surveillance.id] ? '− Show less' : `+ Show all (${conditions.length})`}
+                  </button>
+                )}
               </div>
 
               <div className="card-actions">

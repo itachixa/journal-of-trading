@@ -449,6 +449,125 @@ textarea::placeholder {
   opacity: 0.5;
 }
 
+/* ====================== FAB - Floating Add Button ====================== */
+.fab-add-trade {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  background: var(--gradient-primary);
+  color: white;
+  font-size: 1.8rem;
+  font-weight: 300;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.5), 0 0 40px rgba(59, 130, 246, 0.3);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fab-add-trade:hover {
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 0 6px 30px rgba(139, 92, 246, 0.7), 0 0 60px rgba(59, 130, 246, 0.5);
+}
+
+.fab-add-trade:active {
+  transform: scale(0.95);
+}
+
+.fab-add-trade span {
+  line-height: 1;
+}
+
+/* ====================== Take Trade Button (Calculator) ====================== */
+.btn-take-trade {
+  width: 100%;
+  padding: 14px 24px;
+  margin-top: 20px;
+  background: var(--gradient-primary);
+  border: none;
+  border-radius: var(--radius-lg);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+}
+
+.btn-take-trade:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(139, 92, 246, 0.6);
+}
+
+/* ====================== Trade Notes Display ====================== */
+.trade-notes {
+  padding: 10px 12px;
+  background: rgba(6, 182, 212, 0.1);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--accent-cyan);
+  margin: 8px 0;
+}
+
+.trade-notes .notes-label {
+  font-size: 0.75rem;
+  color: var(--accent-cyan);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.trade-notes .notes-content {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ====================== Surveillance Card Notes ====================== */
+.card-notes-section {
+  padding: 10px 12px;
+  background: rgba(139, 92, 246, 0.1);
+  border-radius: var(--radius-md);
+  margin: 8px 0;
+}
+
+.card-notes-section .notes-label {
+  font-size: 0.75rem;
+  color: var(--accent-purple);
+  margin-right: 6px;
+}
+
+.card-notes-section .notes-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 4px 0 0 0;
+  line-height: 1.4;
+}
+
+/* ====================== Expand Conditions Button ====================== */
+.expand-conditions-btn {
+  background: none;
+  border: none;
+  color: var(--accent-cyan);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  margin-top: 4px;
+}
+
+.expand-conditions-btn:hover {
+  background: rgba(6, 182, 212, 0.15);
+  text-decoration: underline;
+}
+
 /* ====================== RESPONSIVE HELPERS ====================== */
 @media (max-width: 768px) {
   .hide-mobile {

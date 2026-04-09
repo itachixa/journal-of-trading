@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import './Calculator.css';
@@ -14,6 +15,7 @@ const PAIRS_FOR_CALC = [
 
 export default function Calculator() {
   const { t, settings, calculateLotSize } = useApp();
+  const navigate = useNavigate();
 
   const [balance, setBalance] = useState(settings.initialCapital || 10000);
   const [risk, setRisk] = useState(2);
@@ -31,6 +33,19 @@ export default function Calculator() {
   const riskAmount = balance * (risk / 100);
   const rr = slPips && tpPips ? (tpPips / slPips).toFixed(2) : '0.00';
   const potentialProfit = riskAmount * parseFloat(rr);
+
+  const saveToTrade = () => {
+    const tradeData = {
+      lotSize: result.lotSize,
+      stopLoss: parseFloat(slPips) || 0,
+      takeProfit: parseFloat(tpPips) || 0,
+      pair: pair,
+      balance: balance,
+      risk: risk
+    };
+    localStorage.setItem('protrade_calculator_data', JSON.stringify(tradeData));
+    navigate('/add-trade?fromCalculator=true');
+  };
 
   return (
     <motion.div 
@@ -168,6 +183,10 @@ export default function Calculator() {
               <div className="result-value small positive">${potentialProfit.toFixed(2)}</div>
             </div>
           </div>
+
+          <button className="btn-take-trade" onClick={saveToTrade}>
+            🎯 {t('takeTheTrade') || 'Take Trade'}
+          </button>
         </div>
       </div>
     </motion.div>

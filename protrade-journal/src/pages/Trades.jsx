@@ -220,6 +220,13 @@ export default function Trades() {
                     </div>
                   )}
 
+                  {trade.comment && (
+                    <div className="trade-notes">
+                      <span className="notes-label">📝 Notes:</span>
+                      <p className="notes-content">{trade.comment}</p>
+                    </div>
+                  )}
+
                   <div className="trade-card-footer">
                     <span className="trade-date">
                       {new Date(trade.date).toLocaleDateString()}
@@ -304,6 +311,10 @@ export default function Trades() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <button className="fab-add-trade" onClick={() => navigate('/add-trade')}>
+        <span>+</span>
+      </button>
     </motion.div>
   );
 }
