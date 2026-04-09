@@ -284,7 +284,15 @@ export default function AddTrade() {
               </div>
             </div>
 
-            <button type="button" className="btn-primary" onClick={() => setStep(2)}>
+            <button type="button" className="btn-primary" onClick={() => {
+              setFormData(prev => ({
+                ...prev,
+                pair: calculatorData.pair || prev.pair,
+                stopLoss: prev.stopLoss || '',
+                lotSize: prev.lotSize || calcResult.lotSize.toString()
+              }));
+              setStep(2);
+            }}>
               Passer aux détails →
             </button>
           </div>
