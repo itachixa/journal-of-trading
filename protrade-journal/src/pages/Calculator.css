@@ -105,6 +105,9 @@
   border-radius: var(--radius-md);
   color: var(--text-primary);
   font-size: 0.95rem;
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
 }
 
 .calc-card input:focus,
