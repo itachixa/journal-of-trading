@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import './AddTrade.css';
 
-const CALCULATOR_STORAGE_KEY = 'protrade_calculator_data';
+const TEMP_TRADE_KEY = 'protrade_temp_trade';
 
 export default function AddTrade() {
   const navigate = useNavigate();
@@ -12,35 +12,33 @@ export default function AddTrade() {
   const { t, addTrade, updateTrade, trades, tags, PAIRS, calculateLotSize, settings } = useApp();
   
   const editId = searchParams.get('id');
-  const prefillPair = searchParams.get('pair');
-  const prefillDirection = searchParams.get('direction');
-  const prefillNote = searchParams.get('note');
-  const fromCalculator = searchParams.get('fromCalculator');
+  const fromSource = searchParams.get('from');
   
   const existingTrade = editId ? trades.find(t => t.id === parseInt(editId)) : null;
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().slice(0, 16),
-    pair: prefillPair || '',
-    tradeType: prefillDirection || '',
+    pair: '',
+    tradeType: '',
     tradingType: '',
     lotSize: '',
     stopLoss: '',
     takeProfit: '',
     result: '',
-    comment: prefillNote || '',
+    comment: '',
     tags: []
   });
 
   const [calculatorData, setCalculatorData] = useState({
     balance: settings.initialCapital || 10000,
     risk: 2,
-    pair: prefillPair || 'EURUSD'
+    pair: 'EURUSD'
   });
 
   const [screenshot, setScreenshot] = useState(null);
   const [screenshotPreview, setScreenshotPreview] = useState(null);
+  const [prefillSource, setPrefillSource] = useState(null);
 
   useEffect(() => {
     if (existingTrade) {
@@ -52,39 +50,54 @@ export default function AddTrade() {
       if (existingTrade.screenshot) {
         setScreenshotPreview(existingTrade.screenshot);
       }
+      return;
     }
-    if (prefillPair) {
-      setCalculatorData(prev => ({ ...prev, pair: prefillPair }));
-    }
-    if (prefillDirection) {
-      setFormData(prev => ({ ...prev, tradeType: prefillDirection }));
-    }
-    if (fromCalculator) {
-      const calcData = localStorage.getItem(CALCULATOR_STORAGE_KEY);
-      if (calcData) {
+
+    if (fromSource) {
+      const tempData = localStorage.getItem(TEMP_TRADE_KEY);
+      if (tempData) {
         try {
-          const parsed = JSON.parse(calcData);
-          setFormData(prev => ({
-            ...prev,
-            pair: parsed.pair || prefillPair || '',
-            lotSize: parsed.lotSize || '',
-            stopLoss: parsed.stopLoss || '',
-            takeProfit: parsed.takeProfit || '',
-            comment: `Risk: ${parsed.risk}% | Balance: $${parsed.balance}`
-          }));
-          setCalculatorData(prev => ({
-            ...prev,
-            balance: parsed.balance || prev.balance,
-            risk: parsed.risk || prev.risk,
-            pair: parsed.pair || prev.pair
-          }));
-          localStorage.removeItem(CALCULATOR_STORAGE_KEY);
+          const parsed = JSON.parse(tempData);
+          
+          if (parsed.source === 'calculator') {
+            setFormData(prev => ({
+              ...prev,
+              pair: parsed.pair || '',
+              lotSize: parsed.lotSize || '',
+              stopLoss: parsed.stopLoss || '',
+              takeProfit: parsed.takeProfit || '',
+              comment: `Risk: ${parsed.risk}% | Balance: $${parsed.balance} | From Calculator`
+            }));
+            setCalculatorData(prev => ({
+              ...prev,
+              balance: parsed.balance || prev.balance,
+              risk: parsed.risk || prev.risk,
+              pair: parsed.pair || prev.pair
+            }));
+            setPrefillSource('calculator');
+          } 
+          else if (parsed.source === 'surveillance') {
+            const conditionsSummary = parsed.conditions 
+              ? parsed.conditions.filter(c => c.checked).map(c => c.title).join(', ')
+              : '';
+            setFormData(prev => ({
+              ...prev,
+              pair: parsed.pair || '',
+              tradeType: parsed.tradeType || '',
+              comment: parsed.note 
+                ? `${parsed.note}${conditionsSummary ? '\n\nConditions: ' + conditionsSummary : ''}\n\nFrom Surveillance`
+                : (conditionsSummary ? `Conditions: ${conditionsSummary}\n\nFrom Surveillance` : 'From Surveillance')
+            }));
+            setPrefillSource('surveillance');
+          }
+          
+          localStorage.removeItem(TEMP_TRADE_KEY);
         } catch (e) {
-          console.error('Error parsing calculator data:', e);
+          console.error('Error parsing temp trade data:', e);
         }
       }
     }
-  }, [existingTrade, prefillPair, prefillDirection, prefillNote, fromCalculator]);
+  }, [existingTrade, fromSource]);
 
   useEffect(() => {
     const calcResult = calculateLotSize(calculatorData.balance, calculatorData.risk, parseFloat(formData.stopLoss) || 0, calculatorData.pair);
@@ -181,6 +194,11 @@ export default function AddTrade() {
     >
       <div className="page-header">
         <h2>{editId ? t('edit') : t('newTrade')}</h2>
+        {prefillSource && (
+          <span className={`prefill-badge ${prefillSource}`}>
+            {prefillSource === 'calculator' ? '🧮 Pre-filled from Calculator' : '📊 From Surveillance'}
+          </span>
+        )}
       </div>
 
       <div className="step-indicator">
@@ -272,6 +290,11 @@ export default function AddTrade() {
       {step === 2 && (
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
           <form className="trade-form" onSubmit={handleSubmit}>
+            {!formData.pair && (
+              <div className="pair-warning">
+                ⚠️ Pair is required - please select a trading pair
+              </div>
+            )}
             <div className="form-grid">
               <div className="form-group">
                 <label>{t('dateTime')}</label>

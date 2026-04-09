@@ -41,10 +41,11 @@ export default function Calculator() {
       takeProfit: parseFloat(tpPips) || 0,
       pair: pair,
       balance: balance,
-      risk: risk
+      risk: risk,
+      source: 'calculator'
     };
-    localStorage.setItem('protrade_calculator_data', JSON.stringify(tradeData));
-    navigate('/add-trade?fromCalculator=true');
+    localStorage.setItem('protrade_temp_trade', JSON.stringify(tradeData));
+    navigate('/add-trade?from=calculator');
   };
 
   return (

@@ -159,7 +159,15 @@ export default function Surveillance() {
   };
 
   const takeTrade = (surveillance) => {
-    navigate(`/add-trade?pair=${surveillance.pair}&direction=${surveillance.direction}&note=${encodeURIComponent(surveillance.note || '')}`);
+    const tradeData = {
+      pair: surveillance.pair,
+      tradeType: surveillance.direction,
+      note: surveillance.note || '',
+      conditions: surveillance.conditions || [],
+      source: 'surveillance'
+    };
+    localStorage.setItem('protrade_temp_trade', JSON.stringify(tradeData));
+    navigate('/add-trade?from=surveillance');
   };
 
   if (loading) {

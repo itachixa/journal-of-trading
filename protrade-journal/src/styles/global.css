@@ -568,6 +568,44 @@ textarea::placeholder {
   text-decoration: underline;
 }
 
+/* ====================== Prefill Badge ====================== */
+.prefill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-left: 12px;
+}
+
+.prefill-badge.calculator {
+  background: rgba(6, 182, 212, 0.2);
+  color: var(--accent-cyan);
+  border: 1px solid var(--accent-cyan);
+}
+
+.prefill-badge.surveillance {
+  background: rgba(139, 92, 246, 0.2);
+  color: var(--accent-purple);
+  border: 1px solid var(--accent-purple);
+}
+
+/* ====================== Pair Required Warning ====================== */
+.pair-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid var(--warning);
+  border-radius: var(--radius-md);
+  color: var(--warning);
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+}
+
 /* ====================== RESPONSIVE HELPERS ====================== */
 @media (max-width: 768px) {
   .hide-mobile {
