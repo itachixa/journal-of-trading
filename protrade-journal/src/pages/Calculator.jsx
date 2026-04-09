@@ -119,7 +119,10 @@ export default function Calculator() {
             
             <div className="form-group">
               <label>{t('pair')}</label>
-              <select value={pair} onChange={(e) => setPair(e.target.value)}>
+              <select 
+                value={pair} 
+                onChange={(e) => setPair(e.target.value)}
+              >
                 {PAIRS_FOR_CALC.map(p => (
                   <option key={p.value} value={p.value}>{p.label}</option>
                 ))}

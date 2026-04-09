@@ -112,8 +112,12 @@ export default function AddTrade() {
   };
 
   const handleCalculatorChange = (e) => {
-    const { name, value } = e.target.value;
-    setCalculatorData(prev => ({ ...prev, [name]: parseFloat(value) || 0 }));
+    const { name, value } = e.target;
+    if (name === 'pair') {
+      setCalculatorData(prev => ({ ...prev, pair: value }));
+    } else {
+      setCalculatorData(prev => ({ ...prev, [name]: parseFloat(value) || 0 }));
+    }
   };
 
   const handleTagToggle = (tagName) => {
