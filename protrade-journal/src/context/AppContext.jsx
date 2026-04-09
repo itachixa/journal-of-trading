@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 
 const AppContext = createContext();
 
@@ -296,6 +296,12 @@ export function AppProvider({ children }) {
   const [theme, setTheme] = useState('dark');
   const [isLoading, setIsLoading] = useState(true);
 
+  const accountBalance = useMemo(() => {
+    const initialCapital = settings.initialCapital || 10000;
+    const totalProfit = trades.reduce((sum, trade) => sum + (parseFloat(trade.result) || 0), 0);
+    return initialCapital + totalProfit;
+  }, [settings.initialCapital, trades]);
+
   useEffect(() => {
     loadData();
   }, []);
@@ -501,6 +507,7 @@ export function AppProvider({ children }) {
     language,
     theme,
     isLoading,
+    accountBalance,
     toggleLanguage,
     toggleTheme,
     t,

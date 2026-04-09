@@ -212,6 +212,22 @@
   text-shadow: 0 0 10px var(--success-glow);
 }
 
+.capital-value.positive {
+  color: var(--success);
+  text-shadow: 0 0 10px var(--success-glow);
+}
+
+.capital-value.negative {
+  color: var(--danger);
+  text-shadow: 0 0 10px var(--danger-glow);
+}
+
+.initial-capital {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-left: 8px;
+}
+
 .content-area {
   position: relative;
 }

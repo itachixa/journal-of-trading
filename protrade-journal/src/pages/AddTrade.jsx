@@ -9,7 +9,7 @@ const TEMP_TRADE_KEY = 'protrade_temp_trade';
 export default function AddTrade() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { t, addTrade, updateTrade, trades, tags, PAIRS, calculateLotSize, settings } = useApp();
+  const { t, addTrade, updateTrade, trades, tags, PAIRS, calculateLotSize, settings, accountBalance } = useApp();
   
   const editId = searchParams.get('id');
   const fromSource = searchParams.get('from');
@@ -31,7 +31,7 @@ export default function AddTrade() {
   });
 
   const [calculatorData, setCalculatorData] = useState({
-    balance: settings.initialCapital || 10000,
+    balance: accountBalance,
     risk: 2,
     pair: 'EURUSD'
   });

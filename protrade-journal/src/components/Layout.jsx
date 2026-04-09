@@ -24,7 +24,7 @@ const navItems = [
 ];
 
 export default function Layout({ children }) {
-  const { t, language, toggleLanguage, toggleTheme, theme, settings } = useApp();
+  const { t, language, toggleLanguage, toggleTheme, theme, settings, accountBalance } = useApp();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
@@ -93,8 +93,11 @@ export default function Layout({ children }) {
 
           <div className="header-actions">
             <div className="capital-display">
-              <span className="capital-label">{t('capital')}</span>
-              <span className="capital-value">${settings.initialCapital?.toLocaleString() || '10,000'}</span>
+              <span className="capital-label">{t('balance') || 'Balance'}</span>
+              <span className={`capital-value ${accountBalance >= settings.initialCapital ? 'positive' : accountBalance < settings.initialCapital ? 'negative' : ''}`}>
+                ${accountBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+              <span className="initial-capital">(${settings.initialCapital?.toLocaleString() || '10,000'} initial)</span>
             </div>
           </div>
         </header>

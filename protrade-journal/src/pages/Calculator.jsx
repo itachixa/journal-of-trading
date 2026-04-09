@@ -14,10 +14,10 @@ const PAIRS_FOR_CALC = [
 ];
 
 export default function Calculator() {
-  const { t, settings, calculateLotSize } = useApp();
+  const { t, settings, calculateLotSize, accountBalance } = useApp();
   const navigate = useNavigate();
 
-  const [balance, setBalance] = useState(settings.initialCapital || 10000);
+  const [balance, setBalance] = useState(accountBalance);
   const [risk, setRisk] = useState(2);
   const [pair, setPair] = useState('XAUUSD');
   const [slPips, setSlPips] = useState('');
