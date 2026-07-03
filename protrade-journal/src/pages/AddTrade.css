@@ -93,6 +93,10 @@
   text-shadow: 0 0 10px var(--success-glow);
 }
 
+[data-theme="light"] .rr-value.good {
+  text-shadow: 0 0 8px var(--success-glow);
+}
+
 .rr-value.neutral {
   color: var(--warning);
 }

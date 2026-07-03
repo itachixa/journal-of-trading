@@ -71,7 +71,23 @@
 
 .surveillance-card { background: var(--bg-glass); backdrop-filter: blur(20px); border: 1px solid var(--bg-glass-border); border-radius: var(--radius-xl); padding: var(--space-lg); transition: all var(--transition-normal); position: relative; overflow: hidden; }
 .surveillance-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--gradient-primary); opacity: 0; transition: opacity var(--transition-normal); }
-.surveillance-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-xl), var(--shadow-glow); border-color: var(--accent-cyan); }
+.surveillance-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl), var(--shadow-glow);
+  border-color: var(--accent-cyan);
+}
+
+[data-theme="light"] .surveillance-card:hover {
+  box-shadow: var(--shadow-xl), 0 0 20px rgba(59, 130, 246, 0.15);
+}
+
+[data-theme="light"] .setup-form-overlay {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="light"] .setup-form-modal {
+  box-shadow: var(--shadow-xl);
+}
 .surveillance-card.ready { border-color: var(--success); box-shadow: 0 0 30px var(--success-glow); }
 .surveillance-card.ready::before { background: var(--success); opacity: 1; }
 .surveillance-card.ready.complete { border-color: var(--success); box-shadow: 0 0 40px var(--success-glow); animation: glow-pulse 2s ease-in-out infinite; }

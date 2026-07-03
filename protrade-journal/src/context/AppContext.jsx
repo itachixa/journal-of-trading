@@ -1,26 +1,17 @@
 import { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { supabase } from '../lib/supabase';
 
 const AppContext = createContext();
 
-const STORAGE_KEYS = {
-  TRADES: 'protrade_trades',
-  SETTINGS: 'protrade_settings',
-  NOTES: 'protrade_notes',
-  TAGS: 'protrade_tags',
-  SURVEILLANCE: 'protrade_surveillance',
-  LANGUAGE: 'protrade_language',
-  THEME: 'protrade_theme'
-};
-
 const DEFAULT_TAGS = [
-  { id: '1', name: 'BOS', description: 'Break of Structure', color: '#3b82f6' },
-  { id: '2', name: 'FVG', description: 'Fair Value Gap', color: '#8b5cf6' },
-  { id: '3', name: 'Liquidity Grab', description: 'Chasse aux liquidites', color: '#ef4444' },
-  { id: '4', name: 'Trendline', description: 'Cassure de tendance', color: '#10b981' },
-  { id: '5', name: 'Fibo', description: 'Fibonacci', color: '#f59e0b' },
-  { id: '6', name: 'Support/Resistance', description: 'Niveau S/R', color: '#06b6d4' },
-  { id: '7', name: 'Price Action', description: 'Action des prix', color: '#ec4899' },
-  { id: '8', name: 'News', description: 'Trade base sur les news', color: '#f97316' }
+  { name: 'BOS', description: 'Break of Structure', color: '#3b82f6' },
+  { name: 'FVG', description: 'Fair Value Gap', color: '#8b5cf6' },
+  { name: 'Liquidity Grab', description: 'Chasse aux liquidites', color: '#ef4444' },
+  { name: 'Trendline', description: 'Cassure de tendance', color: '#10b981' },
+  { name: 'Fibo', description: 'Fibonacci', color: '#f59e0b' },
+  { name: 'Support/Resistance', description: 'Niveau S/R', color: '#06b6d4' },
+  { name: 'Price Action', description: 'Action des prix', color: '#ec4899' },
+  { name: 'News', description: 'Trade base sur les news', color: '#f97316' }
 ];
 
 const DEFAULT_SETTINGS = {
@@ -30,11 +21,11 @@ const DEFAULT_SETTINGS = {
 };
 
 const defaultConfirmations = [
-  { id: '1', title: 'Trend confirmed', stars: 3 },
-  { id: '2', title: 'Key levels identified', stars: 2 },
-  { id: '3', title: 'Confluence found', stars: 3 },
-  { id: '4', title: 'Risk < 2%', stars: 3 },
-  { id: '5', title: 'RR >= 1:3', stars: 2 }
+  { title: 'Trend confirmed', stars: 3 },
+  { title: 'Key levels identified', stars: 2 },
+  { title: 'Confluence found', stars: 3 },
+  { title: 'Risk < 2%', stars: 3 },
+  { title: 'RR >= 1:3', stars: 2 }
 ];
 
 const translations = {
@@ -295,6 +286,7 @@ export function AppProvider({ children }) {
   const [language, setLanguage] = useState('fr');
   const [theme, setTheme] = useState('dark');
   const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState(null);
 
   const accountBalance = useMemo(() => {
     const initialCapital = settings.initialCapital || 10000;
@@ -303,32 +295,55 @@ export function AppProvider({ children }) {
   }, [settings.initialCapital, trades]);
 
   useEffect(() => {
-    loadData();
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
-    if (!isLoading) {
+    if (user) {
+      loadData();
+    } else {
+      setIsLoading(false);
+      const savedLanguage = localStorage.getItem('protrade_language') || 'fr';
+      const savedTheme = localStorage.getItem('protrade_theme') || 'dark';
+      setLanguage(savedLanguage);
+      setTheme(savedTheme);
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!isLoading && !user) {
       document.documentElement.setAttribute('data-theme', theme);
     }
-  }, [theme, isLoading]);
+  }, [theme, isLoading, user]);
 
-  const loadData = () => {
+  const loadData = async () => {
     try {
-      const storedTrades = JSON.parse(localStorage.getItem(STORAGE_KEYS.TRADES)) || [];
-      const storedSettings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || DEFAULT_SETTINGS;
-      const storedNotes = JSON.parse(localStorage.getItem(STORAGE_KEYS.NOTES)) || [];
-      const storedTags = JSON.parse(localStorage.getItem(STORAGE_KEYS.TAGS)) || DEFAULT_TAGS;
-      const storedSurveillances = JSON.parse(localStorage.getItem(STORAGE_KEYS.SURVEILLANCE)) || [];
-      const storedLanguage = localStorage.getItem(STORAGE_KEYS.LANGUAGE) || 'fr';
-      const storedTheme = localStorage.getItem(STORAGE_KEYS.THEME) || 'dark';
+      const [settingsRes, tradesRes, notesRes, tagsRes, surveillancesRes] = await Promise.all([
+        supabase.from('settings').select('*').single(),
+        supabase.from('trades').select('*').order('date', { ascending: false }),
+        supabase.from('notes').select('*').order('created_at', { ascending: false }),
+        supabase.from('tags').select('*').order('name'),
+        supabase.from('surveillances').select(`*, confirmations:surveillance_confirmations(*), screenshots:surveillance_screenshots(*)`).order('created_at', { ascending: false })
+      ]);
 
-      setTrades(storedTrades);
-      setSettings(storedSettings);
-      setNotes(storedNotes);
-      setTags(storedTags);
-      setSurveillances(storedSurveillances);
-      setLanguage(storedLanguage);
-      setTheme(storedTheme);
+      if (settingsRes.data) setSettings(settingsRes.data);
+      if (tradesRes.data) setTrades(tradesRes.data);
+      if (notesRes.data) setNotes(notesRes.data);
+      if (tagsRes.data) setTags(tagsRes.data);
+      if (surveillancesRes.data) setSurveillances(surveillancesRes.data);
     } catch (e) {
       console.error('Error loading data:', e);
     } finally {
@@ -336,108 +351,131 @@ export function AppProvider({ children }) {
     }
   };
 
-  const saveData = () => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.TRADES, JSON.stringify(trades));
-      localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
-      localStorage.setItem(STORAGE_KEYS.NOTES, JSON.stringify(notes));
-      localStorage.setItem(STORAGE_KEYS.TAGS, JSON.stringify(tags));
-      localStorage.setItem(STORAGE_KEYS.SURVEILLANCE, JSON.stringify(surveillances));
-      localStorage.setItem(STORAGE_KEYS.LANGUAGE, language);
-      localStorage.setItem(STORAGE_KEYS.THEME, theme);
-    } catch (e) {
-      console.error('Error saving data:', e);
-    }
-  };
-
-  useEffect(() => {
-    if (!isLoading) {
-      saveData();
-    }
-  }, [trades, settings, notes, tags, surveillances, language, theme]);
-
-  const toggleLanguage = () => {
-    setLanguage(prev => prev === 'fr' ? 'en' : 'fr');
-  };
-
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-  };
-
   const t = (key) => translations[language][key] || key;
 
-  const addTrade = (trade) => {
+  const addTrade = async (trade) => {
     const newTrade = {
       ...trade,
-      id: Date.now(),
+      user_id: user?.id,
       date: trade.date || new Date().toISOString()
     };
-    setTrades(prev => [...prev, newTrade]);
+    const { data, error } = await supabase.from('trades').insert([newTrade]).select().single();
+    if (error) throw error;
+    setTrades(prev => [data, ...prev]);
   };
 
-  const updateTrade = (id, updatedTrade) => {
-    setTrades(prev => prev.map(t => t.id === id ? { ...t, ...updatedTrade } : t));
+  const updateTrade = async (id, updatedTrade) => {
+    const { data, error } = await supabase.from('trades').update(updatedTrade).eq('id', id).select().single();
+    if (error) throw error;
+    setTrades(prev => prev.map(t => t.id === id ? data : t));
   };
 
-  const deleteTrade = (id) => {
+  const deleteTrade = async (id) => {
+    const { error } = await supabase.from('trades').delete().eq('id', id);
+    if (error) throw error;
     setTrades(prev => prev.filter(t => t.id !== id));
   };
 
-  const addNote = (note) => {
+  const addNote = async (note) => {
     const newNote = {
       ...note,
-      id: Date.now(),
+      user_id: user?.id,
       createdAt: new Date().toISOString()
     };
-    setNotes(prev => [...prev, newNote]);
+    const { data, error } = await supabase.from('notes').insert([newNote]).select().single();
+    if (error) throw error;
+    setNotes(prev => [data, ...prev]);
   };
 
-  const updateNote = (id, updatedNote) => {
-    setNotes(prev => prev.map(n => n.id === id ? { ...n, ...updatedNote } : n));
+  const updateNote = async (id, updatedNote) => {
+    const { data, error } = await supabase.from('notes').update(updatedNote).eq('id', id).select().single();
+    if (error) throw error;
+    setNotes(prev => prev.map(n => n.id === id ? data : n));
   };
 
-  const deleteNote = (id) => {
+  const deleteNote = async (id) => {
+    const { error } = await supabase.from('notes').delete().eq('id', id);
+    if (error) throw error;
     setNotes(prev => prev.filter(n => n.id !== id));
   };
 
-  const addTag = (tag) => {
-    const newTag = {
-      ...tag,
-      id: Date.now().toString()
-    };
-    setTags(prev => [...prev, newTag]);
+  const addTag = async (tag) => {
+    const newTag = { ...tag, user_id: user?.id };
+    const { data, error } = await supabase.from('tags').insert([newTag]).select().single();
+    if (error) throw error;
+    setTags(prev => [...prev, data]);
   };
 
-  const updateTag = (id, updatedTag) => {
-    setTags(prev => prev.map(t => t.id === id ? { ...t, ...updatedTag } : t));
+  const updateTag = async (id, updatedTag) => {
+    const { data, error } = await supabase.from('tags').update(updatedTag).eq('id', id).select().single();
+    if (error) throw error;
+    setTags(prev => prev.map(t => t.id === id ? data : t));
   };
 
-  const deleteTag = (id) => {
+  const deleteTag = async (id) => {
+    const { error } = await supabase.from('tags').delete().eq('id', id);
+    if (error) throw error;
     setTags(prev => prev.filter(t => t.id !== id));
   };
 
-  const addSurveillance = (surveillance) => {
+  const addSurveillance = async (surveillance) => {
     const newSurveillance = {
       ...surveillance,
-      id: Date.now(),
+      user_id: user?.id,
       createdAt: new Date().toISOString(),
       confirmations: surveillance.confirmations || [],
       screenshots: surveillance.screenshots || [],
       customConfirmations: surveillance.customConfirmations || []
     };
-    setSurveillances(prev => [...prev, newSurveillance]);
+    
+    const { data: survData, error: survError } = await supabase.from('surveillances').insert([{
+      user_id: user?.id,
+      pair: surveillance.pair,
+      direction: surveillance.direction,
+      notes: surveillance.notes
+    }]).select().single();
+    
+    if (survError) throw survError;
+    
+    const confs = surveillance.confirmations?.map(c => ({
+      surveillance_id: survData.id,
+      title: c.title,
+      stars: c.stars,
+      checked: c.checked || false
+    })) || [];
+    
+    if (confs.length > 0) {
+      const { error: confError } = await supabase.from('surveillance_confirmations').insert(confs);
+      if (confError) throw confError;
+    }
+    
+    setSurveillances(prev => [...prev, survData]);
+    return survData;
   };
 
-  const updateSurveillance = (id, updatedSurveillance) => {
-    setSurveillances(prev => prev.map(s => s.id === id ? { ...s, ...updatedSurveillance } : s));
+  const updateSurveillance = async (id, updatedSurveillance) => {
+    const { data, error } = await supabase.from('surveillances').update(updatedSurveillance).eq('id', id).select().single();
+    if (error) throw error;
+    setSurveillances(prev => prev.map(s => s.id === id ? data : s));
   };
 
-  const deleteSurveillance = (id) => {
+  const deleteSurveillance = async (id) => {
+    const { error } = await supabase.from('surveillances').delete().eq('id', id);
+    if (error) throw error;
     setSurveillances(prev => prev.filter(s => s.id !== id));
   };
 
-  const updateSettings = (newSettings) => {
-    setSettings(prev => ({ ...prev, ...newSettings }));
+  const updateSettings = async (newSettings) => {
+    if (user) {
+      const { data, error } = await supabase.from('settings').upsert({ 
+        user_id: user.id, 
+        ...newSettings 
+      }).select().single();
+      if (error) throw error;
+      setSettings(prev => ({ ...prev, ...data }));
+    } else {
+      setSettings(prev => ({ ...prev, ...newSettings }));
+    }
   };
 
   const calculateStats = (tradesToCalculate = trades) => {
@@ -508,8 +546,17 @@ export function AppProvider({ children }) {
     theme,
     isLoading,
     accountBalance,
-    toggleLanguage,
-    toggleTheme,
+    user,
+    toggleLanguage: () => {
+      if (user) return;
+      setLanguage(prev => prev === 'fr' ? 'en' : 'fr');
+      localStorage.setItem('protrade_language', language === 'fr' ? 'en' : 'fr');
+    },
+    toggleTheme: () => {
+      if (user) return;
+      setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+      localStorage.setItem('protrade_theme', theme === 'dark' ? 'light' : 'dark');
+    },
     t,
     addTrade,
     updateTrade,

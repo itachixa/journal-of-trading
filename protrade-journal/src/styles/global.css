@@ -38,6 +38,8 @@
   --gradient-success: linear-gradient(135deg, #10b981, #06b6d4);
   --gradient-danger: linear-gradient(135deg, #ef4444, #f97316);
   
+  --gradient-primary-light: linear-gradient(135deg, #2563eb, #7c3aed);
+  
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
@@ -45,6 +47,8 @@
   --shadow-glow: 0 0 30px rgba(59, 130, 246, 0.3);
   --shadow-glow-purple: 0 0 30px rgba(139, 92, 246, 0.3);
   --shadow-glow-cyan: 0 0 30px rgba(6, 182, 212, 0.3);
+  
+  --accent-cyan-glow: rgba(6, 182, 212, 0.4);
   
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
@@ -82,6 +86,15 @@
   --text-secondary: #475569;
   --text-muted: #94a3b8;
   --text-inverse: #ffffff;
+  
+  --success-glow: rgba(16, 185, 129, 0.2);
+  --danger-glow: rgba(239, 68, 68, 0.2);
+  --warning-glow: rgba(245, 158, 11, 0.2);
+  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.2);
+  --shadow-glow-purple: 0 0 20px rgba(139, 92, 246, 0.2);
+  --shadow-glow-cyan: 0 0 20px rgba(6, 182, 212, 0.2);
+  --accent-cyan-glow-light: rgba(6, 182, 212, 0.15);
+  --bg-glass-light-hover: rgba(0, 0, 0, 0.05);
   
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
@@ -160,13 +173,32 @@ input, select, textarea {
   background: var(--text-muted);
 }
 
+/* ====================== LIGHT THEME OVERRIDES ====================== */
+[data-theme="light"] select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23475569' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+}
+
+[data-theme="light"] body::before {
+  background: 
+    radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(6, 182, 212, 0.03) 0%, transparent 50%);
+}
+
+[data-theme="light"] .glass-card:hover {
+  box-shadow: var(--shadow-lg), 0 0 20px rgba(59, 130, 246, 0.15);
+}
+
 /* ====================== DARK THEME DROPDOWNS ====================== */
+[data-theme="dark"] select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+}
+
 select {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   background-color: var(--bg-secondary);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
   background-size: 12px;
@@ -418,9 +450,55 @@ textarea::placeholder {
   animation: shimmer 2s infinite;
 }
 
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+[data-theme="light"] .progress-fill::after {
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
+}
+
+[data-theme="light"] .glass-card:hover {
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+}
+
+/* ====================== LIGHT THEME INPUTS ====================== */
+[data-theme="light"] input[type="text"],
+[data-theme="light"] input[type="number"],
+[data-theme="light"] input[type="email"],
+[data-theme="light"] input[type="password"],
+[data-theme="light"] input[type="date"],
+[data-theme="light"] input[type="datetime-local"],
+[data-theme="light"] textarea {
+  background: var(--bg-glass);
+}
+
+[data-theme="light"] input[type="text"]::placeholder,
+[data-theme="light"] input[type="number"]::placeholder,
+[data-theme="light"] input[type="email"]::placeholder,
+[data-theme="light"] input[type="password"]::placeholder,
+[data-theme="light"] input[type="date"]::placeholder,
+[data-theme="light"] input[type="datetime-local"]::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* ====================== LIGHT THEME TAGS ====================== */
+[data-theme="light"] .tag-pill {
+  color: var(--text-primary);
+}
+
+/* ====================== LIGHT THEME BUTTONS ====================== */
+[data-theme="light"] .btn-take-trade {
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.25);
+}
+
+[data-theme="light"] .btn-take-trade:hover {
+  box-shadow: 0 6px 25px rgba(59, 130, 246, 0.35);
+}
+
+[data-theme="light"] .fab-add-trade {
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3), 0 0 30px rgba(59, 130, 246, 0.2);
+}
+
+[data-theme="light"] .fab-add-trade:hover {
+  box-shadow: 0 6px 30px rgba(139, 92, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.3);
 }
 
 /* ====================== TAG PILLS ====================== */

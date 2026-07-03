@@ -46,9 +46,17 @@
   text-shadow: 0 0 10px var(--success-glow);
 }
 
+[data-theme="light"] .stat-big-value.profit {
+  text-shadow: 0 0 8px var(--success-glow);
+}
+
 .stat-big-value.loss {
   color: var(--danger);
   text-shadow: 0 0 10px var(--danger-glow);
+}
+
+[data-theme="light"] .stat-big-value.loss {
+  text-shadow: 0 0 8px var(--danger-glow);
 }
 
 .charts-row {
