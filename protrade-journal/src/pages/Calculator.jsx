@@ -14,7 +14,7 @@ const PAIRS_FOR_CALC = [
 ];
 
 export default function Calculator() {
-  const { t, settings, calculateLotSize, accountBalance } = useApp();
+  const { t, settings: _settings, calculateLotSize, accountBalance } = useApp();
   const navigate = useNavigate();
 
   const [balance, setBalance] = useState(accountBalance);

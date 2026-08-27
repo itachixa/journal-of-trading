@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
@@ -127,12 +127,15 @@ export default function Surveillance() {
     setFormData(prev => ({ ...prev, conditions: prev.conditions.filter(c => c.id !== conditionId) }));
   };
 
+  const conditionIdRef = useRef(0);
+
   const addTagAsCondition = (tag) => {
     if (formData.conditions.length >= 10) return;
     const exists = formData.conditions.some(c => c.title === tag.name);
     if (exists) return;
+    conditionIdRef.current += 1;
     const condition = {
-      id: Date.now(),
+      id: conditionIdRef.current,
       title: tag.name,
       note: tag.description || '',
       importance: 2,

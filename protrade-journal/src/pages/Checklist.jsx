@@ -25,7 +25,7 @@ const CATEGORIES = [
 ];
 
 export default function Checklist() {
-  const { t } = useApp();
+  const { _t } = useApp();
   const [items, setItems] = useState(DEFAULT_CHECKLIST);
   const [newItemText, setNewItemText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('analysis');
@@ -80,10 +80,6 @@ export default function Checklist() {
 
   const resetChecklist = () => {
     setItems(prev => prev.map(item => ({ ...item, checked: false })));
-  };
-
-  const resetToDefault = () => {
-    setItems(DEFAULT_CHECKLIST);
   };
 
   const getCategoryItems = (categoryKey) => {

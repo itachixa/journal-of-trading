@@ -9,7 +9,7 @@ const TEMP_TRADE_KEY = 'protrade_temp_trade';
 export default function AddTrade() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { t, addTrade, updateTrade, trades, tags, PAIRS, calculateLotSize, settings, accountBalance } = useApp();
+  const { t, addTrade, updateTrade, trades, tags, PAIRS, calculateLotSize, accountBalance } = useApp();
   
   const editId = searchParams.get('id');
   const fromSource = searchParams.get('from');
@@ -104,7 +104,7 @@ export default function AddTrade() {
     if (formData.stopLoss && parseFloat(formData.stopLoss) > 0) {
       setFormData(prev => ({ ...prev, lotSize: calcResult.lotSize || '' }));
     }
-  }, [calculatorData.balance, calculatorData.risk, calculatorData.pair, formData.stopLoss]);
+  }, [calculatorData.balance, calculatorData.risk, calculatorData.pair, formData.stopLoss, calculateLotSize]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
