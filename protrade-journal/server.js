@@ -462,6 +462,8 @@ app.delete('/api/surveillances/:id/screenshots/:screenshotId', authMiddleware, a
 });
 
 // Settings
+const ALLOWED_SETTINGS_COLUMNS = ['initial_capital', 'theme', 'default_risk', 'device', 'currency', 'language'];
+
 app.get('/api/settings', authMiddleware, async (req, res) => {
   const userId = getUserId(req);
   let { data, error } = await supabase
@@ -480,14 +482,23 @@ app.get('/api/settings', authMiddleware, async (req, res) => {
   } else if (error) {
     return res.status(400).json({ error: error.message });
   }
-  res.json(data);
+  res.json(data || {});
 });
 
 app.put('/api/settings', authMiddleware, async (req, res) => {
   const userId = getUserId(req);
+  const updateData = {};
+  for (const key of ALLOWED_SETTINGS_COLUMNS) {
+    if (req.body[key] !== undefined) {
+      updateData[key] = req.body[key];
+    }
+  }
+  if (Object.keys(updateData).length === 0) {
+    return res.status(400).json({ error: 'No valid settings fields provided' });
+  }
   const { data, error } = await supabase
     .from('settings')
-    .update(req.body)
+    .update(updateData)
     .eq('user_id', userId)
     .select()
     .single();
