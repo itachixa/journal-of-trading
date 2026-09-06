@@ -43,6 +43,7 @@ export default function App() {
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/onboarding" element={<OnboardingRoute />} />
           <Route
+            path="/"
             element={
               <ProtectedRoute>
                 <AppProvider>
@@ -51,7 +52,7 @@ export default function App() {
               </ProtectedRoute>
             }
           >
-            <Route path="/" element={<Dashboard />} />
+            <Route index element={<Dashboard />} />
             <Route path="trades" element={<Trades />} />
             <Route path="add-trade" element={<AddTrade />} />
             <Route path="surveillance" element={<Surveillance />} />

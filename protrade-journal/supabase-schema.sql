@@ -17,6 +17,9 @@ create table settings (
   initial_capital numeric default 10000,
   theme text default 'dark',
   default_risk numeric default 2,
+  device text default 'desktop',
+  currency text default 'EUR',
+  language text default 'fr',
   created_at timestamp with time zone default now(),
   updated_at timestamp with time zone default now()
 );

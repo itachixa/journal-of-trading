@@ -57,10 +57,10 @@ export function AppProvider({ children }) {
     const pipValue = pair.includes('JPY') ? 0.01 : 0.0001;
     const pipCount = sl / (pair.includes('JPY') ? 100 : 10000);
     if (!pipCount || !pair) {
-      return { lotSize: 0, riskAmount: riskAmount.toFixed(2), pipValue };
+      return { lotSize: 0, riskAmount: 0, pipValue };
     }
-    const lotSize = (riskAmount / (pipCount * 10)).toFixed(2);
-    return { lotSize: parseFloat(lotSize), riskAmount: riskAmount.toFixed(2), pipValue };
+    const lotSize = parseFloat((riskAmount / (pipCount * 10)).toFixed(2));
+    return { lotSize, riskAmount: parseFloat(riskAmount.toFixed(2)), pipValue };
   }, [settings]);
 
   const t = k => {
@@ -69,6 +69,7 @@ export function AppProvider({ children }) {
         dashboard: 'Tableau de Bord', trades: 'Trades', addTrade: 'Ajouter Trade', calculator: 'Calculateur',
         stats: 'Statistiques', notes: 'Notes', tags: 'Tags', settings: 'Paramètres', capital: 'Capital',
         darkMode: 'Mode Sombre', lightMode: 'Mode Clair', pair: 'Paire', direction: 'Direction',
+        device: 'Appareil', currency: 'Devise',
         lotSize: 'Taille du Lot', stopLoss: 'Stop Loss', takeProfit: 'Take Profit', result: 'Résultat',
         saveTrade: 'Enregistrer', cancel: 'Annuler', delete: 'Supprimer', save: 'Enregistrer', add: 'Ajouter',
         newNote: 'Nouvelle Note', category: 'Catégorie', content: 'Contenu', allCategories: 'Toutes catégories',
@@ -99,6 +100,7 @@ export function AppProvider({ children }) {
         dashboard: 'Dashboard', trades: 'Trades', addTrade: 'Add Trade', calculator: 'Calculator',
         stats: 'Statistics', notes: 'Notes', tags: 'Tags', settings: 'Settings', capital: 'Capital',
         darkMode: 'Dark Mode', lightMode: 'Light Mode', pair: 'Pair', direction: 'Direction',
+        device: 'Device', currency: 'Currency',
         lotSize: 'Lot Size', stopLoss: 'Stop Loss', takeProfit: 'Take Profit', result: 'Result',
         saveTrade: 'Save Trade', cancel: 'Cancel', delete: 'Delete', save: 'Save', add: 'Add',
         newNote: 'New Note', category: 'Category', content: 'Content', allCategories: 'All Categories',
