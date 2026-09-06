@@ -454,3 +454,67 @@
   background: var(--bg-tertiary);
   color: var(--text-primary);
 }
+
+.onboarding-device,
+.onboarding-currency {
+  padding: 0.5rem 0;
+}
+
+.device-options,
+.currency-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.device-card,
+.currency-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: var(--bg-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.device-card:hover,
+.currency-card:hover {
+  border-color: var(--accent);
+}
+
+.device-card.active,
+.currency-card.active {
+  border-color: var(--accent);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.device-icon,
+.currency-flag {
+  font-size: 1.75rem;
+}
+
+.currency-symbol {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  min-width: 40px;
+  text-align: center;
+}
+
+.device-label,
+.currency-label {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.device-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+

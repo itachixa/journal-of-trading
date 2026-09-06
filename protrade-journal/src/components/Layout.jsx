@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, Outlet } from 'react-router-dom';
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -103,7 +103,7 @@ export default function Layout({ children }) {
         </header>
 
         <div className="content-area">
-          {children}
+          <Outlet />
         </div>
       </main>
     </div>

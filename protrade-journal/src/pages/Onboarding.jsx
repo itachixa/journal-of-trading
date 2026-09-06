@@ -6,6 +6,8 @@ import './Onboarding.css';
 
 const STEPS = [
   { id: 'welcome', title: 'Bienvenue', subtitle: 'Configurons votre journal de trading' },
+  { id: 'device', title: 'Appareil', subtitle: 'Comment allez-vous utiliser l\'application ?' },
+  { id: 'currency', title: 'Devise', subtitle: 'Choisissez votre devise principale' },
   { id: 'capital', title: 'Capital Initial', subtitle: 'Définissez votre balance de départ' },
   { id: 'language', title: 'Langue', subtitle: 'Choisissez votre langue préférée' },
   { id: 'theme', title: 'Apparence', subtitle: 'Sélectionnez votre thème' },
@@ -19,6 +21,8 @@ export default function Onboarding() {
   const [language, setLanguage] = useState('fr');
   const [theme, setTheme] = useState('dark');
   const [defaultRisk, setDefaultRisk] = useState(2);
+  const [device, setDevice] = useState('desktop');
+  const [currency, setCurrency] = useState('EUR');
   const { updateSettings, settings } = useApp();
   const { user, completeOnboarding } = useAuth();
   const navigate = useNavigate();
@@ -45,7 +49,9 @@ export default function Onboarding() {
       initialCapital: capital,
       theme,
       defaultRisk,
-      language
+      language,
+      device,
+      currency
     });
   };
 
@@ -124,9 +130,59 @@ export default function Onboarding() {
             )}
 
             {currentStep === 1 && (
+              <div className="onboarding-device">
+                <div className="device-options">
+                  {[
+                    { id: 'mobile', label: 'Mobile', icon: '📱', desc: 'Smartphone / Petite tablette' },
+                    { id: 'tablet', label: 'Tablette', icon: '📲', desc: 'iPad / Tablette Android' },
+                    { id: 'desktop', label: 'Desktop', icon: '🖥️', desc: 'Ordinateur / MacBook' }
+                  ].map(d => (
+                    <button
+                      key={d.id}
+                      className={`device-card ${device === d.id ? 'active' : ''}`}
+                      onClick={() => setDevice(d.id)}
+                    >
+                      <span className="device-icon">{d.icon}</span>
+                      <span className="device-label">{d.label}</span>
+                      <span className="device-desc">{d.desc}</span>
+                      {device === d.id && <span className="check-icon">✓</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {currentStep === 2 && (
+              <div className="onboarding-currency">
+                <div className="currency-options">
+                  {[
+                    { code: 'USD', symbol: '$', label: 'Dollar US', flag: '🇺🇸' },
+                    { code: 'EUR', symbol: '€', label: 'Euro', flag: '🇪🇺' },
+                    { code: 'GBP', symbol: '£', label: 'Livre Sterling', flag: '🇬🇧' },
+                    { code: 'CHF', symbol: 'Fr', label: 'Franc Suisse', flag: '🇨🇭' },
+                    { code: 'CAD', symbol: 'C$', label: 'Dollar Canadien', flag: '🇨🇦' },
+                    { code: 'AUD', symbol: 'A$', label: 'Dollar Australien', flag: '🇦🇺' },
+                    { code: 'JPY', symbol: '¥', label: 'Yen Japonais', flag: '🇯🇵' }
+                  ].map(c => (
+                    <button
+                      key={c.code}
+                      className={`currency-card ${currency === c.code ? 'active' : ''}`}
+                      onClick={() => setCurrency(c.code)}
+                    >
+                      <span className="currency-flag">{c.flag}</span>
+                      <span className="currency-symbol">{c.symbol}</span>
+                      <span className="currency-label">{c.label}</span>
+                      {currency === c.code && <span className="check-icon">✓</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {currentStep === 3 && (
               <div className="onboarding-capital">
                 <div className="capital-display">
-                  <span className="currency">€</span>
+                  <span className="currency">{currency === 'USD' ? '$' : currency === 'GBP' ? '£' : currency === 'JPY' ? '¥' : currency === 'CHF' ? 'Fr' : currency === 'CAD' ? 'C$' : currency === 'AUD' ? 'A$' : '€'}</span>
                   <span className="amount">{capital.toLocaleString()}</span>
                 </div>
                 <input
@@ -145,7 +201,7 @@ export default function Onboarding() {
                       className={`preset-btn ${capital === preset ? 'active' : ''}`}
                       onClick={() => setCapital(preset)}
                     >
-                      {preset >= 1000 ? `${preset / 1000}k` : preset}€
+                      {preset >= 1000 ? `${preset / 1000}k` : preset}{currency === 'USD' ? '$' : currency === 'GBP' ? '£' : currency === 'JPY' ? '¥' : '€'}
                     </button>
                   ))}
                 </div>
@@ -153,7 +209,7 @@ export default function Onboarding() {
               </div>
             )}
 
-            {currentStep === 2 && (
+            {currentStep === 4 && (
               <div className="onboarding-language">
                 <div className="language-options">
                   {[
@@ -174,7 +230,7 @@ export default function Onboarding() {
               </div>
             )}
 
-            {currentStep === 3 && (
+            {currentStep === 5 && (
               <div className="onboarding-theme">
                 <div className="theme-options">
                   {[
@@ -196,7 +252,7 @@ export default function Onboarding() {
               </div>
             )}
 
-            {currentStep === 4 && (
+            {currentStep === 6 && (
               <div className="onboarding-risk">
                 <div className="risk-display">
                   <span className="risk-value">{defaultRisk}%</span>
@@ -228,15 +284,23 @@ export default function Onboarding() {
               </div>
             )}
 
-            {currentStep === 5 && (
+            {currentStep === 7 && (
               <div className="onboarding-complete">
                 <div className="complete-icon">🚀</div>
                 <h3>Tout est prêt !</h3>
                 <p>Votre journal de trading est configuré. Vous pouvez commencer à enregistrer vos trades immédiatement.</p>
                 <div className="complete-summary">
                   <div className="summary-item">
+                    <span className="summary-label">Appareil</span>
+                    <span className="summary-value">{device === 'mobile' ? '📱 Mobile' : device === 'tablet' ? '📲 Tablette' : '🖥️ Desktop'}</span>
+                  </div>
+                  <div className="summary-item">
+                    <span className="summary-label">Devise</span>
+                    <span className="summary-value">{currency}</span>
+                  </div>
+                  <div className="summary-item">
                     <span className="summary-label">Capital</span>
-                    <span className="summary-value">{capital.toLocaleString()}€</span>
+                    <span className="summary-value">{capital.toLocaleString()}{currency === 'USD' ? '$' : currency === 'GBP' ? '£' : currency === 'JPY' ? '¥' : '€'}</span>
                   </div>
                   <div className="summary-item">
                     <span className="summary-label">Langue</span>
