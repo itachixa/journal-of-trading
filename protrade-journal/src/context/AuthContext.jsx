@@ -56,6 +56,29 @@ export function AuthProvider({ children }) {
     return { user: data.user };
   };
 
+  const handleCallback = async () => {
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+      setUser(session?.user || null);
+      if (session?.access_token) {
+        api.setToken(session.access_token);
+      }
+    } catch (e) {
+      console.error('Auth callback error:', e);
+    }
+    setLoading(false);
+  };
+
+  const completeOnboarding = () => {
+    localStorage.setItem('protrade_onboarding_completed', 'true');
+  };
+
+  const hasCompletedOnboarding = () => {
+    return localStorage.getItem('protrade_onboarding_completed') === 'true';
+  };
+
   const signIn = async (email, password) => {
     setError(null);
     setMessage(null);
@@ -110,7 +133,7 @@ export function AuthProvider({ children }) {
 
   const value = {
     user, session, loading, error, message,
-    signUp, signIn, signOut, resetPassword, updatePassword,
+    signUp, signIn, signOut, resetPassword, updatePassword, handleCallback, completeOnboarding, hasCompletedOnboarding,
     setError, setMessage
   };
 

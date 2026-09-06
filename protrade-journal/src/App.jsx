@@ -14,12 +14,14 @@ import Notes from './pages/Notes';
 import Tags from './pages/Tags';
 import Settings from './pages/Settings';
 import Auth from './pages/Auth';
+import Onboarding from './pages/Onboarding';
 import './styles/global.css';
 
 function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth();
+  const { user, loading, hasCompletedOnboarding } = useAuth();
   if (loading) return <div className="loading-screen">Chargement...</div>;
   if (!user) return <Navigate to="/login" replace />;
+  if (!hasCompletedOnboarding()) return <Navigate to="/onboarding" replace />;
   return children;
 }
 
@@ -39,6 +41,7 @@ export default function App() {
           <Route path="/signup" element={<PublicRoute><Auth /></PublicRoute>} />
           <Route path="/auth/reset-password" element={<PublicRoute><Auth /></PublicRoute>} />
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/onboarding" element={<OnboardingRoute />} />
           <Route
             path="/"
             element={
@@ -70,9 +73,20 @@ export default function App() {
 }
 
 function AuthCallback() {
-  const { setMessage } = useAuth();
+  const { handleCallback } = useAuth();
   useEffect(() => {
-    setMessage('Connexion réussie !');
-  }, [setMessage]);
-  return <Navigate to="/" replace />;
+    handleCallback();
+  }, [handleCallback]);
+  return <div className="loading-screen">Vérification en cours...</div>;
+}
+
+function OnboardingRoute() {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="loading-screen">Chargement...</div>;
+  if (!user) return <Navigate to="/login" replace />;
+  return (
+    <AppProvider>
+      <Onboarding />
+    </AppProvider>
+  );
 }
