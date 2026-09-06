@@ -487,10 +487,18 @@ app.get('/api/settings', authMiddleware, async (req, res) => {
 
 app.put('/api/settings', authMiddleware, async (req, res) => {
   const userId = getUserId(req);
+  const camelToSnake = {
+    initialCapital: 'initial_capital',
+    defaultRisk: 'default_risk',
+    device: 'device',
+    currency: 'currency',
+    language: 'language',
+    theme: 'theme'
+  };
   const updateData = {};
-  for (const key of ALLOWED_SETTINGS_COLUMNS) {
+  for (const key of Object.keys(camelToSnake)) {
     if (req.body[key] !== undefined) {
-      updateData[key] = req.body[key];
+      updateData[camelToSnake[key]] = req.body[key];
     }
   }
   if (Object.keys(updateData).length === 0) {
