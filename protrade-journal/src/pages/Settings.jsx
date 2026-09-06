@@ -4,21 +4,22 @@ import { useApp } from '../context/AppContext';
 import './Settings.css';
 
 export default function Settings() {
-  const { t, settings, updateSettings } = useApp();
+  const { t, settings, trades, notes, tags, surveillances, updateSettings } = useApp();
   const [capital, setCapital] = useState(settings.initialCapital || 10000);
 
   const handleSaveCapital = () => {
     updateSettings({ initialCapital: capital });
-    alert(t('save') + '!');
+    alert(t('save') + ' !');
   };
 
   const handleExportData = () => {
     const data = {
-      trades: JSON.parse(localStorage.getItem('protrade_trades') || '[]'),
-      settings: JSON.parse(localStorage.getItem('protrade_settings') || '{}'),
-      notes: JSON.parse(localStorage.getItem('protrade_notes') || '[]'),
-      tags: JSON.parse(localStorage.getItem('protrade_tags') || '[]'),
-      surveillance: JSON.parse(localStorage.getItem('protrade_surveillance') || '[]')
+      trades,
+      settings,
+      notes,
+      tags,
+      surveillances,
+      exportedAt: new Date().toISOString()
     };
 
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -27,11 +28,16 @@ export default function Settings() {
     a.href = url;
     a.download = `protrade_backup_${new Date().toISOString().split('T')[0]}.json`;
     a.click();
+    URL.revokeObjectURL(url);
   };
 
   const handleClearAllData = () => {
-    if (window.confirm('Êtes-vous sûr de vouloir effacer toutes les données? Cette action est irréversible.')) {
-      localStorage.clear();
+    if (window.confirm('Êtes-vous sûr de vouloir effacer toutes les données ? Cette action est irréversible.')) {
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('protrade_')) {
+          localStorage.removeItem(key);
+        }
+      });
       window.location.reload();
     }
   };

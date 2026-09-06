@@ -50,15 +50,18 @@ export function AppProvider({ children }) {
     [settings.initialCapital, trades]
   );
 
-  const calculateLotSize = useCallback(({ pair, _direction, stopLoss, takeProfit }) => {
-    const risk = settings.defaultRisk || 2;
-    const riskAmount = (accountBalance * risk) / 100;
-    const sl = Math.abs(parseFloat(stopLoss) - parseFloat(takeProfit));
-    const _pipValue = pair.includes('JPY') ? 0.01 : 0.0001;
+  const calculateLotSize = useCallback((balance, riskPercent, stopLoss, pair) => {
+    const risk = riskPercent || settings.defaultRisk || 2;
+    const riskAmount = (balance * risk) / 100;
+    const sl = Math.abs(parseFloat(stopLoss) || 0);
+    const pipValue = pair.includes('JPY') ? 0.01 : 0.0001;
     const pipCount = sl / (pair.includes('JPY') ? 100 : 10000);
-    if (!pipCount) return 0;
-    return (riskAmount / (pipCount * 10)).toFixed(2);
-  }, [settings, accountBalance]);
+    if (!pipCount || !pair) {
+      return { lotSize: 0, riskAmount: riskAmount.toFixed(2), pipValue };
+    }
+    const lotSize = (riskAmount / (pipCount * 10)).toFixed(2);
+    return { lotSize: parseFloat(lotSize), riskAmount: riskAmount.toFixed(2), pipValue };
+  }, [settings]);
 
   const t = k => {
     const dict = {
@@ -149,15 +152,20 @@ export function AppProvider({ children }) {
     updateSurveillance: async (id, survData) => { const r = await api.updateSurveillance(id, survData); setSurveillances(p => p.map(x => x.id === id ? r : x)); },
     deleteSurveillance: async (id) => { await api.deleteSurveillance(id); setSurveillances(p => p.filter(x => x.id !== id)); },
     calculateStats: (ts = trades) => {
-      if (ts.length === 0) return { totalTrades: 0, wins: 0, losses: 0, winrate: 0, totalProfit: 0, profitFactor: 0 };
+      if (ts.length === 0) return { totalTrades: 0, wins: 0, losses: 0, winrate: 0, totalProfit: 0, profitFactor: 0, maxWin: 0, maxLoss: 0 };
       const wins = ts.filter(t => t.result > 0);
+      const losses = ts.filter(t => t.result < 0);
       const gp = wins.reduce((s, t) => s + t.result, 0);
-      const gl = Math.abs(ts.filter(t => t.result < 0).reduce((s, t) => s + t.result, 0));
+      const gl = Math.abs(losses.reduce((s, t) => s + t.result, 0));
+      const maxWin = wins.length > 0 ? Math.max(...wins.map(t => t.result)) : 0;
+      const maxLoss = losses.length > 0 ? Math.min(...losses.map(t => t.result)) : 0;
       return {
         totalTrades: ts.length, wins: wins.length, losses: ts.length - wins.length,
         winrate: ((wins.length / ts.length) * 100).toFixed(1),
         totalProfit: ts.reduce((s, t) => s + t.result, 0).toFixed(2),
-        profitFactor: gl > 0 ? (gp / gl).toFixed(2) : 'inf'
+        profitFactor: gl > 0 ? (gp / gl).toFixed(2) : 'inf',
+        maxWin: maxWin.toFixed(2),
+        maxLoss: maxLoss.toFixed(2)
       };
     }
   };

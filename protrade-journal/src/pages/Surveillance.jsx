@@ -127,6 +127,13 @@ export default function Surveillance() {
     setFormData(prev => ({ ...prev, conditions: prev.conditions.filter(c => c.id !== conditionId) }));
   };
 
+  const toggleCondition = (conditionId) => {
+    setFormData(prev => ({
+      ...prev,
+      conditions: prev.conditions.map(c => c.id === conditionId ? { ...c, checked: !c.checked } : c)
+    }));
+  };
+
   const conditionIdRef = useRef(0);
 
   const addTagAsCondition = (tag) => {
@@ -233,7 +240,7 @@ export default function Surveillance() {
                   {formData.conditions.map(condition => (
                     <motion.div key={condition.id} className="condition-item" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
                       <label className="condition-checkbox">
-                        <input type="checkbox" checked={condition.checked || false} onChange={() => {}} />
+                        <input type="checkbox" checked={condition.checked || false} onChange={() => toggleCondition(condition.id)} />
                         <span className="checkmark">{condition.checked ? '✓' : ''}</span>
                       </label>
                       <div className="condition-content">
