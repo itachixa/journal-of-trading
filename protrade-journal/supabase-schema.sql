@@ -139,6 +139,7 @@ create policy "Users can manage confirmations of their surveillances" on surveil
 
 create policy "Users can view screenshots of their surveillances" on surveillance_screenshots for select using (
   exists (select 1 from surveillances where surveillances.id = surveillance_screenshots.surveillance_id and surveillances.user_id = auth.uid())
+);
 create policy "Users can manage screenshots of their surveillances" on surveillance_screenshots for all using (
   exists (select 1 from surveillances where surveillances.id = surveillance_screenshots.surveillance_id and surveillances.user_id = auth.uid())
 );
