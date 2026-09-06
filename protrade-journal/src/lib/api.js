@@ -34,6 +34,18 @@ class ApiClient {
 
   async request(endpoint, options = {}) {
     const headers = { 'Content-Type': 'application/json' }
+    
+    if (!this.token && supabase) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.access_token) {
+          this.token = session.access_token
+        }
+      } catch {
+        // session check failed, will proceed without token
+      }
+    }
+    
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`
     }
