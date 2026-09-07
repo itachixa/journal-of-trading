@@ -2,16 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
+import PairSelector from '../components/PairSelector';
 import './Calculator.css';
 
-const PAIRS_FOR_CALC = [
-  { value: 'XAUUSD', label: 'XAUUSD' },
-  { value: 'EURUSD', label: 'EURUSD' },
-  { value: 'GBPUSD', label: 'GBPUSD' },
-  { value: 'USDJPY', label: 'USDJPY' },
-  { value: 'BTCUSD', label: 'BTCUSD' },
-  { value: 'ETHUSD', label: 'ETHUSD' }
-];
+const PAIRS_FOR_CALC = ['XAUUSD', 'EURUSD', 'GBPUSD', 'USDJPY', 'BTCUSD', 'ETHUSD'];
 
 export default function Calculator() {
   const { t, settings: _settings, calculateLotSize, accountBalance } = useApp();
@@ -119,14 +113,7 @@ export default function Calculator() {
             
             <div className="form-group">
               <label>{t('pair')}</label>
-              <select 
-                value={pair} 
-                onChange={(e) => setPair(e.target.value)}
-              >
-                {PAIRS_FOR_CALC.map(p => (
-                  <option key={p.value} value={p.value}>{p.label}</option>
-                ))}
-              </select>
+              <PairSelector value={pair} onChange={setPair} pairs={PAIRS_FOR_CALC} />
             </div>
 
             <div className="form-row">

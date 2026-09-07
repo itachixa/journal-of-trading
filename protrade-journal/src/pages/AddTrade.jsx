@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
+import PairSelector from '../components/PairSelector';
 import './AddTrade.css';
 
 const TEMP_TRADE_KEY = 'protrade_temp_trade';
@@ -249,15 +250,7 @@ export default function AddTrade() {
               </div>
               <div className="form-group">
                 <label>Paire</label>
-                <select 
-                  name="pair"
-                  value={calculatorData.pair}
-                  onChange={handleCalculatorChange}
-                >
-                  {PAIRS.map(pair => (
-                    <option key={pair.value} value={pair.value}>{pair.label}</option>
-                  ))}
-                </select>
+                <PairSelector value={calculatorData.pair} onChange={(pair) => setCalculatorData(prev => ({ ...prev, pair }))} />
               </div>
               <div className="form-group">
                 <label>Stop Loss (pips)</label>
@@ -321,17 +314,12 @@ export default function AddTrade() {
 
               <div className="form-group">
                 <label>{t('pair')}</label>
-                <select 
-                  name="pair"
-                  value={formData.pair}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Sélectionner...</option>
-                  {PAIRS.map(pair => (
-                    <option key={pair.value} value={pair.value}>{pair.label}</option>
-                  ))}
-                </select>
+                <PairSelector value={formData.pair} onChange={(pair) => setFormData(prev => ({ ...prev, pair }))} />
+                {!formData.pair && (
+                  <div className="pair-warning">
+                    ⚠️ Pair is required - please select a trading pair
+                  </div>
+                )}
               </div>
 
               <div className="form-group">

@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaPlus, FaTrash, FaEdit } from 'react-icons/fa';
 import { useApp } from '../context/AppContext';
+import PairSelector from '../components/PairSelector';
 import './Notes.css';
 
 const CATEGORIES = ['analysis', 'journal', 'mistakes'];
@@ -75,16 +76,10 @@ export default function Notes() {
       </div>
 
       <div className="notes-filters">
-        <select 
-          value={filters.pair}
-          onChange={(e) => setFilters(f => ({ ...f, pair: e.target.value }))}
-        >
-          <option value="">{t('allPairs')}</option>
-          {PAIRS.map(p => (
-            <option key={p.value} value={p.value}>{p.label}</option>
-          ))}
-        </select>
-
+        <PairSelector 
+          value={filters.pair} 
+          onChange={(pair) => setFilters(f => ({ ...f, pair }))} 
+        />
         <select 
           value={filters.category}
           onChange={(e) => setFilters(f => ({ ...f, category: e.target.value }))}
@@ -117,14 +112,7 @@ export default function Notes() {
               <div className="form-row">
                 <div className="form-group">
                   <label>{t('pair')}</label>
-                  <select 
-                    value={formData.pair}
-                    onChange={(e) => setFormData(f => ({ ...f, pair: e.target.value }))}
-                  >
-                    {PAIRS.map(p => (
-                      <option key={p.value} value={p.value}>{p.label}</option>
-                    ))}
-                  </select>
+                  <PairSelector value={formData.pair} onChange={(pair) => setFormData(f => ({ ...f, pair }))} />
                 </div>
 
                 <div className="form-group">

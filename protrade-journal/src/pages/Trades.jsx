@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaThLarge, FaList, FaDownload, FaTrash, FaEdit, FaSearch, FaFilter } from 'react-icons/fa';
 import { useApp } from '../context/AppContext';
+import PairSelector from '../components/PairSelector';
 import './Trades.css';
 
 export default function Trades() {
@@ -113,15 +114,10 @@ export default function Trades() {
           />
         </div>
 
-        <select 
-          value={filters.pair}
-          onChange={(e) => setFilters(f => ({ ...f, pair: e.target.value }))}
-        >
-          <option value="">{t('allPairs')}</option>
-          {PAIRS.map(pair => (
-            <option key={pair.value} value={pair.value}>{pair.label}</option>
-          ))}
-        </select>
+        <PairSelector 
+          value={filters.pair} 
+          onChange={(pair) => setFilters(f => ({ ...f, pair }))} 
+        />
 
         <select 
           value={filters.type}

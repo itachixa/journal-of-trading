@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import PairSelector from '../components/PairSelector';
 import './Surveillance.css';
 
 const DIRECTIONS = ['Buy', 'Sell'];
@@ -213,9 +214,7 @@ export default function Surveillance() {
               <div className="form-row">
                 <div className="form-group">
                   <label>{t('pair')}</label>
-                  <select value={formData.pair} onChange={(e) => setFormData(f => ({ ...f, pair: e.target.value }))}>
-                    {SETUP_PAIRS.map(p => <option key={p} value={p}>{p}</option>)}
-                  </select>
+                  <PairSelector value={formData.pair} onChange={(pair) => setFormData(f => ({ ...f, pair }))} pairs={SETUP_PAIRS} />
                 </div>
                 <div className="form-group">
                   <label>{t('direction')}</label>
