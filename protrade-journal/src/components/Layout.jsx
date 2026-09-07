@@ -7,7 +7,7 @@ import {
   FaThLarge, FaList, FaEye, FaPlusCircle, FaCalculator, 
   FaChartPie, FaCheckSquare, FaStickyNote, FaTags, FaCog,
   FaSignOutAlt, FaGlobe, FaMoon, FaSun, FaBars, FaTimes,
-  FaChartLine
+  FaChartLine, FaShieldAlt
 } from 'react-icons/fa';
 import './Layout.css';
 
@@ -21,6 +21,7 @@ const navItems = [
   { path: '/checklist', icon: FaCheckSquare, labelKey: 'checklist' },
   { path: '/notes', icon: FaStickyNote, labelKey: 'notes' },
   { path: '/tags', icon: FaTags, labelKey: 'tags' },
+  { path: '/risk', icon: FaShieldAlt, labelKey: 'risk' },
   { path: '/settings', icon: FaCog, labelKey: 'settings' }
 ];
 
@@ -30,6 +31,8 @@ export default function Layout({ children }) {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+
+  const currencySymbol = settings.currency === 'USD' ? '$' : settings.currency === 'GBP' ? '£' : settings.currency === 'JPY' ? '¥' : settings.currency === 'CHF' ? 'Fr' : settings.currency === 'CAD' ? 'C$' : settings.currency === 'AUD' ? 'A$' : '€';
 
   const handleLogout = async () => {
     await signOut();
@@ -107,9 +110,9 @@ export default function Layout({ children }) {
             <div className="capital-display">
               <span className="capital-label">{t('balance') || 'Balance'}</span>
               <span className={`capital-value ${accountBalance >= settings.initialCapital ? 'positive' : accountBalance < settings.initialCapital ? 'negative' : ''}`}>
-                ${accountBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {currencySymbol}{accountBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
-              <span className="initial-capital">(${settings.initialCapital?.toLocaleString() || '10,000'} initial)</span>
+              <span className="initial-capital">({currencySymbol}{settings.initialCapital?.toLocaleString() || '10,000'} initial)</span>
             </div>
           </div>
         </header>

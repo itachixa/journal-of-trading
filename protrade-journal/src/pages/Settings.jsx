@@ -4,7 +4,7 @@ import { useApp } from '../context/AppContext';
 import './Settings.css';
 
 export default function Settings() {
-  const { t, settings, updateSettings } = useApp();
+  const { t, settings, updateSettings, trades, notes, tags, surveillances, deleteTrade, deleteNote, deleteTag, deleteSurveillance } = useApp();
   const [capital, setCapital] = useState(settings.initialCapital || 10000);
   const [theme, setTheme] = useState(settings.theme || 'dark');
   const [defaultRisk, setDefaultRisk] = useState(settings.defaultRisk || 2);
@@ -12,15 +12,17 @@ export default function Settings() {
   const [currency, setCurrency] = useState(settings.currency || 'EUR');
   const [language, setLanguage] = useState(settings.language || 'fr');
   const [saved, setSaved] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   useEffect(() => {
-    if (settings.initialCapital) setCapital(settings.initialCapital);
-    if (settings.theme) setTheme(settings.theme);
-    if (settings.defaultRisk) setDefaultRisk(settings.defaultRisk);
-    if (settings.device) setDevice(settings.device);
-    if (settings.currency) setCurrency(settings.currency);
-    if (settings.language) setLanguage(settings.language);
-  }, [settings]);
+    setCapital(settings.initialCapital || 10000);
+    setTheme(settings.theme || 'dark');
+    setDefaultRisk(settings.defaultRisk || 2);
+    setDevice(settings.device || 'desktop');
+    setCurrency(settings.currency || 'EUR');
+    setLanguage(settings.language || 'fr');
+  }, [settings.initialCapital, settings.theme, settings.defaultRisk, settings.device, settings.currency, settings.language]);
 
   const handleSave = async () => {
     await updateSettings({
@@ -35,33 +37,50 @@ export default function Settings() {
     setTimeout(() => setSaved(false), 3000);
   };
 
-  const handleExportData = () => {
-    const data = {
-      trades: JSON.parse(localStorage.getItem('protrade_trades') || '[]'),
-      settings,
-      notes: JSON.parse(localStorage.getItem('protrade_notes') || '[]'),
-      tags: JSON.parse(localStorage.getItem('protrade_tags') || '[]'),
-      surveillance: JSON.parse(localStorage.getItem('protrade_surveillance') || '[]'),
-      exportedAt: new Date().toISOString()
-    };
+  const handleExportData = async () => {
+    setExporting(true);
+    try {
+      const data = {
+        trades: trades || [],
+        settings: settings || {},
+        notes: notes || [],
+        tags: tags || [],
+        surveillance: surveillances || [],
+        exportedAt: new Date().toISOString()
+      };
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `protrade_backup_${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `protrade_backup_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Export failed:', e);
+    } finally {
+      setExporting(false);
+    }
   };
 
-  const handleClearAllData = () => {
-    if (window.confirm('Êtes-vous sûr de vouloir effacer toutes les données ? Cette action est irréversible.')) {
-      Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('protrade_')) {
-          localStorage.removeItem(key);
-        }
-      });
+  const handleClearAllData = async () => {
+    if (!window.confirm('Êtes-vous sûr de vouloir effacer toutes vos données ? Cette action est irréversible.')) {
+      return;
+    }
+    setClearing(true);
+    try {
+      await Promise.all([
+        ...trades.map(t => deleteTrade(t.id)),
+        ...notes.map(n => deleteNote(n.id)),
+        ...tags.map(tg => deleteTag(tg.id)),
+        ...surveillances.map(s => deleteSurveillance(s.id))
+      ]);
       window.location.reload();
+    } catch (e) {
+      console.error('Clear all data failed:', e);
+      setClearing(false);
     }
   };
 
@@ -208,8 +227,8 @@ export default function Settings() {
           <p className="settings-description">
             Exporter toutes vos données au format JSON
           </p>
-          <button className="btn-secondary" onClick={handleExportData}>
-            {t('exportAll')}
+          <button className="btn-secondary" onClick={handleExportData} disabled={exporting}>
+            {exporting ? 'Exportation...' : t('exportAll')}
           </button>
         </div>
 
@@ -218,8 +237,8 @@ export default function Settings() {
           <p className="settings-description">
             Cette action supprimera définitivement toutes vos données
           </p>
-          <button className="btn-danger" onClick={handleClearAllData}>
-            {t('clearAllData')}
+          <button className="btn-danger" onClick={handleClearAllData} disabled={clearing}>
+            {clearing ? 'Suppression...' : t('clearAllData')}
           </button>
         </div>
       </div>

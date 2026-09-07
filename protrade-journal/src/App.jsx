@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Trades from './pages/Trades';
+import TradeDetail from './pages/TradeDetail';
 import AddTrade from './pages/AddTrade';
 import Surveillance from './pages/Surveillance';
 import Calculator from './pages/Calculator';
@@ -12,6 +13,8 @@ import Stats from './pages/Stats';
 import Checklist from './pages/Checklist';
 import Notes from './pages/Notes';
 import Tags from './pages/Tags';
+import RiskManagement from './pages/RiskManagement';
+import Psychology from './pages/Psychology';
 import Settings from './pages/Settings';
 import Auth from './pages/Auth';
 import Onboarding from './pages/Onboarding';
@@ -54,6 +57,7 @@ export default function App() {
           >
             <Route index element={<Dashboard />} />
             <Route path="trades" element={<Trades />} />
+            <Route path="trades/:id" element={<TradeDetail />} />
             <Route path="add-trade" element={<AddTrade />} />
             <Route path="surveillance" element={<Surveillance />} />
             <Route path="calculator" element={<Calculator />} />
@@ -61,6 +65,8 @@ export default function App() {
             <Route path="checklist" element={<Checklist />} />
             <Route path="notes" element={<Notes />} />
             <Route path="tags" element={<Tags />} />
+            <Route path="risk" element={<RiskManagement />} />
+            <Route path="psychology" element={<Psychology />} />
             <Route path="settings" element={<Settings />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
@@ -72,13 +78,14 @@ export default function App() {
 
 function AuthCallback() {
   const { handleCallback, hasCompletedOnboarding } = useAuth();
+  const navigate = useNavigate();
   const target = hasCompletedOnboarding() ? '/' : '/onboarding';
 
   useEffect(() => {
     handleCallback().then(() => {
-      window.location.replace(target);
+      navigate(target, { replace: true });
     });
-  }, [handleCallback, target]);
+  }, [handleCallback, navigate, target]);
 
   return (
     <div className="loading-screen">

@@ -1,0 +1,237 @@
+.trade-detail-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.trade-detail-page .page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.trade-detail-page .header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.trade-detail-page .header-left h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.trade-detail-page .header-actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.trade-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: var(--space-lg);
+}
+
+.trade-detail-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.trade-detail-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.detail-card {
+  background: var(--bg-card);
+  border: 1px solid var(--bg-glass-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+}
+
+.detail-card h3 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 var(--space-md) 0;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 1rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.detail-value.pair {
+  color: var(--accent-cyan);
+}
+
+.detail-value.direction.buy {
+  color: var(--success);
+}
+
+.detail-value.direction.sell {
+  color: var(--danger);
+}
+
+.result-card {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(139, 92, 246, 0.04));
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.result-display {
+  text-align: center;
+  padding: var(--space-lg) 0;
+}
+
+.result-big {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: var(--space-sm);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.result-big.positive {
+  color: var(--success);
+  text-shadow: 0 0 20px var(--success-glow);
+}
+
+.result-big.negative {
+  color: var(--danger);
+  text-shadow: 0 0 20px var(--danger-glow);
+}
+
+.result-meta {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-xl);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.detail-comment {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+.detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.screenshot-container {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--bg-glass-border);
+}
+
+.screenshot-container img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.no-screenshot {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: var(--space-xl);
+}
+
+.stats-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--bg-glass-border);
+  font-size: 0.9rem;
+}
+
+.stat-row:last-child {
+  border-bottom: none;
+}
+
+.stat-row span:first-child {
+  color: var(--text-secondary);
+}
+
+.font-mono {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-weight: 600;
+}
+
+@media (max-width: 1024px) {
+  .trade-detail-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .trade-detail-sidebar {
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .trade-detail-page .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .trade-detail-page .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  
+  .trade-detail-page .header-actions button {
+    flex: 1;
+    min-width: 120px;
+  }
+  
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .result-meta {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+  
+  .result-big {
+    font-size: 2rem;
+  }
+}

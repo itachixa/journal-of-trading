@@ -7,9 +7,9 @@ export const PAIRS = ['EURUSD','GBPUSD','USDJPY','USDCHF','AUDUSD','USDCAD','NZD
 export const SETUP_PAIRS = ['EURUSD','GBPUSD','USDJPY','GBPJPY','AUDUSD','USDCAD'];
 
 const DEFAULT_TAGS = [
-  { name: 'BOS', color: '#3b82f6' },
-  { name: 'FVG', color: '#8b5cf6' },
-  { name: 'Liquidity Grab', color: '#ef4444' }
+  { id: 'tag-1', name: 'BOS', color: '#3b82f6' },
+  { id: 'tag-2', name: 'FVG', color: '#8b5cf6' },
+  { id: 'tag-3', name: 'Liquidity Grab', color: '#ef4444' }
 ];
 
 const DEFAULT_SETTINGS = { initialCapital: 10000, theme: 'dark', defaultRisk: 2 };
@@ -29,7 +29,7 @@ export function AppProvider({ children }) {
       const [tradesRes, notesRes, tagsRes, survRes, settingsRes] = await Promise.all([
         api.getTrades(), api.getNotes(), api.getTags(), api.getSurveillances(), api.getSettings()
       ]);
-      setTrades(tradesRes);
+      setTrades(tradesRes || []);
       setNotes(notesRes || []);
       setTags(tagsRes.length > 0 ? tagsRes : DEFAULT_TAGS);
       setSurveillances(survRes || []);
@@ -42,25 +42,20 @@ export function AppProvider({ children }) {
           currency: settingsRes.currency || 'EUR',
           language: settingsRes.language || 'fr'
         });
-        if (settingsRes.language) {
-          setLanguage(settingsRes.language);
-          localStorage.setItem('protrade_language', settingsRes.language);
-        }
-        if (settingsRes.theme) {
-          setTheme(settingsRes.theme);
-          localStorage.setItem('protrade_theme', settingsRes.theme);
-        }
       }
     } catch (e) { console.error(e); }
     setIsLoading(false);
   };
 
   const loadPrefs = () => {
-    setLanguage(localStorage.getItem('protrade_language') || 'fr');
-    setTheme(localStorage.getItem('protrade_theme') || 'dark');
+    const lang = localStorage.getItem('protrade_language') || 'fr';
+    const thm = localStorage.getItem('protrade_theme') || 'dark';
+    setLanguage(lang);
+    setTheme(thm);
   };
 
-  useEffect(() => { loadData(); loadPrefs(); }, []);
+  useEffect(() => { loadPrefs(); }, []);
+  useEffect(() => { loadData(); }, []);
   useEffect(() => { document.documentElement.setAttribute('data-theme', theme); }, [theme]);
 
   const accountBalance = useMemo(() =>
@@ -68,17 +63,28 @@ export function AppProvider({ children }) {
     [settings.initialCapital, trades]
   );
 
-  const calculateLotSize = useCallback((balance, riskPercent, stopLoss, pair) => {
+  const calculateLotSize = useCallback((balance, riskPercent, stopLossPips, pair) => {
     const risk = riskPercent || settings.defaultRisk || 2;
     const riskAmount = (balance * risk) / 100;
-    const sl = Math.abs(parseFloat(stopLoss) || 0);
-    const pipValue = pair.includes('JPY') ? 0.01 : 0.0001;
-    const pipCount = sl / (pair.includes('JPY') ? 100 : 10000);
-    if (!pipCount || !pair) {
-      return { lotSize: 0, riskAmount: 0, pipValue };
+    const slPips = Math.abs(parseFloat(stopLossPips) || 0);
+
+    if (!slPips || !pair || !balance) {
+      return { lotSize: 0, riskAmount: 0, pipValue: 0 };
     }
-    const lotSize = parseFloat((riskAmount / (pipCount * 10)).toFixed(2));
-    return { lotSize, riskAmount: parseFloat(riskAmount.toFixed(2)), pipValue };
+
+    let pipValuePerLot;
+    if (pair.includes('JPY')) {
+      pipValuePerLot = 7.5;
+    } else if (pair === 'XAUUSD') {
+      pipValuePerLot = 1.0;
+    } else if (pair.includes('BTC') || pair.includes('ETH')) {
+      pipValuePerLot = 1.0;
+    } else {
+      pipValuePerLot = 10.0;
+    }
+
+    const lotSize = parseFloat((riskAmount / (slPips * pipValuePerLot)).toFixed(2));
+    return { lotSize, riskAmount: parseFloat(riskAmount.toFixed(2)), pipValue: pipValuePerLot };
   }, [settings]);
 
   const t = k => {
@@ -105,15 +111,16 @@ export function AppProvider({ children }) {
         marketNotes: 'Notes de Marché', tagManager: 'Gestionnaire de Tags', createTag: 'Créer un Tag',
         tagName: 'Nom du Tag', description: 'Description', color: 'Couleur', create: 'Créer',
         existingTags: 'Tags Existants', capitalSettings: 'Paramètres du Capital', initialCapital: 'Capital Initial',
-        exportData: 'Exporter les Données', exportAll: 'Tout Exporter', dangerZone: 'Zone de Danger',
-        clearAllData: 'Supprimer Toutes les Données', surveillance: 'Surveillance', screenshots: 'Captures',
-        completion: 'Achèvement', edit: 'Modifier', uploadImage: 'Télécharger Image',
-        comment: 'Commentaire', trade: 'Trade', analysis: 'Analyse',
-        journal: 'Journal', mistakes: 'Erreurs', login: 'Connexion', signup: 'Inscription',
-        email: 'Email', password: 'Mot de passe', logout: 'Déconnexion', noAccount: "Pas encore de compte ?",
-        hasAccount: 'Déjà un compte ?', resetPassword: 'Réinitialiser le mot de passe',
-        sendResetLink: 'Envoyer le lien', backToLogin: 'Retour à la connexion'
-      },
+         exportData: 'Exporter les Données', exportAll: 'Tout Exporter', dangerZone: 'Zone de Danger',
+         clearAllData: 'Supprimer Toutes les Données', surveillance: 'Surveillance', screenshots: 'Captures',
+         completion: 'Achèvement', edit: 'Modifier', uploadImage: 'Télécharger Image',
+         comment: 'Commentaire', trade: 'Trade', analysis: 'Analyse',
+         journal: 'Journal', mistakes: 'Erreurs', login: 'Connexion', signup: 'Inscription',
+         email: 'Email', password: 'Mot de passe', logout: 'Déconnexion', noAccount: "Pas encore de compte ?",
+         hasAccount: 'Déjà un compte ?', resetPassword: 'Réinitialiser le mot de passe',
+          sendResetLink: 'Envoyer le lien', backToLogin: 'Retour à la connexion',
+          riskManagement: 'Gestion des Risques'
+       },
       en: {
         dashboard: 'Dashboard', trades: 'Trades', addTrade: 'Add Trade', calculator: 'Calculator',
         stats: 'Statistics', notes: 'Notes', tags: 'Tags', settings: 'Settings', capital: 'Capital',
@@ -136,17 +143,27 @@ export function AppProvider({ children }) {
         marketNotes: 'Market Notes', tagManager: 'Tag Manager', createTag: 'Create Tag',
         tagName: 'Tag Name', description: 'Description', color: 'Color', create: 'Create',
         existingTags: 'Existing Tags', capitalSettings: 'Capital Settings', initialCapital: 'Initial Capital',
-        exportData: 'Export Data', exportAll: 'Export All', dangerZone: 'Danger Zone',
-        clearAllData: 'Clear All Data', surveillance: 'Surveillance', screenshots: 'Screenshots',
-        completion: 'Completion', edit: 'Edit', uploadImage: 'Upload Image',
-        comment: 'Comment', trade: 'Trade', analysis: 'Analysis',
-        journal: 'Journal', mistakes: 'Mistakes', login: 'Login', signup: 'Sign Up',
-        email: 'Email', password: 'Password', logout: 'Logout', noAccount: "Don't have an account?",
-        hasAccount: 'Already have an account?', resetPassword: 'Reset Password',
-        sendResetLink: 'Send Reset Link', backToLogin: 'Back to Login'
-      }
+         exportData: 'Export Data', exportAll: 'Export All', dangerZone: 'Danger Zone',
+         clearAllData: 'Clear All Data', surveillance: 'Surveillance', screenshots: 'Screenshots',
+         completion: 'Completion', edit: 'Edit', uploadImage: 'Upload Image',
+         comment: 'Comment', trade: 'Trade', analysis: 'Analysis',
+         journal: 'Journal', mistakes: 'Mistakes', login: 'Login', signup: 'Sign Up',
+         email: 'Email', password: 'Password', logout: 'Logout', noAccount: "Don't have an account?",
+         hasAccount: 'Already have an account?', resetPassword: 'Reset Password',
+         sendResetLink: 'Send Reset Link', backToLogin: 'Back to Login'
+       }
     };
     return dict[language][k] || k;
+  };
+
+  const reset = () => {
+    setTrades([]);
+    setSettings(DEFAULT_SETTINGS);
+    setNotes([]);
+    setTags(DEFAULT_TAGS);
+    setSurveillances([]);
+    setLanguage('fr');
+    setTheme('dark');
   };
 
   const value = {
@@ -157,35 +174,114 @@ export function AppProvider({ children }) {
     calculateLotSize,
     updateSettings: async (newSettings) => {
       const r = await api.updateSettings(newSettings);
-      setSettings(r);
+      if (r && r.error) {
+        console.error('Failed to update settings:', r.error);
+        throw new Error(r.error);
+      }
+      setSettings(r || newSettings);
     },
-    addTrade: async (tradeData) => { const r = await api.createTrade({ ...tradeData, date: tradeData.date || new Date().toISOString() }); setTrades(p => [r, ...p]); },
-    updateTrade: async (id, tradeData) => { const r = await api.updateTrade(id, tradeData); setTrades(p => p.map(x => x.id === id ? r : x)); },
-    deleteTrade: async (id) => { await api.deleteTrade(id); setTrades(p => p.filter(x => x.id !== id)); },
-    addNote: async (noteData) => { const r = await api.createNote(noteData); setNotes(p => [r, ...p]); },
-    updateNote: async (id, noteData) => { const r = await api.updateNote(id, noteData); setNotes(p => p.map(x => x.id === id ? r : x)); },
-    deleteNote: async (id) => { await api.deleteNote(id); setNotes(p => p.filter(x => x.id !== id)); },
-    addTag: async (tagData) => { const r = await api.createTag(tagData); setTags(p => [...p, r]); },
-    updateTag: async (id, tagData) => { const r = await api.updateTag(id, tagData); setTags(p => p.map(x => x.id === id ? r : x)); },
-    deleteTag: async (id) => { await api.deleteTag(id); setTags(p => p.filter(x => x.id !== id)); },
-    addSurveillance: async (survData) => { const r = await api.createSurveillance({ ...survData, created_at: new Date().toISOString() }); setSurveillances(p => [...p, r]); },
-    updateSurveillance: async (id, survData) => { const r = await api.updateSurveillance(id, survData); setSurveillances(p => p.map(x => x.id === id ? r : x)); },
-    deleteSurveillance: async (id) => { await api.deleteSurveillance(id); setSurveillances(p => p.filter(x => x.id !== id)); },
+    addTrade: async (tradeData) => {
+      const r = await api.createTrade({ ...tradeData, date: tradeData.date || new Date().toISOString() });
+      if (r && r.error) {
+        console.error('Failed to add trade:', r.error);
+        throw new Error(r.error);
+      }
+      setTrades(p => [r, ...p]);
+    },
+    updateTrade: async (id, tradeData) => {
+      const r = await api.updateTrade(id, tradeData);
+      if (r && r.error) {
+        console.error('Failed to update trade:', r.error);
+        throw new Error(r.error);
+      }
+      setTrades(p => p.map(x => x.id === id ? r : x));
+    },
+    deleteTrade: async (id) => {
+      await api.deleteTrade(id);
+      setTrades(p => p.filter(x => x.id !== id));
+    },
+    addNote: async (noteData) => {
+      const r = await api.createNote(noteData);
+      if (r && r.error) {
+        console.error('Failed to add note:', r.error);
+        throw new Error(r.error);
+      }
+      setNotes(p => [r, ...p]);
+    },
+    updateNote: async (id, noteData) => {
+      const r = await api.updateNote(id, noteData);
+      if (r && r.error) {
+        console.error('Failed to update note:', r.error);
+        throw new Error(r.error);
+      }
+      setNotes(p => p.map(x => x.id === id ? r : x));
+    },
+    deleteNote: async (id) => {
+      await api.deleteNote(id);
+      setNotes(p => p.filter(x => x.id !== id));
+    },
+    addTag: async (tagData) => {
+      const r = await api.createTag(tagData);
+      if (r && r.error) {
+        console.error('Failed to add tag:', r.error);
+        throw new Error(r.error);
+      }
+      setTags(p => [...p, r]);
+    },
+    updateTag: async (id, tagData) => {
+      const r = await api.updateTag(id, tagData);
+      if (r && r.error) {
+        console.error('Failed to update tag:', r.error);
+        throw new Error(r.error);
+      }
+      setTags(p => p.map(x => x.id === id ? r : x));
+    },
+    deleteTag: async (id) => {
+      await api.deleteTag(id);
+      setTags(p => p.filter(x => x.id !== id));
+    },
+    addSurveillance: async (survData) => {
+      const r = await api.createSurveillance({ ...survData, created_at: new Date().toISOString() });
+      if (r && r.error) {
+        console.error('Failed to add surveillance:', r.error);
+        throw new Error(r.error);
+      }
+      setSurveillances(p => [...p, r]);
+    },
+    updateSurveillance: async (id, survData) => {
+      const r = await api.updateSurveillance(id, survData);
+      if (r && r.error) {
+        console.error('Failed to update surveillance:', r.error);
+        throw new Error(r.error);
+      }
+      setSurveillances(p => p.map(x => x.id === id ? r : x));
+    },
+    deleteSurveillance: async (id) => {
+      await api.deleteSurveillance(id);
+      setSurveillances(p => p.filter(x => x.id !== id));
+    },
+    reset,
     calculateStats: (ts = trades) => {
-      if (ts.length === 0) return { totalTrades: 0, wins: 0, losses: 0, winrate: 0, totalProfit: 0, profitFactor: 0, maxWin: 0, maxLoss: 0 };
+      if (ts.length === 0) return { totalTrades: 0, wins: 0, losses: 0, breakevens: 0, winrate: 0, totalProfit: 0, profitFactor: 0, maxWin: 0, maxLoss: 0, avgWin: 0, avgLoss: 0 };
       const wins = ts.filter(t => t.result > 0);
       const losses = ts.filter(t => t.result < 0);
+      const breakevens = ts.filter(t => t.result === 0);
       const gp = wins.reduce((s, t) => s + t.result, 0);
       const gl = Math.abs(losses.reduce((s, t) => s + t.result, 0));
       const maxWin = wins.length > 0 ? Math.max(...wins.map(t => t.result)) : 0;
       const maxLoss = losses.length > 0 ? Math.min(...losses.map(t => t.result)) : 0;
       return {
-        totalTrades: ts.length, wins: wins.length, losses: ts.length - wins.length,
+        totalTrades: ts.length,
+        wins: wins.length,
+        losses: losses.length,
+        breakevens: breakevens.length,
         winrate: ((wins.length / ts.length) * 100).toFixed(1),
         totalProfit: ts.reduce((s, t) => s + t.result, 0).toFixed(2),
         profitFactor: gl > 0 ? (gp / gl).toFixed(2) : 'inf',
         maxWin: maxWin.toFixed(2),
-        maxLoss: maxLoss.toFixed(2)
+        maxLoss: maxLoss.toFixed(2),
+        avgWin: wins.length > 0 ? (gp / wins.length).toFixed(2) : 0,
+        avgLoss: losses.length > 0 ? (gl / losses.length).toFixed(2) : 0
       };
     }
   };

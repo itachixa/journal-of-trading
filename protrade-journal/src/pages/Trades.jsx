@@ -166,6 +166,8 @@ export default function Trades() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
+                  onClick={() => navigate(`/trades/${trade.id}`)}
+                  style={{ cursor: 'pointer' }}
                 >
                   <div className="trade-card-header">
                     <span className="trade-pair">{trade.pair}</span>
@@ -228,10 +230,10 @@ export default function Trades() {
                       {new Date(trade.date).toLocaleDateString()}
                     </span>
                     <div className="trade-actions">
-                      <button className="action-icon" onClick={() => navigate(`/add-trade?id=${trade.id}`)}>
+                      <button className="action-icon" onClick={(e) => { e.stopPropagation(); navigate(`/add-trade?id=${trade.id}`); }}>
                         <FaEdit />
                       </button>
-                      <button className="action-icon danger" onClick={() => handleDelete(trade.id)}>
+                      <button className="action-icon danger" onClick={(e) => { e.stopPropagation(); handleDelete(trade.id); }}>
                         <FaTrash />
                       </button>
                     </div>
@@ -268,7 +270,7 @@ export default function Trades() {
               </thead>
               <tbody>
                 {filteredTrades.map(trade => (
-                  <tr key={trade.id}>
+                  <tr key={trade.id} onClick={() => navigate(`/trades/${trade.id}`)} style={{ cursor: 'pointer' }}>
                     <td>{new Date(trade.date).toLocaleDateString()}</td>
                     <td>{trade.pair}</td>
                     <td>
@@ -292,10 +294,10 @@ export default function Trades() {
                     </td>
                     <td>
                       <div className="table-actions">
-                        <button onClick={() => navigate(`/add-trade?id=${trade.id}`)}>
+                        <button onClick={(e) => { e.stopPropagation(); navigate(`/add-trade?id=${trade.id}`); }}>
                           <FaEdit />
                         </button>
-                        <button onClick={() => handleDelete(trade.id)}>
+                        <button onClick={(e) => { e.stopPropagation(); handleDelete(trade.id); }}>
                           <FaTrash />
                         </button>
                       </div>

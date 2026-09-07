@@ -8,7 +8,7 @@ import './Calculator.css';
 const PAIRS_FOR_CALC = ['XAUUSD', 'EURUSD', 'GBPUSD', 'USDJPY', 'BTCUSD', 'ETHUSD'];
 
 export default function Calculator() {
-  const { t, settings: _settings, calculateLotSize, accountBalance } = useApp();
+  const { t, calculateLotSize, accountBalance } = useApp();
   const navigate = useNavigate();
 
   const [balance, setBalance] = useState(accountBalance);
@@ -20,13 +20,17 @@ export default function Calculator() {
   const [result, setResult] = useState({ lotSize: 0, riskAmount: 0, pipValue: 0 });
 
   useEffect(() => {
+    setBalance(accountBalance);
+  }, [accountBalance]);
+
+  useEffect(() => {
     const calcResult = calculateLotSize(balance, risk, parseFloat(slPips) || 0, pair);
     setResult(calcResult);
   }, [balance, risk, slPips, pair, calculateLotSize]);
 
   const riskAmount = balance * (risk / 100);
-  const rr = slPips && tpPips ? (tpPips / slPips).toFixed(2) : '0.00';
-  const potentialProfit = riskAmount * parseFloat(rr);
+  const rr = slPips && tpPips && parseFloat(slPips) > 0 ? (parseFloat(tpPips) / parseFloat(slPips)).toFixed(2) : '0.00';
+  const potentialProfit = result.lotSize * parseFloat(slPips || 0) * result.pipValue * parseFloat(rr);
 
   const saveToTrade = () => {
     const tradeData = {

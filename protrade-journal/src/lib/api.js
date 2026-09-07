@@ -9,6 +9,7 @@ export const supabase = supabaseUrl && supabaseAnonKey
   : null
 
 let backendAvailable = true
+let backendCheckTimer = null
 
 async function checkBackend() {
   try {
@@ -48,6 +49,30 @@ class ApiClient {
     
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`
+    }
+
+    if (backendAvailable) {
+      try {
+        const res = await fetch(`${this.baseURL}${endpoint}`, {
+          headers,
+          ...options
+        })
+        if (res.ok) {
+          return await res.json()
+        }
+        if (res.status === 404 || res.status === 400 || res.status === 500) {
+          backendAvailable = false
+        }
+      } catch {
+        backendAvailable = false
+      }
+    }
+
+    if (!backendAvailable) {
+      const res = await fetch(`${this.baseURL}/health`, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+      if (res.ok) {
+        backendAvailable = true
+      }
     }
 
     if (backendAvailable) {

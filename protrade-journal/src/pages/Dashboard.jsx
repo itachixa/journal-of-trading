@@ -1,15 +1,15 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { FaTrophy, FaExchangeAlt, FaArrowUp, FaBalanceScale, FaExternalLinkAlt } from 'react-icons/fa';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
+import { FaTrophy, FaExchangeAlt, FaArrowUp, FaArrowDown, FaBalanceScale, FaExternalLinkAlt, FaPercent } from 'react-icons/fa';
 import { useApp } from '../context/AppContext';
 import './Dashboard.css';
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899'];
 
 export default function Dashboard() {
-  const { t, trades, calculateStats, settings } = useApp();
+  const { t, trades, calculateStats, settings, accountBalance } = useApp();
   const navigate = useNavigate();
 
   const stats = useMemo(() => calculateStats(trades), [trades, calculateStats]);
@@ -23,7 +23,7 @@ export default function Dashboard() {
     return sorted.map(trade => {
       cumulative += trade.result;
       return {
-        date: new Date(trade.date).toLocaleDateString(),
+        date: new Date(trade.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
         value: cumulative
       };
     });
@@ -56,14 +56,16 @@ export default function Dashboard() {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.1 }
+      transition: { staggerChildren: 0.05 }
     }
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 15 },
     visible: { opacity: 1, y: 0 }
   };
+
+  const currencySymbol = settings.currency === 'USD' ? '$' : settings.currency === 'GBP' ? '£' : settings.currency === 'JPY' ? '¥' : settings.currency === 'CHF' ? 'Fr' : settings.currency === 'CAD' ? 'C$' : settings.currency === 'AUD' ? 'A$' : '€';
 
   return (
     <motion.div 
@@ -100,7 +102,7 @@ export default function Dashboard() {
           <div className="stat-info">
             <span className="stat-label">{t('totalProfit')}</span>
             <span className={`stat-value ${parseFloat(stats.totalProfit) >= 0 ? 'positive' : 'negative'}`}>
-              ${parseFloat(stats.totalProfit).toLocaleString()}
+              {currencySymbol}{parseFloat(stats.totalProfit).toLocaleString()}
             </span>
           </div>
         </div>
@@ -112,6 +114,50 @@ export default function Dashboard() {
           <div className="stat-info">
             <span className="stat-label">{t('profitFactor')}</span>
             <span className="stat-value">{stats.profitFactor}</span>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon win">
+            <FaArrowUp />
+          </div>
+          <div className="stat-info">
+            <span className="stat-label">Avg Win</span>
+            <span className="stat-value positive">+{currencySymbol}{stats.avgWin}</span>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon loss">
+            <FaArrowDown />
+          </div>
+          <div className="stat-info">
+            <span className="stat-label">Avg Loss</span>
+            <span className="stat-value negative">-{currencySymbol}{stats.avgLoss}</span>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon profit">
+            <FaPercent />
+          </div>
+          <div className="stat-info">
+            <span className="stat-label">R/R</span>
+            <span className="stat-value">
+              {stats.avgLoss > 0 ? (stats.avgWin / stats.avgLoss).toFixed(2) : '0.00'}
+            </span>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon profit">
+            <FaBalanceScale />
+          </div>
+          <div className="stat-info">
+            <span className="stat-label">{t('balance') || 'Balance'}</span>
+            <span className={`stat-value ${accountBalance >= settings.initialCapital ? 'positive' : 'negative'}`}>
+              {currencySymbol}{accountBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
           </div>
         </div>
       </motion.div>
@@ -177,13 +223,17 @@ export default function Dashboard() {
                     </span>
                   </div>
                   <span className={`trade-result ${trade.result >= 0 ? 'positive' : 'negative'}`}>
-                    {trade.result >= 0 ? '+' : ''}${trade.result?.toFixed(2)}
+                    {trade.result >= 0 ? '+' : ''}{currencySymbol}{trade.result?.toFixed(2)}
                   </span>
                 </div>
               ))
             ) : (
               <div className="empty-state">
+                <div className="empty-icon">📊</div>
                 <p>{t('noTrades')}</p>
+                <button className="btn-primary small" onClick={() => navigate('/add-trade')}>
+                  {t('addTrade')}
+                </button>
               </div>
             )}
           </div>
@@ -204,7 +254,8 @@ export default function Dashboard() {
                     innerRadius={50}
                     outerRadius={80}
                     paddingAngle={4}
-                    dataKey="value"
+                    dataKey="profit"
+                    nameKey="name"
                   >
                     {pairData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -217,7 +268,7 @@ export default function Dashboard() {
                       borderRadius: '10px',
                       color: '#f1f5f9'
                     }}
-                    formatter={(value, name) => [`$${value.toFixed(2)}`, name]}
+                    formatter={(value) => [`${currencySymbol}${value.toFixed(2)}`, 'Profit']}
                   />
                 </PieChart>
               </ResponsiveContainer>

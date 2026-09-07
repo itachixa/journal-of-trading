@@ -52,8 +52,11 @@ export function AuthProvider({ children }) {
       setError(error.message);
       return { error: error.message };
     }
+    if (data.session?.access_token) {
+      api.setToken(data.session.access_token);
+    }
     setMessage('Vérifiez votre email pour confirmer votre compte');
-    return { user: data.user };
+    return { user: data.user, session: data.session };
   };
 
   const handleCallback = async () => {
