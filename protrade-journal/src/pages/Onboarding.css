@@ -99,7 +99,7 @@
 
 .onboarding-card {
   background: var(--bg-secondary);
-  border: 1px solid var(--border);
+  border: 1px solid var(--bg-glass-border);
   border-radius: 20px;
   padding: 2rem;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -165,10 +165,17 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem;
-  background: var(--bg-primary);
+  background: var(--bg-glass-light);
   border-radius: 10px;
   font-size: 0.9rem;
   color: var(--text-secondary);
+  border: 1px solid var(--bg-glass-border);
+}
+
+[data-theme="light"] .feature {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: var(--text-primary);
 }
 
 .feature-icon {
@@ -259,8 +266,8 @@
 .preset-btn {
   padding: 0.5rem 1rem;
   border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--bg-primary);
+  border: 1px solid var(--bg-glass-border);
+  background: var(--bg-glass-light);
   color: var(--text-secondary);
   font-size: 0.85rem;
   cursor: pointer;
@@ -268,14 +275,34 @@
 }
 
 .preset-btn:hover {
-  border-color: var(--accent);
+  border-color: var(--accent-cyan);
   color: var(--text-primary);
+  background: var(--bg-glass);
 }
 
 .preset-btn.active {
   background: var(--accent);
   border-color: var(--accent);
   color: white;
+  box-shadow: 0 0 12px var(--accent-cyan-glow);
+}
+
+[data-theme="light"] .preset-btn {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: var(--text-secondary);
+}
+
+[data-theme="light"] .preset-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--accent-cyan);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .preset-btn.active {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: var(--accent);
+  color: var(--text-primary);
 }
 
 .capital-hint,
@@ -395,8 +422,9 @@
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.75rem 1rem;
-  background: var(--bg-primary);
+  background: var(--bg-glass-light);
   border-radius: 10px;
+  border: 1px solid var(--bg-glass-border);
 }
 
 .summary-label {
@@ -417,7 +445,7 @@
   gap: 0.75rem;
   margin-top: 1.5rem;
   padding-top: 1.5rem;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--bg-glass-border);
 }
 
 .spacer {
@@ -445,14 +473,27 @@
 }
 
 .onboarding-btn.secondary {
-  background: var(--bg-primary);
+  background: var(--bg-glass-light);
   color: var(--text-secondary);
-  border: 1px solid var(--border);
+  border: 1px solid var(--bg-glass-border);
 }
 
 .onboarding-btn.secondary:hover {
   background: var(--bg-tertiary);
   color: var(--text-primary);
+  border-color: var(--accent-cyan);
+}
+
+[data-theme="light"] .onboarding-btn.secondary {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: var(--text-secondary);
+}
+
+[data-theme="light"] .onboarding-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-primary);
+  border-color: var(--accent-cyan);
 }
 
 .onboarding-device,
@@ -474,22 +515,48 @@
   gap: 1rem;
   padding: 1rem 1.25rem;
   border-radius: 12px;
-  border: 2px solid var(--border);
-  background: var(--bg-primary);
+  border: 2px solid var(--bg-glass-border);
+  background: var(--bg-glass-light);
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .device-card:hover,
 .currency-card:hover {
-  border-color: var(--accent);
+  border-color: var(--accent-cyan);
+  background: var(--bg-glass);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .device-card.active,
 .currency-card.active {
   border-color: var(--accent);
-  background: rgba(59, 130, 246, 0.08);
+  background: rgba(59, 130, 246, 0.15);
+  box-shadow: 0 0 0 1px var(--accent-cyan), 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+[data-theme="light"] .device-card,
+[data-theme="light"] .currency-card {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .device-card:hover,
+[data-theme="light"] .currency-card:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .device-card.active,
+[data-theme="light"] .currency-card.active {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-cyan), 0 4px 12px rgba(59, 130, 246, 0.2);
 }
 
 .device-icon,
