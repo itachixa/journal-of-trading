@@ -54,7 +54,7 @@
           const res = await fetch(`${apiUrl}${path}`, options);
           const text = await res.text();
           let json = null;
-          try { json = JSON.parse(text); } catch {}
+          try { json = JSON.parse(text); } catch { /* ignore parse error */ }
           
           return { status: res.status, data: json, text: text.slice(0, 200) };
         } catch (err) {

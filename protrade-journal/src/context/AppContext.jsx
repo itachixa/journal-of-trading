@@ -26,13 +26,31 @@ export function AppProvider({ children }) {
 
   const loadData = async () => {
     try {
-      const [tradesRes, notesRes, tagsRes, survRes] = await Promise.all([
-        api.getTrades(), api.getNotes(), api.getTags(), api.getSurveillances()
+      const [tradesRes, notesRes, tagsRes, survRes, settingsRes] = await Promise.all([
+        api.getTrades(), api.getNotes(), api.getTags(), api.getSurveillances(), api.getSettings()
       ]);
       setTrades(tradesRes);
       setNotes(notesRes || []);
       setTags(tagsRes.length > 0 ? tagsRes : DEFAULT_TAGS);
       setSurveillances(survRes || []);
+      if (settingsRes && Object.keys(settingsRes).length > 0) {
+        setSettings({
+          initialCapital: settingsRes.initial_capital ?? settingsRes.initialCapital ?? 10000,
+          theme: settingsRes.theme || 'dark',
+          defaultRisk: settingsRes.default_risk ?? settingsRes.defaultRisk ?? 2,
+          device: settingsRes.device || 'desktop',
+          currency: settingsRes.currency || 'EUR',
+          language: settingsRes.language || 'fr'
+        });
+        if (settingsRes.language) {
+          setLanguage(settingsRes.language);
+          localStorage.setItem('protrade_language', settingsRes.language);
+        }
+        if (settingsRes.theme) {
+          setTheme(settingsRes.theme);
+          localStorage.setItem('protrade_theme', settingsRes.theme);
+        }
+      }
     } catch (e) { console.error(e); }
     setIsLoading(false);
   };

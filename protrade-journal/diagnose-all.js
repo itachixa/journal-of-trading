@@ -57,7 +57,7 @@ async function testBackendEndpoints() {
       const res = await fetch(`${API_URL}${ep.path}`, { method: ep.method, headers });
       const text = await res.text();
       let json = null;
-      try { json = JSON.parse(text); } catch {}
+      try { json = JSON.parse(text); } catch { /* ignore parse error */ }
       
       if (res.ok) {
         console.log(`✅ ${ep.method} ${ep.path}: ${res.status} OK`);
