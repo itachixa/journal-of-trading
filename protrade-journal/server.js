@@ -501,6 +501,11 @@ app.put('/api/settings', authMiddleware, async (req, res) => {
       updateData[camelToSnake[key]] = req.body[key];
     }
   }
+  console.log('SETTINGS_PUT', {
+    userId,
+    receivedBody: req.body,
+    mappedUpdateData: updateData
+  });
   if (Object.keys(updateData).length === 0) {
     return res.status(400).json({ error: 'No valid settings fields provided' });
   }
@@ -510,7 +515,22 @@ app.put('/api/settings', authMiddleware, async (req, res) => {
     .eq('user_id', userId)
     .select()
     .single();
-  if (error) return res.status(400).json({ error: error.message });
+  console.log('SETTINGS_PUT_RESULT', {
+    data,
+    error
+  });
+  if (error) {
+    if (error.code === 'PGRST116') {
+      const { data: newData, error: insertError } = await supabase
+        .from('settings')
+        .insert({ user_id: userId, ...updateData })
+        .select()
+        .single();
+      if (insertError) return res.status(400).json({ error: insertError.message });
+      return res.json(newData);
+    }
+    return res.status(400).json({ error: error.message });
+  }
   res.json(data);
 });
 
