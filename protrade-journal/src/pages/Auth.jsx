@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Auth.css';
@@ -10,14 +10,20 @@ export default function Auth() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showReset, setShowReset] = useState(false);
   const [resetSent, setResetSent] = useState(false);
-  const { signIn, signUp, resetPassword, error, message, loading } = useAuth();
+  const { signIn, signUp, resetPassword, error, message, loading, setError, setMessage } = useAuth();
   const navigate = useNavigate();
+
+  const switchMode = useCallback((newMode) => {
+    setMode(newMode);
+    setMessage(null);
+    setError(null);
+  }, [setMode, setMessage, setError]);
 
   useEffect(() => {
     if (message && mode === 'signup' && message.includes('email')) {
-      setMode('verify');
+      switchMode('verify');
     }
-  }, [message, mode]);
+  }, [message, mode, switchMode]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -66,23 +72,25 @@ export default function Auth() {
               <p>Lien envoyé ! Vérifiez votre boîte mail.</p>
             </div>
           )}
-          <form onSubmit={handleSubmit}>
-            <div className="input-group">
-              <label htmlFor="email">Email</label>
-              <input
-                id="email"
-                type="email"
-                placeholder="vous@exemple.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <button type="submit" className="auth-btn" disabled={loading || resetSent}>
-              {loading ? 'Envoi...' : 'Envoyer le lien'}
-            </button>
-          </form>
-          <button className="auth-link" onClick={() => { setShowReset(false); setResetSent(false); }}>
+          {!resetSent && (
+            <form onSubmit={handleSubmit}>
+              <div className="input-group">
+                <label htmlFor="email">Email</label>
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="vous@exemple.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <button type="submit" className="auth-btn" disabled={loading || resetSent}>
+                {loading ? 'Envoi...' : 'Envoyer le lien'}
+              </button>
+            </form>
+          )}
+          <button className="auth-link" onClick={() => { setShowReset(false); setResetSent(false); switchMode('login'); }}>
             ← Retour à la connexion
           </button>
         </div>
@@ -98,23 +106,38 @@ export default function Auth() {
           <div className="auth-orb auth-orb-2"></div>
           <div className="auth-orb auth-orb-3"></div>
         </div>
-        <div className="auth-card">
+        <div className="auth-card auth-verify-card">
           <div className="auth-logo">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M3 3v18h18"/>
               <path d="M7 16l4-8 4 4 6-8"/>
             </svg>
           </div>
+          <div className="verify-icon">📧</div>
           <h1>Vérifiez votre email</h1>
           <p className="auth-subtitle">
             Nous avons envoyé un lien de confirmation à<br/>
             <strong>{email}</strong>
           </p>
           <div className="auth-success-card">
-            <div className="auth-success-icon">📧</div>
+            <div className="auth-success-icon">✅</div>
             <p>Cliquez sur le lien dans l'email pour activer votre compte.</p>
           </div>
-          <button className="auth-link" onClick={() => setMode('login')}>
+          <div className="verify-steps">
+            <div className="verify-step">
+              <span className="verify-step-num">1</span>
+              <span>Ouvrez votre boîte mail</span>
+            </div>
+            <div className="verify-step">
+              <span className="verify-step-num">2</span>
+              <span>Cherchez l'email de ProTrade Journal</span>
+            </div>
+            <div className="verify-step">
+              <span className="verify-step-num">3</span>
+              <span>Cliquez sur le lien de confirmation</span>
+            </div>
+          </div>
+          <button className="auth-link" onClick={() => switchMode('login')}>
             ← Retour à la connexion
           </button>
         </div>
@@ -190,13 +213,13 @@ export default function Auth() {
           </button>
         </form>
         <div className="auth-footer">
-          <button className="auth-link" onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}>
+          <button className="auth-link" onClick={() => switchMode(mode === 'login' ? 'signup' : 'login')}>
             {mode === 'login'
               ? "Pas encore de compte ? S'inscrire"
               : 'Déjà un compte ? Se connecter'}
           </button>
           {mode === 'login' && (
-            <button className="auth-link auth-link-secondary" onClick={() => setShowReset(true)}>
+            <button className="auth-link auth-link-secondary" onClick={() => { setShowReset(true); setResetSent(false); switchMode('reset'); }}>
               Mot de passe oublié ?
             </button>
           )}

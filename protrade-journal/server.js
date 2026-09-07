@@ -534,6 +534,11 @@ app.put('/api/settings', authMiddleware, async (req, res) => {
   res.json(data);
 });
 
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // Static files
 app.use(express.static(path.join(__dirname, 'dist')));
 

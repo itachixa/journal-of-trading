@@ -1,6 +1,7 @@
-import { NavLink, useLocation, Outlet } from 'react-router-dom';
+import { NavLink, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FaThLarge, FaList, FaEye, FaPlusCircle, FaCalculator, 
@@ -25,8 +26,15 @@ const navItems = [
 
 export default function Layout({ children }) {
   const { t, language, toggleLanguage, toggleTheme, theme, settings, accountBalance } = useApp();
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   const getPageTitle = (path) => {
     const item = navItems.find(nav => nav.path === path);
@@ -78,6 +86,10 @@ export default function Layout({ children }) {
               <span>{theme === 'dark' ? '🌙' : '☀️'}</span>
             </button>
           </div>
+          <button className="logout-btn" onClick={handleLogout}>
+            <FaSignOutAlt />
+            <span>{t('logout')}</span>
+          </button>
         </div>
       </aside>
 

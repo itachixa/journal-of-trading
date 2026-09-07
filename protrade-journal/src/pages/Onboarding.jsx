@@ -55,8 +55,8 @@ export default function Onboarding() {
     });
   };
 
-  const finish = () => {
-    saveSettings();
+  const finish = async () => {
+    await saveSettings();
     completeOnboarding();
     navigate('/');
   };

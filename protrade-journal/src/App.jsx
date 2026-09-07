@@ -71,11 +71,24 @@ export default function App() {
 }
 
 function AuthCallback() {
-  const { handleCallback } = useAuth();
+  const { handleCallback, hasCompletedOnboarding } = useAuth();
+  const target = hasCompletedOnboarding() ? '/' : '/onboarding';
+
   useEffect(() => {
-    handleCallback();
-  }, [handleCallback]);
-  return <div className="loading-screen">Vérification en cours...</div>;
+    handleCallback().then(() => {
+      window.location.replace(target);
+    });
+  }, [handleCallback, target]);
+
+  return (
+    <div className="loading-screen">
+      <div className="loading-content">
+        <div className="loading-spinner"></div>
+        <p>Vérification de votre email...</p>
+        <p className="loading-subtitle">Vous allez être redirigé automatiquement</p>
+      </div>
+    </div>
+  );
 }
 
 function OnboardingRoute() {
