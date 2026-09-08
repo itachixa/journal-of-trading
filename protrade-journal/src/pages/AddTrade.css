@@ -116,18 +116,27 @@
   border: 2px solid;
   border-radius: var(--radius-full);
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-fast);
-  background: transparent;
+  background: var(--bg-glass-light);
+  color: var(--text-secondary);
+  border-color: var(--bg-glass-border);
 }
 
 .tag-toggle:hover {
   transform: scale(1.05);
+  background: var(--bg-glass);
+  border-color: var(--tag-color);
+  color: var(--text-primary);
 }
 
 .tag-toggle.selected {
+  background: var(--tag-color);
+  border-color: var(--tag-color);
+  color: white;
   box-shadow: 0 0 15px var(--tag-color);
+  transform: scale(1.05);
 }
 
 .file-upload {
@@ -395,4 +404,36 @@
 .add-trade-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+}
+
+.form-message {
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.form-message.success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid var(--success);
+  color: var(--success-light);
+}
+
+.form-message.error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--danger);
+  color: var(--danger-light);
+}
+
+@media (max-width: 768px) {
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .form-actions button {
+    width: 100%;
+  }
 }

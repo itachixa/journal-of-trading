@@ -6,16 +6,16 @@ const DEFAULT_PAIRS = PAIRS;
 export default function PairSelector({ value, onChange, pairs = DEFAULT_PAIRS }) {
   return (
     <div className="pair-selector">
-      {pairs.map(pair => (
-        <button
-          key={pair}
-          type="button"
-          className={`pair-chip ${value === pair ? 'active' : ''}`}
-          onClick={() => onChange(pair)}
-        >
-          {pair}
-        </button>
-      ))}
+      <select 
+        value={value} 
+        onChange={(e) => onChange(e.target.value)}
+        className="pair-select"
+      >
+        <option value="">Sélectionner une paire...</option>
+        {pairs.map(pair => (
+          <option key={pair} value={pair}>{pair}</option>
+        ))}
+      </select>
     </div>
   );
 }

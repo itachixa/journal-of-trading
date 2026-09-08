@@ -7,6 +7,16 @@ import './AddTrade.css';
 
 const TEMP_TRADE_KEY = 'protrade_temp_trade';
 
+const getLocalDateTime = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
 export default function AddTrade() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -19,7 +29,7 @@ export default function AddTrade() {
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().slice(0, 16),
+    date: getLocalDateTime(),
     pair: '',
     tradeType: '',
     tradingType: '',
@@ -40,12 +50,27 @@ export default function AddTrade() {
   const [screenshot, setScreenshot] = useState(null);
   const [screenshotPreview, setScreenshotPreview] = useState(null);
   const [prefillSource, setPrefillSource] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   useEffect(() => {
     if (existingTrade) {
+      const formatDateForInput = (dateStr) => {
+        if (!dateStr) return getLocalDateTime();
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return getLocalDateTime();
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+      };
+      
       setFormData({
         ...existingTrade,
-        date: existingTrade.date?.slice(0, 16) || '',
+        date: formatDateForInput(existingTrade.date),
         tags: existingTrade.tags || []
       });
       if (existingTrade.screenshot) {
@@ -142,8 +167,10 @@ export default function AddTrade() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitError(null);
+    setSubmitSuccess(false);
     
     const tradeData = {
       ...formData,
@@ -154,18 +181,27 @@ export default function AddTrade() {
       screenshot: screenshot || existingTrade?.screenshot
     };
 
-    if (editId) {
-      updateTrade(parseInt(editId), tradeData);
-    } else {
-      addTrade(tradeData);
+    try {
+      setSubmitting(true);
+      if (editId) {
+        await updateTrade(parseInt(editId), tradeData);
+      } else {
+        await addTrade(tradeData);
+      }
+      setSubmitSuccess(true);
+      setTimeout(() => {
+        navigate('/trades');
+      }, 800);
+    } catch (err) {
+      setSubmitError(err.message || 'Erreur lors de l\'enregistrement du trade');
+    } finally {
+      setSubmitting(false);
     }
-
-    navigate('/trades');
   };
 
   const handleClear = () => {
     setFormData({
-      date: new Date().toISOString().slice(0, 16),
+      date: getLocalDateTime(),
       pair: '',
       tradeType: '',
       tradingType: '',
@@ -178,6 +214,8 @@ export default function AddTrade() {
     });
     setScreenshot(null);
     setScreenshotPreview(null);
+    setSubmitError(null);
+    setSubmitSuccess(false);
   };
 
   const calculatedRR = useMemo(() => {
@@ -476,6 +514,17 @@ export default function AddTrade() {
               </div>
             </div>
 
+            {submitError && (
+              <div className="form-message error">
+                {submitError}
+              </div>
+            )}
+            {submitSuccess && (
+              <div className="form-message success">
+                Trade enregistré avec succès !
+              </div>
+            )}
+
             <div className="form-actions">
               <button type="button" className="btn-secondary" onClick={() => setStep(1)}>
                 ← Calculateur
@@ -483,8 +532,8 @@ export default function AddTrade() {
               <button type="button" className="btn-secondary" onClick={handleClear}>
                 {t('clear')}
               </button>
-              <button type="submit" className="btn-primary">
-                {t('saveTrade')}
+              <button type="submit" className="btn-primary" disabled={submitting}>
+                {submitting ? 'Enregistrement...' : t('saveTrade')}
               </button>
             </div>
           </form>
