@@ -115,33 +115,35 @@ class ApiClient {
       if (method === 'GET' && !id && !subResource) {
         const { data, error } = await supabase.from(table).select('*')
         if (error) return { error: error.message }
-        return data || []
+        return (data || []).map(item => this.mapFromSupabase(table, item))
       }
 
       if (method === 'GET' && id && subResource) {
         const { data, error } = await supabase.from(subResource).select('*').eq(subResource === 'confirmations' ? 'surveillance_id' : 'surveillance_id', id)
         if (error) return { error: error.message }
-        return data || []
+        return (data || []).map(item => this.mapFromSupabase(subResource, item))
       }
 
       if (method === 'GET' && id) {
         const { data, error } = await supabase.from(table).select('*').eq('id', id).single()
         if (error) return { error: error.message }
-        return data
+        return this.mapFromSupabase(table, data)
       }
 
       if (method === 'POST' && !id) {
         const body = options.body ? JSON.parse(options.body) : {}
-        const { data, error } = await supabase.from(table).insert(body).select().single()
+        const mapped = this.mapToSupabase(table, body)
+        const { data, error } = await supabase.from(table).insert(mapped).select().single()
         if (error) return { error: error.message }
-        return data
+        return this.mapFromSupabase(table, data)
       }
 
       if (method === 'PUT' && id && !subResource) {
         const body = options.body ? JSON.parse(options.body) : {}
-        const { data, error } = await supabase.from(table).update(body).eq('id', id).select().single()
+        const mapped = this.mapToSupabase(table, body)
+        const { data, error } = await supabase.from(table).update(mapped).eq('id', id).select().single()
         if (error) return { error: error.message }
-        return data
+        return this.mapFromSupabase(table, data)
       }
 
       if (method === 'DELETE' && id && !subResource) {
@@ -174,6 +176,91 @@ class ApiClient {
     } catch (e) {
       return { error: e.message }
     }
+  }
+
+  mapToSupabase(table, body) {
+    if (table === 'trades') {
+      const mapped = { ...body }
+      if (mapped.tradeType) {
+        mapped.direction = mapped.tradeType.toLowerCase()
+        delete mapped.tradeType
+      }
+      if (mapped.tradingType) {
+        mapped.style = mapped.tradingType
+        delete mapped.tradingType
+      }
+      if (mapped.lotSize !== undefined) {
+        mapped.lot_size = mapped.lotSize
+        delete mapped.lotSize
+      }
+      if (mapped.stopLoss !== undefined) {
+        mapped.stop_loss = mapped.stopLoss
+        delete mapped.stopLoss
+      }
+      if (mapped.takeProfit !== undefined) {
+        mapped.take_profit = mapped.takeProfit
+        delete mapped.takeProfit
+      }
+      if (mapped.screenshot) {
+        mapped.screenshot_url = mapped.screenshot
+        delete mapped.screenshot
+      }
+      if (mapped.result === '' || mapped.result === null || mapped.result === undefined) {
+        mapped.result = 0
+      }
+      if (mapped.date) {
+        mapped.date = new Date(mapped.date).toISOString()
+      }
+      return mapped
+    }
+    if (table === 'notes') {
+      return body
+    }
+    if (table === 'tags') {
+      return body
+    }
+    if (table === 'surveillances') {
+      const mapped = { ...body }
+      if (mapped.direction) {
+        mapped.direction = mapped.direction.toLowerCase()
+      }
+      if (mapped.date) {
+        mapped.date = new Date(mapped.date).toISOString()
+      }
+      return mapped
+    }
+    if (table === 'settings') {
+      const mapped = {}
+      if (body.initialCapital !== undefined) mapped.initial_capital = body.initialCapital
+      if (body.theme !== undefined) mapped.theme = body.theme
+      if (body.defaultRisk !== undefined) mapped.default_risk = body.defaultRisk
+      if (body.device !== undefined) mapped.device = body.device
+      if (body.currency !== undefined) mapped.currency = body.currency
+      if (body.language !== undefined) mapped.language = body.language
+      return mapped
+    }
+    return body
+  }
+
+  mapFromSupabase(table, item) {
+    if (!item || typeof item !== 'object') return item
+    if (table === 'trades') {
+      const mapped = { ...item }
+      if ('direction' in mapped) { mapped.tradeType = mapped.direction; delete mapped.direction }
+      if ('style' in mapped) { mapped.tradingType = mapped.style; delete mapped.style }
+      if ('lot_size' in mapped) { mapped.lotSize = mapped.lot_size; delete mapped.lot_size }
+      if ('stop_loss' in mapped) { mapped.stopLoss = mapped.stop_loss; delete mapped.stop_loss }
+      if ('take_profit' in mapped) { mapped.takeProfit = mapped.take_profit; delete mapped.take_profit }
+      if ('screenshot_url' in mapped) { mapped.screenshot = mapped.screenshot_url; delete mapped.screenshot_url }
+      return mapped
+    }
+    if (table === 'settings') {
+      const mapped = { ...item }
+      if ('initial_capital' in mapped) { mapped.initialCapital = mapped.initial_capital; delete mapped.initial_capital }
+      if ('default_risk' in mapped) { mapped.defaultRisk = mapped.default_risk; delete mapped.default_risk }
+      return mapped
+    }
+    return item
   }
 
   getTrades() { return this.request('/trades') }
