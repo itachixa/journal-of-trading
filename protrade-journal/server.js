@@ -46,6 +46,100 @@ function getUserId(req) {
   return req.user ? req.user.id : null;
 }
 
+function mapToSupabase(table, body) {
+  if (table === 'trades') {
+    const mapped = { ...body }
+    if (mapped.tradeType) {
+      mapped.direction = mapped.tradeType.toLowerCase()
+      delete mapped.tradeType
+    }
+    if (mapped.tradingType) {
+      mapped.style = mapped.tradingType
+      delete mapped.tradingType
+    }
+    if (mapped.lotSize !== undefined) {
+      mapped.lot_size = mapped.lotSize
+      delete mapped.lotSize
+    }
+    if (mapped.stopLoss !== undefined) {
+      mapped.stop_loss = mapped.stopLoss
+      delete mapped.stopLoss
+    }
+    if (mapped.takeProfit !== undefined) {
+      mapped.take_profit = mapped.takeProfit
+      delete mapped.takeProfit
+    }
+    if (mapped.screenshot) {
+      mapped.screenshot_url = mapped.screenshot
+      delete mapped.screenshot
+    }
+    if (mapped.result === '' || mapped.result === null || mapped.result === undefined) {
+      mapped.result = 0
+    }
+    if (mapped.date) {
+      mapped.date = new Date(mapped.date).toISOString()
+    }
+    return mapped
+  }
+  if (table === 'notes') {
+    return body
+  }
+  if (table === 'tags') {
+    return body
+  }
+  if (table === 'surveillances') {
+    const mapped = { ...body }
+    if (mapped.direction) {
+      mapped.direction = mapped.direction.toLowerCase()
+    }
+    if (mapped.note) {
+      mapped.notes = mapped.note
+      delete mapped.note
+    }
+    if (mapped.date) {
+      mapped.date = new Date(mapped.date).toISOString()
+    }
+    return mapped
+  }
+  if (table === 'settings') {
+    const mapped = {}
+    if (body.initialCapital !== undefined) mapped.initial_capital = body.initialCapital
+    if (body.theme !== undefined) mapped.theme = body.theme
+    if (body.defaultRisk !== undefined) mapped.default_risk = body.defaultRisk
+    if (body.device !== undefined) mapped.device = body.device
+    if (body.currency !== undefined) mapped.currency = body.currency
+    if (body.language !== undefined) mapped.language = body.language
+    return mapped
+  }
+  return body
+}
+
+function mapFromSupabase(table, item) {
+  if (!item || typeof item !== 'object') return item
+  if (table === 'trades') {
+    const mapped = { ...item }
+    if ('direction' in mapped) { mapped.tradeType = mapped.direction; delete mapped.direction }
+    if ('style' in mapped) { mapped.tradingType = mapped.style; delete mapped.style }
+    if ('lot_size' in mapped) { mapped.lotSize = mapped.lot_size; delete mapped.lot_size }
+    if ('stop_loss' in mapped) { mapped.stopLoss = mapped.stop_loss; delete mapped.stop_loss }
+    if ('take_profit' in mapped) { mapped.takeProfit = mapped.take_profit; delete mapped.take_profit }
+    if ('screenshot_url' in mapped) { mapped.screenshot = mapped.screenshot_url; delete mapped.screenshot_url }
+    return mapped
+  }
+  if (table === 'surveillances') {
+    const mapped = { ...item }
+    if ('notes' in mapped) { mapped.note = mapped.notes; delete mapped.notes }
+    return mapped
+  }
+  if (table === 'settings') {
+    const mapped = { ...item }
+    if ('initial_capital' in mapped) { mapped.initialCapital = mapped.initial_capital; delete mapped.initial_capital }
+    if ('default_risk' in mapped) { mapped.defaultRisk = mapped.default_risk; delete mapped.default_risk }
+    return mapped
+  }
+  return item
+}
+
 // Auth routes
 app.post('/api/auth/register', async (req, res) => {
   const { email, password } = req.body;
@@ -106,18 +200,19 @@ app.get('/api/trades', authMiddleware, async (req, res) => {
     .eq('user_id', userId)
     .order('date', { ascending: false });
   if (error) return res.status(400).json({ error: error.message });
-  res.json(data || []);
+  res.json((data || []).map(item => mapFromSupabase('trades', item)));
 });
 
 app.post('/api/trades', authMiddleware, async (req, res) => {
   const userId = getUserId(req);
+  const mapped = mapToSupabase('trades', { ...req.body, user_id: userId })
   const { data, error } = await supabase
     .from('trades')
-    .insert({ ...req.body, user_id: userId })
+    .insert(mapped)
     .select()
     .single();
   if (error) return res.status(400).json({ error: error.message });
-  res.json(data);
+  res.json(mapFromSupabase('trades', data));
 });
 
 app.get('/api/trades/:id', authMiddleware, async (req, res) => {
@@ -129,20 +224,21 @@ app.get('/api/trades/:id', authMiddleware, async (req, res) => {
     .eq('user_id', userId)
     .single();
   if (error) return res.status(404).json({ error: 'Trade not found' });
-  res.json(data);
+  res.json(mapFromSupabase('trades', data));
 });
 
 app.put('/api/trades/:id', authMiddleware, async (req, res) => {
   const userId = getUserId(req);
+  const mapped = mapToSupabase('trades', req.body)
   const { data, error } = await supabase
     .from('trades')
-    .update(req.body)
+    .update(mapped)
     .eq('id', req.params.id)
     .eq('user_id', userId)
     .select()
     .single();
   if (error) return res.status(400).json({ error: error.message });
-  res.json(data);
+  res.json(mapFromSupabase('trades', data));
 });
 
 app.delete('/api/trades/:id', authMiddleware, async (req, res) => {
@@ -165,18 +261,19 @@ app.get('/api/notes', authMiddleware, async (req, res) => {
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
   if (error) return res.status(400).json({ error: error.message });
-  res.json(data || []);
+  res.json((data || []).map(item => mapFromSupabase('notes', item)));
 });
 
 app.post('/api/notes', authMiddleware, async (req, res) => {
   const userId = getUserId(req);
+  const mapped = mapToSupabase('notes', { ...req.body, user_id: userId })
   const { data, error } = await supabase
     .from('notes')
-    .insert({ ...req.body, user_id: userId })
+    .insert(mapped)
     .select()
     .single();
   if (error) return res.status(400).json({ error: error.message });
-  res.json(data);
+  res.json(mapFromSupabase('notes', data));
 });
 
 app.get('/api/notes/:id', authMiddleware, async (req, res) => {
@@ -188,20 +285,21 @@ app.get('/api/notes/:id', authMiddleware, async (req, res) => {
     .eq('user_id', userId)
     .single();
   if (error) return res.status(404).json({ error: 'Note not found' });
-  res.json(data);
+  res.json(mapFromSupabase('notes', data));
 });
 
 app.put('/api/notes/:id', authMiddleware, async (req, res) => {
   const userId = getUserId(req);
+  const mapped = mapToSupabase('notes', req.body)
   const { data, error } = await supabase
     .from('notes')
-    .update(req.body)
+    .update(mapped)
     .eq('id', req.params.id)
     .eq('user_id', userId)
     .select()
     .single();
   if (error) return res.status(400).json({ error: error.message });
-  res.json(data);
+  res.json(mapFromSupabase('notes', data));
 });
 
 app.delete('/api/notes/:id', authMiddleware, async (req, res) => {
@@ -224,18 +322,19 @@ app.get('/api/tags', authMiddleware, async (req, res) => {
     .eq('user_id', userId)
     .order('name');
   if (error) return res.status(400).json({ error: error.message });
-  res.json(data || []);
+  res.json((data || []).map(item => mapFromSupabase('tags', item)));
 });
 
 app.post('/api/tags', authMiddleware, async (req, res) => {
   const userId = getUserId(req);
+  const mapped = mapToSupabase('tags', { ...req.body, user_id: userId })
   const { data, error } = await supabase
     .from('tags')
-    .insert({ ...req.body, user_id: userId })
+    .insert(mapped)
     .select()
     .single();
   if (error) return res.status(400).json({ error: error.message });
-  res.json(data);
+  res.json(mapFromSupabase('tags', data));
 });
 
 app.get('/api/tags/:id', authMiddleware, async (req, res) => {
@@ -247,20 +346,21 @@ app.get('/api/tags/:id', authMiddleware, async (req, res) => {
     .eq('user_id', userId)
     .single();
   if (error) return res.status(404).json({ error: 'Tag not found' });
-  res.json(data);
+  res.json(mapFromSupabase('tags', data));
 });
 
 app.put('/api/tags/:id', authMiddleware, async (req, res) => {
   const userId = getUserId(req);
+  const mapped = mapToSupabase('tags', req.body)
   const { data, error } = await supabase
     .from('tags')
-    .update(req.body)
+    .update(mapped)
     .eq('id', req.params.id)
     .eq('user_id', userId)
     .select()
     .single();
   if (error) return res.status(400).json({ error: error.message });
-  res.json(data);
+  res.json(mapFromSupabase('tags', data));
 });
 
 app.delete('/api/tags/:id', authMiddleware, async (req, res) => {
@@ -283,18 +383,19 @@ app.get('/api/surveillances', authMiddleware, async (req, res) => {
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
   if (error) return res.status(400).json({ error: error.message });
-  res.json(data || []);
+  res.json((data || []).map(item => mapFromSupabase('surveillances', item)));
 });
 
 app.post('/api/surveillances', authMiddleware, async (req, res) => {
   const userId = getUserId(req);
+  const mapped = mapToSupabase('surveillances', { ...req.body, user_id: userId })
   const { data, error } = await supabase
     .from('surveillances')
-    .insert({ ...req.body, user_id: userId })
+    .insert(mapped)
     .select()
     .single();
   if (error) return res.status(400).json({ error: error.message });
-  res.json(data);
+  res.json(mapFromSupabase('surveillances', data));
 });
 
 app.get('/api/surveillances/:id', authMiddleware, async (req, res) => {
@@ -306,20 +407,21 @@ app.get('/api/surveillances/:id', authMiddleware, async (req, res) => {
     .eq('user_id', userId)
     .single();
   if (error) return res.status(404).json({ error: 'Surveillance not found' });
-  res.json(data);
+  res.json(mapFromSupabase('surveillances', data));
 });
 
 app.put('/api/surveillances/:id', authMiddleware, async (req, res) => {
   const userId = getUserId(req);
+  const mapped = mapToSupabase('surveillances', req.body)
   const { data, error } = await supabase
     .from('surveillances')
-    .update(req.body)
+    .update(mapped)
     .eq('id', req.params.id)
     .eq('user_id', userId)
     .select()
     .single();
   if (error) return res.status(400).json({ error: error.message });
-  res.json(data);
+  res.json(mapFromSupabase('surveillances', data));
 });
 
 app.delete('/api/surveillances/:id', authMiddleware, async (req, res) => {
@@ -348,7 +450,7 @@ app.get('/api/surveillances/:id/confirmations', authMiddleware, async (req, res)
     .eq('surveillance_id', req.params.id)
     .order('created_at');
   if (error) return res.status(400).json({ error: error.message });
-  res.json(data || []);
+  res.json((data || []).map(item => mapFromSupabase('surveillance_confirmations', item)));
 });
 
 app.post('/api/surveillances/:id/confirmations', authMiddleware, async (req, res) => {
@@ -360,13 +462,14 @@ app.post('/api/surveillances/:id/confirmations', authMiddleware, async (req, res
     .eq('user_id', userId)
     .single();
   if (survError || !surv) return res.status(404).json({ error: 'Surveillance not found' });
+  const mapped = mapToSupabase('surveillance_confirmations', { ...req.body, surveillance_id: req.params.id })
   const { data, error } = await supabase
     .from('surveillance_confirmations')
-    .insert({ ...req.body, surveillance_id: req.params.id })
+    .insert(mapped)
     .select()
     .single();
   if (error) return res.status(400).json({ error: error.message });
-  res.json(data);
+  res.json(mapFromSupabase('surveillance_confirmations', data));
 });
 
 app.put('/api/surveillances/:id/confirmations/:confirmationId', authMiddleware, async (req, res) => {
@@ -378,15 +481,16 @@ app.put('/api/surveillances/:id/confirmations/:confirmationId', authMiddleware, 
     .eq('user_id', userId)
     .single();
   if (survError || !surv) return res.status(404).json({ error: 'Surveillance not found' });
+  const mapped = mapToSupabase('surveillance_confirmations', req.body)
   const { data, error } = await supabase
     .from('surveillance_confirmations')
-    .update(req.body)
+    .update(mapped)
     .eq('id', req.params.confirmationId)
     .eq('surveillance_id', req.params.id)
     .select()
     .single();
   if (error) return res.status(400).json({ error: error.message });
-  res.json(data);
+  res.json(mapFromSupabase('surveillance_confirmations', data));
 });
 
 app.delete('/api/surveillances/:id/confirmations/:confirmationId', authMiddleware, async (req, res) => {
@@ -422,7 +526,7 @@ app.get('/api/surveillances/:id/screenshots', authMiddleware, async (req, res) =
     .eq('surveillance_id', req.params.id)
     .order('created_at');
   if (error) return res.status(400).json({ error: error.message });
-  res.json(data || []);
+  res.json((data || []).map(item => mapFromSupabase('surveillance_screenshots', item)));
 });
 
 app.post('/api/surveillances/:id/screenshots', authMiddleware, async (req, res) => {
@@ -434,13 +538,14 @@ app.post('/api/surveillances/:id/screenshots', authMiddleware, async (req, res) 
     .eq('user_id', userId)
     .single();
   if (survError || !surv) return res.status(404).json({ error: 'Surveillance not found' });
+  const mapped = mapToSupabase('surveillance_screenshots', { ...req.body, surveillance_id: req.params.id })
   const { data, error } = await supabase
     .from('surveillance_screenshots')
-    .insert({ ...req.body, surveillance_id: req.params.id })
+    .insert(mapped)
     .select()
     .single();
   if (error) return res.status(400).json({ error: error.message });
-  res.json(data);
+  res.json(mapFromSupabase('surveillance_screenshots', data));
 });
 
 app.delete('/api/surveillances/:id/screenshots/:screenshotId', authMiddleware, async (req, res) => {
@@ -482,26 +587,16 @@ app.get('/api/settings', authMiddleware, async (req, res) => {
   } else if (error) {
     return res.status(400).json({ error: error.message });
   }
-  res.json(data || {});
+  res.json(mapFromSupabase('settings', data || {}));
 });
 
 app.put('/api/settings', authMiddleware, async (req, res) => {
   const userId = getUserId(req);
-  const camelToSnake = {
-    initialCapital: 'initial_capital',
-    defaultRisk: 'default_risk',
-    device: 'device',
-    currency: 'currency',
-    language: 'language',
-    theme: 'theme'
-  };
+  const mapped = mapToSupabase('settings', req.body)
   const updateData = {};
-  for (const key of Object.keys(camelToSnake)) {
-    if (req.body[key] !== undefined && req.body[key] !== null) {
-      if (!ALLOWED_SETTINGS_COLUMNS.includes(camelToSnake[key])) {
-        return res.status(400).json({ error: `Invalid settings field: ${key}` });
-      }
-      updateData[camelToSnake[key]] = req.body[key];
+  for (const key of Object.keys(mapped)) {
+    if (ALLOWED_SETTINGS_COLUMNS.includes(key)) {
+      updateData[key] = mapped[key];
     }
   }
   if (Object.keys(updateData).length === 0) {
@@ -521,11 +616,11 @@ app.put('/api/settings', authMiddleware, async (req, res) => {
         .select()
         .single();
       if (insertError) return res.status(400).json({ error: insertError.message });
-      return res.json(newData);
+      return res.json(mapFromSupabase('settings', newData));
     }
     return res.status(400).json({ error: error.message });
   }
-  res.json(data);
+  res.json(mapFromSupabase('settings', data));
 });
 
 // Health check
