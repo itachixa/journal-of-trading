@@ -20,7 +20,7 @@ const getLocalDateTime = () => {
 export default function AddTrade() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { t, addTrade, updateTrade, trades, tags, PAIRS, calculateLotSize, accountBalance } = useApp();
+  const { t, addTrade, updateTrade, trades, tags, PAIRS, calculateLotSize, accountBalance, userPairs } = useApp();
   
   const editId = searchParams.get('id');
   const fromSource = searchParams.get('from');
@@ -288,7 +288,7 @@ export default function AddTrade() {
               </div>
               <div className="form-group">
                 <label>Paire</label>
-                <PairSelector value={calculatorData.pair} onChange={(pair) => setCalculatorData(prev => ({ ...prev, pair }))} />
+                <PairSelector value={calculatorData.pair} onChange={(pair) => setCalculatorData(prev => ({ ...prev, pair }))} pairs={userPairs} />
               </div>
               <div className="form-group">
                 <label>Stop Loss (pips)</label>
@@ -352,7 +352,7 @@ export default function AddTrade() {
 
               <div className="form-group">
                 <label>{t('pair')}</label>
-                <PairSelector value={formData.pair} onChange={(pair) => setFormData(prev => ({ ...prev, pair }))} />
+                <PairSelector value={formData.pair} onChange={(pair) => setFormData(prev => ({ ...prev, pair }))} pairs={userPairs} />
                 {!formData.pair && (
                   <div className="pair-warning">
                     ⚠️ Pair is required - please select a trading pair

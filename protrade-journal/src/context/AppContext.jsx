@@ -14,6 +14,15 @@ const DEFAULT_TAGS = [
 
 const DEFAULT_SETTINGS = { initialCapital: 10000, theme: 'dark', defaultRisk: 2 };
 
+const normalizeSettings = (s = {}) => ({
+  initialCapital: s.initial_capital ?? s.initialCapital ?? 10000,
+  theme: s.theme || 'dark',
+  defaultRisk: s.default_risk ?? s.defaultRisk ?? 2,
+  device: s.device || 'desktop',
+  currency: s.currency || 'EUR',
+  language: s.language || 'fr'
+});
+
 export function AppProvider({ children }) {
   const [trades, setTrades] = useState([]);
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
@@ -23,6 +32,14 @@ export function AppProvider({ children }) {
   const [language, setLanguage] = useState('fr');
   const [theme, setTheme] = useState('dark');
   const [isLoading, setIsLoading] = useState(true);
+  const [userPairs, setUserPairs] = useState(() => {
+    try {
+      const saved = localStorage.getItem('protrade_user_pairs');
+      return saved ? JSON.parse(saved) : SETUP_PAIRS;
+    } catch {
+      return SETUP_PAIRS;
+    }
+  });
 
   const loadData = async () => {
     try {
@@ -34,14 +51,7 @@ export function AppProvider({ children }) {
       setTags(tagsRes.length > 0 ? tagsRes : DEFAULT_TAGS);
       setSurveillances(survRes || []);
       if (settingsRes && Object.keys(settingsRes).length > 0) {
-        setSettings({
-          initialCapital: settingsRes.initial_capital ?? settingsRes.initialCapital ?? 10000,
-          theme: settingsRes.theme || 'dark',
-          defaultRisk: settingsRes.default_risk ?? settingsRes.defaultRisk ?? 2,
-          device: settingsRes.device || 'desktop',
-          currency: settingsRes.currency || 'EUR',
-          language: settingsRes.language || 'fr'
-        });
+        setSettings(normalizeSettings(settingsRes));
       }
     } catch (e) { console.error(e); }
     setIsLoading(false);
@@ -167,7 +177,11 @@ export function AppProvider({ children }) {
   };
 
   const value = {
-    trades, settings, notes, tags, surveillances, language, theme, isLoading, accountBalance, PAIRS, SETUP_PAIRS,
+    trades, settings, notes, tags, surveillances, language, theme, isLoading, accountBalance, PAIRS, SETUP_PAIRS, userPairs,
+    setUserPairs: (pairs) => {
+      setUserPairs(pairs);
+      localStorage.setItem('protrade_user_pairs', JSON.stringify(pairs));
+    },
     toggleLanguage: () => setLanguage(p => { const n = p === 'fr' ? 'en' : 'fr'; localStorage.setItem('protrade_language', n); return n; }),
     toggleTheme: () => setTheme(p => { const n = p === 'dark' ? 'light' : 'dark'; localStorage.setItem('protrade_theme', n); return n; }),
     t,
@@ -178,7 +192,9 @@ export function AppProvider({ children }) {
         console.error('Failed to update settings:', r.error);
         throw new Error(r.error);
       }
-      setSettings(r || newSettings);
+      if (r) {
+        setSettings(normalizeSettings({ ...newSettings, ...r }));
+      }
     },
     addTrade: async (tradeData) => {
       const r = await api.createTrade({ ...tradeData, date: tradeData.date || new Date().toISOString() });
@@ -280,11 +296,11 @@ export function AppProvider({ children }) {
         profitFactor: gl > 0 ? (gp / gl).toFixed(2) : 'inf',
         maxWin: maxWin.toFixed(2),
         maxLoss: maxLoss.toFixed(2),
-        avgWin: wins.length > 0 ? (gp / wins.length).toFixed(2) : 0,
-        avgLoss: losses.length > 0 ? (gl / losses.length).toFixed(2) : 0
-      };
-    }
-  };
+         avgWin: wins.length > 0 ? (gp / wins.length).toFixed(2) : 0,
+         avgLoss: losses.length > 0 ? (gl / losses.length).toFixed(2) : 0
+       };
+     }
+   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

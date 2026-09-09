@@ -2,13 +2,15 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
+import { PAIRS } from '../context/AppContext';
 import './Onboarding.css';
 
 const STEPS = [
   { id: 'welcome', title: 'Bienvenue', subtitle: 'Configurons votre journal de trading' },
   { id: 'device', title: 'Appareil', subtitle: 'Comment allez-vous utiliser l\'application ?' },
-  { id: 'currency', title: 'Devise', subtitle: 'Choisissez votre devise principale' },
+  { id: 'pairs', title: 'Vos Paires', subtitle: 'Sélectionnez 4 paires que vous tradez le plus' },
   { id: 'capital', title: 'Capital Initial', subtitle: 'Définissez votre balance de départ' },
+  { id: 'currency', title: 'Devise', subtitle: 'Choisissez votre devise principale' },
   { id: 'language', title: 'Langue', subtitle: 'Choisissez votre langue préférée' },
   { id: 'theme', title: 'Apparence', subtitle: 'Sélectionnez votre thème' },
   { id: 'risk', title: 'Gestion du Risque', subtitle: 'Configurez votre risque par défaut' },
@@ -23,7 +25,8 @@ export default function Onboarding() {
   const [defaultRisk, setDefaultRisk] = useState(2);
   const [device, setDevice] = useState('desktop');
   const [currency, setCurrency] = useState('EUR');
-  const { updateSettings, settings } = useApp();
+  const [selectedPairs, setSelectedPairs] = useState(['EURUSD', 'GBPUSD', 'USDJPY', 'GBPJPY']);
+  const { updateSettings, settings, setUserPairs } = useApp();
   const { user, completeOnboarding } = useAuth();
   const navigate = useNavigate();
 
@@ -36,6 +39,8 @@ export default function Onboarding() {
   const next = () => {
     if (currentStep === STEPS.length - 2) {
       saveSettings();
+    } else if (currentStep === 2) {
+      setUserPairs(selectedPairs);
     }
     setCurrentStep(s => Math.min(s + 1, STEPS.length - 1));
   };
@@ -53,6 +58,7 @@ export default function Onboarding() {
       device,
       currency
     });
+    setUserPairs(selectedPairs);
   };
 
   const finish = async () => {
@@ -153,28 +159,63 @@ export default function Onboarding() {
             )}
 
             {currentStep === 2 && (
-              <div className="onboarding-currency">
-                <div className="currency-options">
-                  {[
-                    { code: 'USD', symbol: '$', label: 'Dollar US', flag: '🇺🇸' },
-                    { code: 'EUR', symbol: '€', label: 'Euro', flag: '🇪🇺' },
-                    { code: 'GBP', symbol: '£', label: 'Livre Sterling', flag: '🇬🇧' },
-                    { code: 'CHF', symbol: 'Fr', label: 'Franc Suisse', flag: '🇨🇭' },
-                    { code: 'CAD', symbol: 'C$', label: 'Dollar Canadien', flag: '🇨🇦' },
-                    { code: 'AUD', symbol: 'A$', label: 'Dollar Australien', flag: '🇦🇺' },
-                    { code: 'JPY', symbol: '¥', label: 'Yen Japonais', flag: '🇯🇵' }
-                  ].map(c => (
-                    <button
-                      key={c.code}
-                      className={`currency-card ${currency === c.code ? 'active' : ''}`}
-                      onClick={() => setCurrency(c.code)}
-                    >
-                      <span className="currency-flag">{c.flag}</span>
-                      <span className="currency-symbol">{c.symbol}</span>
-                      <span className="currency-label">{c.label}</span>
-                      {currency === c.code && <span className="check-icon">✓</span>}
-                    </button>
-                  ))}
+              <div className="onboarding-pairs">
+                <div className="pairs-selection">
+                  <p className="pairs-hint">Sélectionnez 4 paires que vous tradez régulièrement</p>
+                  <div className="pairs-grid">
+                    {PAIRS.map(pair => (
+                      <button
+                        key={pair}
+                        className={`pair-option ${selectedPairs.includes(pair) ? 'selected' : ''}`}
+                        onClick={() => {
+                          setSelectedPairs(prev => {
+                            if (prev.includes(pair)) {
+                              return prev.filter(p => p !== pair);
+                            }
+                            if (prev.length >= 4) return prev;
+                            return [...prev, pair];
+                          });
+                        }}
+                      >
+                        {pair}
+                        {selectedPairs.includes(pair) && <span className="pair-check">✓</span>}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="pairs-count">
+                    {selectedPairs.length}/4 sélectionnées
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 2 && (
+              <div className="onboarding-pairs">
+                <div className="pairs-selection">
+                  <p className="pairs-hint">Sélectionnez 4 paires que vous tradez régulièrement</p>
+                  <div className="pairs-grid">
+                    {PAIRS.map(pair => (
+                      <button
+                        key={pair}
+                        className={`pair-option ${selectedPairs.includes(pair) ? 'selected' : ''}`}
+                        onClick={() => {
+                          setSelectedPairs(prev => {
+                            if (prev.includes(pair)) {
+                              return prev.filter(p => p !== pair);
+                            }
+                            if (prev.length >= 4) return prev;
+                            return [...prev, pair];
+                          });
+                        }}
+                      >
+                        {pair}
+                        {selectedPairs.includes(pair) && <span className="pair-check">✓</span>}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="pairs-count">
+                    {selectedPairs.length}/4 sélectionnées
+                  </div>
                 </div>
               </div>
             )}
@@ -210,6 +251,33 @@ export default function Onboarding() {
             )}
 
             {currentStep === 4 && (
+              <div className="onboarding-currency">
+                <div className="currency-options">
+                  {[
+                    { code: 'USD', symbol: '$', label: 'Dollar US', flag: '🇺🇸' },
+                    { code: 'EUR', symbol: '€', label: 'Euro', flag: '🇪🇺' },
+                    { code: 'GBP', symbol: '£', label: 'Livre Sterling', flag: '🇬🇧' },
+                    { code: 'CHF', symbol: 'Fr', label: 'Franc Suisse', flag: '🇨🇭' },
+                    { code: 'CAD', symbol: 'C$', label: 'Dollar Canadien', flag: '🇨🇦' },
+                    { code: 'AUD', symbol: 'A$', label: 'Dollar Australien', flag: '🇦🇺' },
+                    { code: 'JPY', symbol: '¥', label: 'Yen Japonais', flag: '🇯🇵' }
+                  ].map(c => (
+                    <button
+                      key={c.code}
+                      className={`currency-card ${currency === c.code ? 'active' : ''}`}
+                      onClick={() => setCurrency(c.code)}
+                    >
+                      <span className="currency-flag">{c.flag}</span>
+                      <span className="currency-symbol">{c.symbol}</span>
+                      <span className="currency-label">{c.label}</span>
+                      {currency === c.code && <span className="check-icon">✓</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {currentStep === 5 && (
               <div className="onboarding-language">
                 <div className="language-options">
                   {[
@@ -230,7 +298,7 @@ export default function Onboarding() {
               </div>
             )}
 
-            {currentStep === 5 && (
+            {currentStep === 6 && (
               <div className="onboarding-theme">
                 <div className="theme-options">
                   {[
@@ -252,7 +320,7 @@ export default function Onboarding() {
               </div>
             )}
 
-            {currentStep === 6 && (
+            {currentStep === 7 && (
               <div className="onboarding-risk">
                 <div className="risk-display">
                   <span className="risk-value">{defaultRisk}%</span>
@@ -284,7 +352,7 @@ export default function Onboarding() {
               </div>
             )}
 
-            {currentStep === 7 && (
+            {currentStep === 8 && (
               <div className="onboarding-complete">
                 <div className="complete-icon">🚀</div>
                 <h3>Tout est prêt !</h3>
