@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
+import { formatCurrency } from '../utils/formatters';
 import PairSelector from '../components/PairSelector';
 import './Calculator.css';
 
@@ -30,7 +31,7 @@ export default function Calculator() {
 
   const riskAmount = balance * (risk / 100);
   const rr = slPips && tpPips && parseFloat(slPips) > 0 ? (parseFloat(tpPips) / parseFloat(slPips)).toFixed(2) : '0.00';
-  const potentialProfit = result.lotSize * parseFloat(slPips || 0) * result.pipValue * parseFloat(rr);
+  const potentialProfit = (result.lotSize || 0) * (parseFloat(slPips) || 0) * (result.pipValue || 0) * parseFloat(rr);
 
   const saveToTrade = () => {
     const tradeData = {
@@ -108,7 +109,7 @@ export default function Calculator() {
               <span className="risk-label">
                 <span className="warning-icon">⚠️</span> {t('riskAmount')}
               </span>
-              <span className="risk-value">${riskAmount.toFixed(2)}</span>
+              <span className="risk-value">{formatCurrency(riskAmount)}</span>
             </div>
           </div>
 

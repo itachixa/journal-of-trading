@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaThLarge, FaList, FaDownload, FaTrash, FaEdit, FaSearch, FaFilter } from 'react-icons/fa';
 import { useApp } from '../context/AppContext';
+import { formatCurrency, formatDate } from '../utils/formatters';
 import PairSelector from '../components/PairSelector';
 import './Trades.css';
 
 export default function Trades() {
-  const { t, trades, deleteTrade, tags, PAIRS } = useApp();
+  const { t, trades, deleteTrade, tags, PAIRS, settings } = useApp();
   const navigate = useNavigate();
 
   const [viewMode, setViewMode] = useState('grid');
@@ -34,7 +35,13 @@ export default function Trades() {
         }
       }
       return true;
-    }).sort((a, b) => new Date(b.date) - new Date(a.date));
+    }).sort((a, b) => {
+      const da = new Date(a.date);
+      const db = new Date(b.date);
+      const ta = Number.isNaN(da.getTime()) ? 0 : da.getTime();
+      const tb = Number.isNaN(db.getTime()) ? 0 : db.getTime();
+      return tb - ta;
+    });
   }, [trades, filters, searchTerm]);
 
   const handleClearFilters = () => {
@@ -197,7 +204,7 @@ export default function Trades() {
                     </div>
 
                     <div className={`trade-result-badge ${trade.result >= 0 ? 'win' : 'loss'}`}>
-                      {trade.result >= 0 ? '+' : ''}{trade.result?.toFixed(2)} $
+                      {trade.result >= 0 ? '+' : ''}{formatCurrency(trade.result, settings.currency)}
                     </div>
                   </div>
 
@@ -227,7 +234,7 @@ export default function Trades() {
 
                   <div className="trade-card-footer">
                     <span className="trade-date">
-                      {new Date(trade.date).toLocaleDateString()}
+                      {formatDate(trade.date)}
                     </span>
                     <div className="trade-actions">
                       <button className="action-icon" onClick={(e) => { e.stopPropagation(); navigate(`/add-trade?id=${trade.id}`); }}>
@@ -271,7 +278,7 @@ export default function Trades() {
               <tbody>
                 {filteredTrades.map(trade => (
                   <tr key={trade.id} onClick={() => navigate(`/trades/${trade.id}`)} style={{ cursor: 'pointer' }}>
-                    <td>{new Date(trade.date).toLocaleDateString()}</td>
+                    <td>{formatDate(trade.date)}</td>
                     <td>{trade.pair}</td>
                     <td>
                       <span className={`type-badge ${trade.tradeType?.toLowerCase()}`}>
@@ -283,7 +290,7 @@ export default function Trades() {
                     <td>{trade.stopLoss}</td>
                     <td>{trade.takeProfit}</td>
                     <td className={trade.result >= 0 ? 'positive' : 'negative'}>
-                      {trade.result >= 0 ? '+' : ''}{trade.result?.toFixed(2)}
+                      {formatCurrency(trade.result, 'EUR')}
                     </td>
                     <td>
                       <div className="tags-cell">

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { formatCurrency } from '../utils/formatters';
 import { 
   FaThLarge, FaList, FaEye, FaPlusCircle, FaCalculator, 
   FaChartPie, FaCheckSquare, FaStickyNote, FaTags, FaCog,
@@ -32,7 +33,6 @@ export default function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
-  const currencySymbol = settings.currency === 'USD' ? '$' : settings.currency === 'GBP' ? '£' : settings.currency === 'JPY' ? '¥' : settings.currency === 'CHF' ? 'Fr' : settings.currency === 'CAD' ? 'C$' : settings.currency === 'AUD' ? 'A$' : '€';
 
   const handleLogout = async () => {
     await signOut();
@@ -109,10 +109,10 @@ export default function Layout({ children }) {
           <div className="header-actions">
             <div className="capital-display">
               <span className="capital-label">{t('balance') || 'Balance'}</span>
-              <span className={`capital-value ${accountBalance >= settings.initialCapital ? 'positive' : accountBalance < settings.initialCapital ? 'negative' : ''}`}>
-                {currencySymbol}{accountBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
-              <span className="initial-capital">({currencySymbol}{settings.initialCapital?.toLocaleString() || '10,000'} initial)</span>
+               <span className={`capital-value ${Number(accountBalance) >= Number(settings.initialCapital) ? 'positive' : Number(accountBalance) < Number(settings.initialCapital) ? 'negative' : ''}`}>
+                 {formatCurrency(accountBalance, settings.currency)}
+               </span>
+               <span className="initial-capital">({formatCurrency(settings.initialCapital, settings.currency)} initial)</span>
             </div>
           </div>
         </header>

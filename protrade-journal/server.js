@@ -118,7 +118,7 @@ function mapFromSupabase(table, item) {
   if (!item || typeof item !== 'object') return item
   if (table === 'trades') {
     const mapped = { ...item }
-    if ('direction' in mapped) { mapped.tradeType = mapped.direction; delete mapped.direction }
+    if ('direction' in mapped) { mapped.tradeType = mapped.direction.charAt(0).toUpperCase() + mapped.direction.slice(1); delete mapped.direction }
     if ('style' in mapped) { mapped.tradingType = mapped.style; delete mapped.style }
     if ('lot_size' in mapped) { mapped.lotSize = mapped.lot_size; delete mapped.lot_size }
     if ('stop_loss' in mapped) { mapped.stopLoss = mapped.stop_loss; delete mapped.stop_loss }

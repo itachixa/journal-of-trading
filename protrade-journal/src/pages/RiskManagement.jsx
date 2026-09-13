@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { FaShieldAlt, FaExclamationTriangle, FaCheckCircle, FaChartLine } from 'react-icons/fa';
 import { useApp } from '../context/AppContext';
+import { toNumber } from '../utils/formatters';
 import './RiskManagement.css';
 
 export default function RiskManagement() {
@@ -27,7 +28,13 @@ export default function RiskManagement() {
   const weekRiskPct = accountBalance > 0 ? (weekLoss / accountBalance) * 100 : 0;
 
   const consecutiveLosses = useMemo(() => {
-    const sorted = [...trades].sort((a, b) => new Date(b.date) - new Date(a.date));
+    const sorted = [...trades].sort((a, b) => {
+      const da = new Date(a.date);
+      const db = new Date(b.date);
+      const ta = Number.isNaN(da.getTime()) ? 0 : da.getTime();
+      const tb = Number.isNaN(db.getTime()) ? 0 : db.getTime();
+      return tb - ta;
+    });
     let count = 0;
     for (const trade of sorted) {
       if (trade.result < 0) count++;
@@ -41,9 +48,15 @@ export default function RiskManagement() {
     let peak = settings.initialCapital || 10000;
     let maxDD = 0;
     let cumulative = settings.initialCapital || 10000;
-    const sorted = [...trades].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const sorted = [...trades].sort((a, b) => {
+      const da = new Date(a.date);
+      const db = new Date(b.date);
+      const ta = Number.isNaN(da.getTime()) ? 0 : da.getTime();
+      const tb = Number.isNaN(db.getTime()) ? 0 : db.getTime();
+      return ta - tb;
+    });
     for (const trade of sorted) {
-      cumulative += trade.result;
+      cumulative += toNumber(trade.result);
       if (cumulative > peak) peak = cumulative;
       const dd = ((peak - cumulative) / peak) * 100;
       if (dd > maxDD) maxDD = dd;
@@ -79,16 +92,16 @@ export default function RiskManagement() {
           <div className="risk-stats">
             <div className="risk-stat">
               <span className="risk-stat-label">Balance</span>
-              <span className="risk-stat-value">${accountBalance.toLocaleString()}</span>
+              <span className="risk-stat-value">${toNumber(accountBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
             <div className="risk-stat">
               <span className="risk-stat-label">Capital Initial</span>
-              <span className="risk-stat-value">${(settings.initialCapital || 10000).toLocaleString()}</span>
+              <span className="risk-stat-value">${toNumber(settings.initialCapital || 10000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
             <div className="risk-stat">
               <span className="risk-stat-label">Max Drawdown</span>
               <span className={`risk-stat-value ${maxDrawdown > 20 ? 'danger' : maxDrawdown > 10 ? 'warning' : 'success'}`}>
-                {maxDrawdown.toFixed(2)}%
+                {toNumber(maxDrawdown).toFixed(2)}%
               </span>
             </div>
             <div className="risk-stat">
@@ -163,7 +176,7 @@ export default function RiskManagement() {
                       />
                     </div>
                     <div className="rule-values">
-                      <span>{rule.current.toFixed(1)}{rule.unit}</span>
+                      <span>{toNumber(rule.current).toFixed(1)}{rule.unit}</span>
                       <span>Limit: {rule.limit}{rule.unit}</span>
                     </div>
                   </div>

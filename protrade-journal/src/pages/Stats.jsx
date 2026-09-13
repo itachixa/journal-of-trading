@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 import { FaTrophy, FaArrowUp, FaArrowDown, FaChartLine } from 'react-icons/fa';
 import { useApp } from '../context/AppContext';
+import { formatCurrency, formatDate, formatNumber, toNumber } from '../utils/formatters';
 import './Stats.css';
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899'];
@@ -12,16 +13,25 @@ export default function Stats() {
 
   const stats = useMemo(() => calculateStats(trades), [trades, calculateStats]);
 
+  const safeTotalProfit = formatNumber(stats.totalProfit);
+  const safeProfitFactor = stats.profitFactor === Infinity || stats.profitFactor === 'inf' ? '∞' : formatNumber(stats.profitFactor);
+
   const equityData = useMemo(() => {
     if (!trades.length) return [];
     
     let cumulative = settings.initialCapital || 10000;
-    const sorted = [...trades].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const sorted = [...trades].sort((a, b) => {
+      const da = new Date(a.date);
+      const db = new Date(b.date);
+      const ta = Number.isNaN(da.getTime()) ? 0 : da.getTime();
+      const tb = Number.isNaN(db.getTime()) ? 0 : db.getTime();
+      return ta - tb;
+    });
     
     return sorted.map(trade => {
-      cumulative += trade.result;
+      cumulative += toNumber(trade.result);
       return {
-        date: new Date(trade.date).toLocaleDateString(),
+        date: formatDate(trade.date),
         value: cumulative
       };
     });
@@ -66,7 +76,7 @@ export default function Stats() {
             <FaTrophy />
             <span>{t('winrate')}</span>
           </div>
-          <div className="stat-big-value">{stats.winrate}%</div>
+          <div className="stat-big-value">{formatNumber(stats.winrate, 1)}%</div>
         </div>
 
         <div className="stat-card large">
@@ -74,8 +84,8 @@ export default function Stats() {
             <FaArrowUp />
             <span>{t('totalProfit')}</span>
           </div>
-          <div className={`stat-big-value ${parseFloat(stats.totalProfit) >= 0 ? 'profit' : 'loss'}`}>
-            ${parseFloat(stats.totalProfit).toLocaleString()}
+          <div className={`stat-big-value ${parseFloat(safeTotalProfit) >= 0 ? 'profit' : 'loss'}`}>
+            {formatCurrency(stats.totalProfit, settings.currency)}
           </div>
         </div>
 
@@ -84,7 +94,7 @@ export default function Stats() {
             <FaArrowUp />
             <span>{t('bestTrade')}</span>
           </div>
-          <div className="stat-big-value profit">${stats.maxWin}</div>
+          <div className="stat-big-value profit">{formatCurrency(stats.maxWin, settings.currency)}</div>
         </div>
 
         <div className="stat-card large">
@@ -92,7 +102,7 @@ export default function Stats() {
             <FaArrowDown />
             <span>{t('worstTrade')}</span>
           </div>
-          <div className="stat-big-value loss">${stats.maxLoss}</div>
+          <div className="stat-big-value loss">{formatCurrency(stats.maxLoss, settings.currency)}</div>
         </div>
       </div>
 
@@ -188,7 +198,7 @@ export default function Stats() {
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={pairData}>
                 <XAxis dataKey="name" stroke="#64748b" fontSize={12} />
-                <YAxis stroke="#64748b" fontSize={12} tickFormatter={(v) => `$${v}`} />
+                <YAxis stroke="#64748b" fontSize={12} tickFormatter={(v) => `$${toNumber(v)}`} />
                 <Tooltip 
                   contentStyle={{ 
                     background: '#1a2332', 
@@ -196,7 +206,7 @@ export default function Stats() {
                     borderRadius: '10px',
                     color: '#f1f5f9'
                   }}
-                  formatter={(value) => [`$${value.toFixed(2)}`, 'Profit']}
+                  formatter={(value) => [`$${toNumber(value).toFixed(2)}`, 'Capital']}
                 />
                 <Bar dataKey="profit" fill="#3b82f6" radius={[4, 4, 0, 0]} />
               </BarChart>

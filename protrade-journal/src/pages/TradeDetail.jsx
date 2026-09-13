@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaArrowLeft, FaEdit, FaTrash, FaCopy, FaExternalLinkAlt, FaBalanceScale } from 'react-icons/fa';
 import { useApp } from '../context/AppContext';
+import { formatCurrency, formatDateTime, toNumber } from '../utils/formatters';
 import './TradeDetail.css';
 
 export default function TradeDetail() {
@@ -44,8 +45,8 @@ export default function TradeDetail() {
     navigate(`/add-trade?id=${trade.id}`);
   };
 
-  const rr = trade.stopLoss && trade.takeProfit && trade.stopLoss > 0 
-    ? (trade.takeProfit / trade.stopLoss).toFixed(2) 
+  const rr = toNumber(trade.stopLoss) > 0 && toNumber(trade.takeProfit) > 0 
+    ? (toNumber(trade.takeProfit) / toNumber(trade.stopLoss)).toFixed(2) 
     : '0.00';
 
   return (
@@ -92,7 +93,7 @@ export default function TradeDetail() {
               <div className="detail-item">
                 <span className="detail-label">{t('dateTime')}</span>
                 <span className="detail-value">
-                  {new Date(trade.date).toLocaleString('fr-FR')}
+                  {formatDateTime(trade.date)}
                 </span>
               </div>
               <div className="detail-item">
@@ -130,10 +131,10 @@ export default function TradeDetail() {
             <h3>📈 {t('result')}</h3>
             <div className="result-display">
               <div className={`result-big ${trade.result >= 0 ? 'positive' : 'negative'}`}>
-                {trade.result >= 0 ? '+' : ''}{currencySymbol}{trade.result?.toFixed(2)}
+                {formatCurrency(trade.result, settings.currency)}
               </div>
               <div className="result-meta">
-                <span>Risk: {trade.lotSize ? ((accountBalance * 0.02) / (trade.stopLoss * 10)).toFixed(2) : '-'} lots</span>
+                <span>Risk: {trade.lotSize ? ((accountBalance * 0.02) / (toNumber(trade.stopLoss) * 10)).toFixed(2) : '-'} lots</span>
                 <span>P&L: {trade.result >= 0 ? 'Gagnant' : 'Perdant'}</span>
               </div>
             </div>
@@ -177,16 +178,16 @@ export default function TradeDetail() {
             <div className="stats-list">
               <div className="stat-row">
                 <span>Balance</span>
-                <span className="font-mono">{currencySymbol}{accountBalance.toLocaleString()}</span>
+                <span className="font-mono">{formatCurrency(accountBalance, settings.currency)}</span>
               </div>
               <div className="stat-row">
                 <span>Capital Initial</span>
-                <span className="font-mono">{currencySymbol}{settings.initialCapital?.toLocaleString()}</span>
+                <span className="font-mono">{formatCurrency(settings.initialCapital, settings.currency)}</span>
               </div>
               <div className="stat-row">
                 <span>P&L Total</span>
                 <span className={`font-mono ${accountBalance >= settings.initialCapital ? 'positive' : 'negative'}`}>
-                  {currencySymbol}{(accountBalance - settings.initialCapital).toFixed(2)}
+                  {formatCurrency(accountBalance - settings.initialCapital, settings.currency)}
                 </span>
               </div>
             </div>

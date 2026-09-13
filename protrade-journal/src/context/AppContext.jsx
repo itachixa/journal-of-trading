@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { api } from '../lib/api';
+import { toNumber } from '../utils/formatters';
 
 const AppContext = createContext();
 
@@ -279,11 +280,11 @@ export function AppProvider({ children }) {
     reset,
     calculateStats: (ts = trades) => {
       if (ts.length === 0) return { totalTrades: 0, wins: 0, losses: 0, breakevens: 0, winrate: 0, totalProfit: 0, profitFactor: 0, maxWin: 0, maxLoss: 0, avgWin: 0, avgLoss: 0 };
-      const wins = ts.filter(t => t.result > 0);
-      const losses = ts.filter(t => t.result < 0);
-      const breakevens = ts.filter(t => t.result === 0);
-      const gp = wins.reduce((s, t) => s + t.result, 0);
-      const gl = Math.abs(losses.reduce((s, t) => s + t.result, 0));
+      const wins = ts.filter(t => toNumber(t.result) > 0);
+      const losses = ts.filter(t => toNumber(t.result) < 0);
+      const breakevens = ts.filter(t => toNumber(t.result) === 0);
+      const gp = wins.reduce((s, t) => s + toNumber(t.result), 0);
+      const gl = Math.abs(losses.reduce((s, t) => s + toNumber(t.result), 0));
       const maxWin = wins.length > 0 ? Math.max(...wins.map(t => t.result)) : 0;
       const maxLoss = losses.length > 0 ? Math.min(...losses.map(t => t.result)) : 0;
       return {
@@ -291,15 +292,15 @@ export function AppProvider({ children }) {
         wins: wins.length,
         losses: losses.length,
         breakevens: breakevens.length,
-        winrate: ((wins.length / ts.length) * 100).toFixed(1),
-        totalProfit: ts.reduce((s, t) => s + t.result, 0).toFixed(2),
-        profitFactor: gl > 0 ? (gp / gl).toFixed(2) : 'inf',
-        maxWin: maxWin.toFixed(2),
-        maxLoss: maxLoss.toFixed(2),
-         avgWin: wins.length > 0 ? (gp / wins.length).toFixed(2) : 0,
-         avgLoss: losses.length > 0 ? (gl / losses.length).toFixed(2) : 0
-       };
-     }
+        winrate: parseFloat(((wins.length / ts.length) * 100).toFixed(1)),
+        totalProfit: parseFloat(ts.reduce((s, t) => s + toNumber(t.result), 0).toFixed(2)),
+        profitFactor: gl > 0 ? parseFloat((gp / gl).toFixed(2)) : Infinity,
+        maxWin: parseFloat(maxWin.toFixed(2)),
+        maxLoss: parseFloat(maxLoss.toFixed(2)),
+        avgWin: wins.length > 0 ? parseFloat((gp / wins.length).toFixed(2)) : 0,
+        avgLoss: losses.length > 0 ? parseFloat((gl / losses.length).toFixed(2)) : 0
+      };
+    }
    };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
