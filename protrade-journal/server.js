@@ -87,6 +87,11 @@ function mapToSupabase(table, body) {
   if (table === 'tags') {
     return body
   }
+  if (table === 'notes') {
+    const mapped = { ...body }
+    delete mapped.pair
+    return mapped
+  }
   if (table === 'surveillances') {
     const mapped = { ...body }
     if (mapped.direction) {

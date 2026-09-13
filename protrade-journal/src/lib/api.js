@@ -292,7 +292,9 @@ class ApiClient {
       return mapped
     }
     if (table === 'notes') {
-      return body
+      const mapped = { ...body }
+      delete mapped.pair
+      return mapped
     }
     if (table === 'tags') {
       return body
