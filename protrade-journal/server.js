@@ -99,6 +99,8 @@ function mapToSupabase(table, body) {
     if (mapped.date) {
       mapped.date = new Date(mapped.date).toISOString()
     }
+    delete mapped.conditions
+    delete mapped.screenshots
     return mapped
   }
   if (table === 'settings') {
@@ -110,6 +112,9 @@ function mapToSupabase(table, body) {
     if (body.currency !== undefined) mapped.currency = body.currency
     if (body.language !== undefined) mapped.language = body.language
     return mapped
+  }
+  if (table === 'surveillance_confirmations') {
+    return body
   }
   return body
 }
@@ -135,6 +140,16 @@ function mapFromSupabase(table, item) {
     const mapped = { ...item }
     if ('initial_capital' in mapped) { mapped.initialCapital = mapped.initial_capital; delete mapped.initial_capital }
     if ('default_risk' in mapped) { mapped.defaultRisk = mapped.default_risk; delete mapped.default_risk }
+    return mapped
+  }
+  if (table === 'surveillance_confirmations') {
+    const mapped = { ...item }
+    if ('surveillance_id' in mapped) { delete mapped.surveillance_id }
+    return mapped
+  }
+  if (table === 'surveillance_screenshots') {
+    const mapped = { ...item }
+    if ('surveillance_id' in mapped) { delete mapped.surveillance_id }
     return mapped
   }
   return item
@@ -383,11 +398,36 @@ app.get('/api/surveillances', authMiddleware, async (req, res) => {
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
   if (error) return res.status(400).json({ error: error.message });
-  res.json((data || []).map(item => mapFromSupabase('surveillances', item)));
+
+  const surveillances = (data || []).map(item => mapFromSupabase('surveillances', item));
+
+  // Fetch confirmations for all surveillances
+  if (surveillances.length > 0) {
+    const ids = surveillances.map(s => s.id);
+    const { data: confirmations, error: confError } = await supabase
+      .from('surveillance_confirmations')
+      .select('*')
+      .in('surveillance_id', ids)
+      .order('created_at');
+    if (!confError && confirmations) {
+      const confBySurv = {};
+      confirmations.forEach(c => {
+        const mapped = mapFromSupabase('surveillance_confirmations', c);
+        if (!confBySurv[mapped.surveillance_id]) confBySurv[mapped.surveillance_id] = [];
+        confBySurv[mapped.surveillance_id].push(mapped);
+      });
+      surveillances.forEach(s => {
+        s.conditions = confBySurv[s.id] || [];
+      });
+    }
+  }
+
+  res.json(surveillances);
 });
 
 app.post('/api/surveillances', authMiddleware, async (req, res) => {
   const userId = getUserId(req);
+  const conditions = req.body.conditions || [];
   const mapped = mapToSupabase('surveillances', { ...req.body, user_id: userId })
   const { data, error } = await supabase
     .from('surveillances')
@@ -395,7 +435,25 @@ app.post('/api/surveillances', authMiddleware, async (req, res) => {
     .select()
     .single();
   if (error) return res.status(400).json({ error: error.message });
-  res.json(mapFromSupabase('surveillances', data));
+
+  const surveillance = mapFromSupabase('surveillances', data);
+
+  // Insert conditions
+  if (conditions.length > 0) {
+    const confs = conditions.map((c, idx) => ({
+      surveillance_id: surveillance.id,
+      title: c.title,
+      stars: c.stars || 3,
+      checked: c.checked || false,
+      created_at: new Date(Date.now() + idx).toISOString()
+    }));
+    await supabase.from('surveillance_confirmations').insert(confs);
+    surveillance.conditions = confs.map(c => mapFromSupabase('surveillance_confirmations', c));
+  } else {
+    surveillance.conditions = [];
+  }
+
+  res.json(surveillance);
 });
 
 app.get('/api/surveillances/:id', authMiddleware, async (req, res) => {
@@ -407,11 +465,27 @@ app.get('/api/surveillances/:id', authMiddleware, async (req, res) => {
     .eq('user_id', userId)
     .single();
   if (error) return res.status(404).json({ error: 'Surveillance not found' });
-  res.json(mapFromSupabase('surveillances', data));
+
+  const surveillance = mapFromSupabase('surveillances', data);
+
+  // Fetch confirmations
+  const { data: confirmations, error: confError } = await supabase
+    .from('surveillance_confirmations')
+    .select('*')
+    .eq('surveillance_id', req.params.id)
+    .order('created_at');
+  if (!confError && confirmations) {
+    surveillance.conditions = confirmations.map(c => mapFromSupabase('surveillance_confirmations', c));
+  } else {
+    surveillance.conditions = [];
+  }
+
+  res.json(surveillance);
 });
 
 app.put('/api/surveillances/:id', authMiddleware, async (req, res) => {
   const userId = getUserId(req);
+  const conditions = req.body.conditions || [];
   const mapped = mapToSupabase('surveillances', req.body)
   const { data, error } = await supabase
     .from('surveillances')
@@ -421,7 +495,26 @@ app.put('/api/surveillances/:id', authMiddleware, async (req, res) => {
     .select()
     .single();
   if (error) return res.status(400).json({ error: error.message });
-  res.json(mapFromSupabase('surveillances', data));
+
+  const surveillance = mapFromSupabase('surveillances', data);
+
+  // Sync conditions: delete existing and insert new
+  await supabase.from('surveillance_confirmations').delete().eq('surveillance_id', req.params.id);
+  if (conditions.length > 0) {
+    const confs = conditions.map((c, idx) => ({
+      surveillance_id: surveillance.id,
+      title: c.title,
+      stars: c.stars || 3,
+      checked: c.checked || false,
+      created_at: new Date(Date.now() + idx).toISOString()
+    }));
+    await supabase.from('surveillance_confirmations').insert(confs);
+    surveillance.conditions = confs.map(c => mapFromSupabase('surveillance_confirmations', c));
+  } else {
+    surveillance.conditions = [];
+  }
+
+  res.json(surveillance);
 });
 
 app.delete('/api/surveillances/:id', authMiddleware, async (req, res) => {

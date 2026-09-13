@@ -115,7 +115,30 @@ class ApiClient {
       if (method === 'GET' && !id && !subResource) {
         const { data, error } = await supabase.from(table).select('*')
         if (error) return { error: error.message }
-        return (data || []).map(item => this.mapFromSupabase(table, item))
+        const items = (data || []).map(item => this.mapFromSupabase(table, item))
+
+        // For surveillances, fetch confirmations
+        if (table === 'surveillances' && items.length > 0) {
+          const ids = items.map(s => s.id)
+          const { data: confirmations, error: confError } = await supabase
+            .from('surveillance_confirmations')
+            .select('*')
+            .in('surveillance_id', ids)
+            .order('created_at')
+          if (!confError && confirmations) {
+            const confBySurv = {}
+            confirmations.forEach(c => {
+              const mapped = this.mapFromSupabase('surveillance_confirmations', c)
+              if (!confBySurv[mapped.surveillance_id]) confBySurv[mapped.surveillance_id] = []
+              confBySurv[mapped.surveillance_id].push(mapped)
+            })
+            items.forEach(s => {
+              s.conditions = confBySurv[s.id] || []
+            })
+          }
+        }
+
+        return items
       }
 
       if (method === 'GET' && id && subResource) {
@@ -127,23 +150,78 @@ class ApiClient {
       if (method === 'GET' && id) {
         const { data, error } = await supabase.from(table).select('*').eq('id', id).single()
         if (error) return { error: error.message }
-        return this.mapFromSupabase(table, data)
+        const item = this.mapFromSupabase(table, data)
+
+        // For surveillances, fetch confirmations
+        if (table === 'surveillances') {
+          const { data: confirmations, error: confError } = await supabase
+            .from('surveillance_confirmations')
+            .select('*')
+            .eq('surveillance_id', id)
+            .order('created_at')
+          if (!confError && confirmations) {
+            item.conditions = confirmations.map(c => this.mapFromSupabase('surveillance_confirmations', c))
+          } else {
+            item.conditions = []
+          }
+        }
+
+        return item
       }
 
       if (method === 'POST' && !id) {
         const body = options.body ? JSON.parse(options.body) : {}
+        const conditions = body.conditions || []
         const mapped = this.mapToSupabase(table, body)
         const { data, error } = await supabase.from(table).insert(mapped).select().single()
         if (error) return { error: error.message }
-        return this.mapFromSupabase(table, data)
+        const item = this.mapFromSupabase(table, data)
+
+        // For surveillances, insert conditions
+        if (table === 'surveillances' && conditions.length > 0) {
+          const confs = conditions.map((c, idx) => ({
+            surveillance_id: item.id,
+            title: c.title,
+            stars: c.stars || 3,
+            checked: c.checked || false,
+            created_at: new Date(Date.now() + idx).toISOString()
+          }))
+          await supabase.from('surveillance_confirmations').insert(confs)
+          item.conditions = confs.map(c => this.mapFromSupabase('surveillance_confirmations', c))
+        } else if (table === 'surveillances') {
+          item.conditions = []
+        }
+
+        return item
       }
 
       if (method === 'PUT' && id && !subResource) {
         const body = options.body ? JSON.parse(options.body) : {}
+        const conditions = body.conditions || []
         const mapped = this.mapToSupabase(table, body)
         const { data, error } = await supabase.from(table).update(mapped).eq('id', id).select().single()
         if (error) return { error: error.message }
-        return this.mapFromSupabase(table, data)
+        const item = this.mapFromSupabase(table, data)
+
+        // For surveillances, sync conditions
+        if (table === 'surveillances') {
+          await supabase.from('surveillance_confirmations').delete().eq('surveillance_id', id)
+          if (conditions.length > 0) {
+            const confs = conditions.map((c, idx) => ({
+              surveillance_id: item.id,
+              title: c.title,
+              stars: c.stars || 3,
+              checked: c.checked || false,
+              created_at: new Date(Date.now() + idx).toISOString()
+            }))
+            await supabase.from('surveillance_confirmations').insert(confs)
+            item.conditions = confs.map(c => this.mapFromSupabase('surveillance_confirmations', c))
+          } else {
+            item.conditions = []
+          }
+        }
+
+        return item
       }
 
       if (method === 'DELETE' && id && !subResource) {
@@ -227,6 +305,8 @@ class ApiClient {
       if (mapped.date) {
         mapped.date = new Date(mapped.date).toISOString()
       }
+      delete mapped.conditions
+      delete mapped.screenshots
       return mapped
     }
     if (table === 'settings') {
@@ -238,6 +318,9 @@ class ApiClient {
       if (body.currency !== undefined) mapped.currency = body.currency
       if (body.language !== undefined) mapped.language = body.language
       return mapped
+    }
+    if (table === 'surveillance_confirmations') {
+      return body
     }
     return body
   }
@@ -258,6 +341,11 @@ class ApiClient {
       const mapped = { ...item }
       if ('initial_capital' in mapped) { mapped.initialCapital = mapped.initial_capital; delete mapped.initial_capital }
       if ('default_risk' in mapped) { mapped.defaultRisk = mapped.default_risk; delete mapped.default_risk }
+      return mapped
+    }
+    if (table === 'surveillance_confirmations') {
+      const mapped = { ...item }
+      if ('surveillance_id' in mapped) { delete mapped.surveillance_id }
       return mapped
     }
     return item
