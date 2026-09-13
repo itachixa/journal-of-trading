@@ -5,56 +5,11 @@
 
 .pair-select {
   width: 100%;
-  padding: 12px 36px 12px 14px;
-  background: var(--bg-glass-light);
-  border: 1px solid var(--bg-glass-border);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  min-height: 44px;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 12px;
-}
-
-.pair-select:hover {
-  border-color: var(--accent-cyan);
-  background-color: var(--bg-tertiary);
-}
-
-.pair-select:focus {
-  outline: none;
-  border-color: var(--accent-cyan);
-  box-shadow: 0 0 0 3px var(--accent-cyan-glow);
-}
-
-.pair-select option {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  padding: 12px;
-  font-weight: 500;
-}
-
-.pair-select option:checked {
-  background: var(--accent-cyan) !important;
-  color: white;
-}
-
-.pair-select option:hover {
-  background: var(--bg-tertiary);
 }
 
 @media (max-width: 768px) {
   .pair-select {
     font-size: 16px;
     min-height: 48px;
-    padding: 12px;
   }
 }
