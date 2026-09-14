@@ -92,12 +92,24 @@ create table surveillance_screenshots (
   created_at timestamp with time zone default now()
 );
 
+-- Checklist items table
+create table checklist_items (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid references auth.users on delete cascade,
+  category text not null,
+  text text not null,
+  checked boolean default false,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+
 -- Indexes for performance
 create index idx_trades_user_id on trades(user_id);
 create index idx_trades_date on trades(date);
 create index idx_notes_user_id on notes(user_id);
 create index idx_surveillances_user_id on surveillances(user_id);
 create index idx_tags_user_id on tags(user_id);
+create index idx_checklist_user_id on checklist_items(user_id);
 
 -- Row Level Security policies
 alter table settings enable row level security;
@@ -146,3 +158,8 @@ create policy "Users can view screenshots of their surveillances" on surveillanc
 create policy "Users can manage screenshots of their surveillances" on surveillance_screenshots for all using (
   exists (select 1 from surveillances where surveillances.id = surveillance_screenshots.surveillance_id and surveillances.user_id = auth.uid())
 );
+
+create policy "Users can view their own checklist items" on checklist_items for select using (auth.uid() = user_id);
+create policy "Users can insert their own checklist items" on checklist_items for insert with check (auth.uid() = user_id);
+create policy "Users can update their own checklist items" on checklist_items for update using (auth.uid() = user_id);
+create policy "Users can delete their own checklist items" on checklist_items for delete using (auth.uid() = user_id);

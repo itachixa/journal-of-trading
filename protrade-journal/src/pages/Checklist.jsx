@@ -1,9 +1,7 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import './Checklist.css';
-
-const STORAGE_KEY = 'protrade_checklist';
 
 const DEFAULT_CHECKLIST = [
   { id: 1, category: 'analysis', text: 'Identify market structure (trend/range)', checked: false },
@@ -27,46 +25,44 @@ const CATEGORIES = [
 ];
 
 export default function Checklist() {
-  const { _t } = useApp();
-  const [items, setItems] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : DEFAULT_CHECKLIST;
-    } catch {
-      return DEFAULT_CHECKLIST;
-    }
-  });
+  const { 
+    _t, 
+    checklistItems, 
+    isLoading, 
+    addChecklistItem, 
+    updateChecklistItem, 
+    deleteChecklistItem 
+  } = useApp();
+  
   const [newItemText, setNewItemText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('analysis');
   const [editItemId, setEditItemId] = useState(null);
   const [editText, setEditText] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
+  const items = checklistItems.length > 0 ? checklistItems : DEFAULT_CHECKLIST;
 
-  const toggleItem = (id) => {
-    setItems(prev => prev.map(item => 
-      item.id === id ? { ...item, checked: !item.checked } : item
-    ));
+  const toggleItem = async (id) => {
+    const item = items.find(i => i.id === id);
+    if (item) {
+      await updateChecklistItem(id, { checked: !item.checked });
+    }
   };
 
-  const deleteItem = (id) => {
-    setItems(prev => prev.filter(item => item.id !== id));
+  const deleteItem = async (id) => {
+    await deleteChecklistItem(id);
   };
 
-  const addItem = () => {
+  const addItem = async () => {
     if (!newItemText.trim()) return;
     
-    const newItem = {
-      id: Date.now(),
+    await addChecklistItem({
       category: selectedCategory,
       text: newItemText.trim(),
       checked: false
-    };
+    });
     
-    setItems(prev => [...prev, newItem]);
     setNewItemText('');
     setShowAddForm(false);
   };
@@ -76,12 +72,10 @@ export default function Checklist() {
     setEditText(item.text);
   };
 
-  const saveEdit = () => {
+  const saveEdit = async () => {
     if (!editText.trim()) return;
     
-    setItems(prev => prev.map(item => 
-      item.id === editItemId ? { ...item, text: editText.trim() } : item
-    ));
+    await updateChecklistItem(editItemId, { text: editText.trim() });
     setEditItemId(null);
     setEditText('');
   };
@@ -91,8 +85,12 @@ export default function Checklist() {
     setEditText('');
   };
 
-  const resetChecklist = () => {
-    setItems(prev => prev.map(item => ({ ...item, checked: false })));
+  const resetChecklist = async () => {
+    for (const item of items) {
+      if (item.checked) {
+        await updateChecklistItem(item.id, { checked: false });
+      }
+    }
   };
 
   const getCategoryItems = (categoryKey) => {
@@ -111,6 +109,17 @@ export default function Checklist() {
     const checked = items.filter(item => item.checked).length;
     return Math.round((checked / items.length) * 100);
   }, [items]);
+
+  if (isLoading && checklistItems.length === 0) {
+    return (
+      <div className="checklist-page loading">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading checklist...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div 

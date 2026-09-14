@@ -723,6 +723,62 @@ app.put('/api/settings', authMiddleware, async (req, res) => {
   res.json(mapFromSupabase('settings', data));
 });
 
+// Checklist
+app.get('/api/checklist', authMiddleware, async (req, res) => {
+  const userId = getUserId(req);
+  const { data, error } = await supabase
+    .from('checklist_items')
+    .select('*')
+    .eq('user_id', userId)
+    .order('category')
+    .order('created_at');
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data || []);
+});
+
+app.post('/api/checklist', authMiddleware, async (req, res) => {
+  const userId = getUserId(req);
+  const { category, text, checked } = req.body;
+  if (!category || !text) return res.status(400).json({ error: 'Category and text required' });
+  const { data, error } = await supabase
+    .from('checklist_items')
+    .insert({ user_id: userId, category, text, checked: checked || false })
+    .select()
+    .single();
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data);
+});
+
+app.put('/api/checklist/:id', authMiddleware, async (req, res) => {
+  const userId = getUserId(req);
+  const { text, checked, category } = req.body;
+  const updates = {};
+  if (text !== undefined) updates.text = text;
+  if (checked !== undefined) updates.checked = checked;
+  if (category !== undefined) updates.category = category;
+  updates.updated_at = new Date().toISOString();
+  const { data, error } = await supabase
+    .from('checklist_items')
+    .update(updates)
+    .eq('id', req.params.id)
+    .eq('user_id', userId)
+    .select()
+    .single();
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data);
+});
+
+app.delete('/api/checklist/:id', authMiddleware, async (req, res) => {
+  const userId = getUserId(req);
+  const { error } = await supabase
+    .from('checklist_items')
+    .delete()
+    .eq('id', req.params.id)
+    .eq('user_id', userId);
+  if (error) return res.status(400).json({ error: error.message });
+  res.json({ success: true });
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

@@ -397,6 +397,11 @@ class ApiClient {
   createSurveillanceScreenshot(surveillanceId, data) { return this.request(`/surveillances/${surveillanceId}/screenshots`, { method: 'POST', body: JSON.stringify(data) }) }
   deleteSurveillanceScreenshot(surveillanceId, screenshotId) { return this.request(`/surveillances/${surveillanceId}/screenshots/${screenshotId}`, { method: 'DELETE' }) }
 
+  getChecklist() { return this.request('/checklist') }
+  createChecklistItem(data) { return this.request('/checklist', { method: 'POST', body: JSON.stringify(data) }) }
+  updateChecklistItem(id, data) { return this.request(`/checklist/${id}`, { method: 'PUT', body: JSON.stringify(data) }) }
+  deleteChecklistItem(id) { return this.request(`/checklist/${id}`, { method: 'DELETE' }) }
+
   getSettings() { return this.request('/settings') }
   updateSettings(data) { return this.request('/settings', { method: 'PUT', body: JSON.stringify(data) }) }
 }

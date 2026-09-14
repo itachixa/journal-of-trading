@@ -30,6 +30,7 @@ export function AppProvider({ children }) {
   const [notes, setNotes] = useState([]);
   const [tags, setTags] = useState(DEFAULT_TAGS);
   const [surveillances, setSurveillances] = useState([]);
+  const [checklistItems, setChecklistItems] = useState([]);
   const [language, setLanguage] = useState('fr');
   const [theme, setTheme] = useState('dark');
   const [isLoading, setIsLoading] = useState(true);
@@ -44,13 +45,14 @@ export function AppProvider({ children }) {
 
   const loadData = async () => {
     try {
-      const [tradesRes, notesRes, tagsRes, survRes, settingsRes] = await Promise.all([
-        api.getTrades(), api.getNotes(), api.getTags(), api.getSurveillances(), api.getSettings()
+      const [tradesRes, notesRes, tagsRes, survRes, settingsRes, checklistRes] = await Promise.all([
+        api.getTrades(), api.getNotes(), api.getTags(), api.getSurveillances(), api.getSettings(), api.getChecklist()
       ]);
       setTrades(tradesRes || []);
       setNotes(notesRes || []);
       setTags(tagsRes.length > 0 ? tagsRes : DEFAULT_TAGS);
       setSurveillances(survRes || []);
+      setChecklistItems(checklistRes || []);
       if (settingsRes && Object.keys(settingsRes).length > 0) {
         setSettings(normalizeSettings(settingsRes));
       }
@@ -178,7 +180,7 @@ export function AppProvider({ children }) {
   };
 
   const value = {
-    trades, settings, notes, tags, surveillances, language, theme, isLoading, accountBalance, PAIRS, SETUP_PAIRS, userPairs,
+    trades, settings, notes, tags, surveillances, checklistItems, language, theme, isLoading, accountBalance, PAIRS, SETUP_PAIRS, userPairs,
     setUserPairs: (pairs) => {
       setUserPairs(pairs);
       localStorage.setItem('protrade_user_pairs', JSON.stringify(pairs));
@@ -276,6 +278,26 @@ export function AppProvider({ children }) {
     deleteSurveillance: async (id) => {
       await api.deleteSurveillance(id);
       setSurveillances(p => p.filter(x => x.id !== id));
+    },
+    addChecklistItem: async (itemData) => {
+      const r = await api.createChecklistItem(itemData);
+      if (r && r.error) {
+        console.error('Failed to add checklist item:', r.error);
+        throw new Error(r.error);
+      }
+      setChecklistItems(p => [...p, r]);
+    },
+    updateChecklistItem: async (id, itemData) => {
+      const r = await api.updateChecklistItem(id, itemData);
+      if (r && r.error) {
+        console.error('Failed to update checklist item:', r.error);
+        throw new Error(r.error);
+      }
+      setChecklistItems(p => p.map(x => x.id === id ? r : x));
+    },
+    deleteChecklistItem: async (id) => {
+      await api.deleteChecklistItem(id);
+      setChecklistItems(p => p.filter(x => x.id !== id));
     },
     reset,
     calculateStats: (ts = trades) => {
