@@ -227,6 +227,9 @@ export default function Surveillance() {
             <button className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`} onClick={() => setViewMode('grid')} title="Grid view">▦</button>
             <button className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')} title="List view">☰</button>
           </div>
+          <button className="btn-primary" onClick={() => { resetForm(); setShowForm(true); }}>
+            + {t('add') || 'Add'}
+          </button>
         </div>
       </header>
 

@@ -1,7 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import './Checklist.css';
+
+const STORAGE_KEY = 'protrade_checklist';
 
 const DEFAULT_CHECKLIST = [
   { id: 1, category: 'analysis', text: 'Identify market structure (trend/range)', checked: false },
@@ -26,12 +28,23 @@ const CATEGORIES = [
 
 export default function Checklist() {
   const { _t } = useApp();
-  const [items, setItems] = useState(DEFAULT_CHECKLIST);
+  const [items, setItems] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : DEFAULT_CHECKLIST;
+    } catch {
+      return DEFAULT_CHECKLIST;
+    }
+  });
   const [newItemText, setNewItemText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('analysis');
   const [editItemId, setEditItemId] = useState(null);
   const [editText, setEditText] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  }, [items]);
 
   const toggleItem = (id) => {
     setItems(prev => prev.map(item => 
