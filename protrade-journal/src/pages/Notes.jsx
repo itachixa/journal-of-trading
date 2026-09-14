@@ -2,30 +2,27 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaPlus, FaTrash, FaEdit } from 'react-icons/fa';
 import { useApp } from '../context/AppContext';
-import PairSelector from '../components/PairSelector';
 import './Notes.css';
 
 const CATEGORIES = ['analysis', 'journal', 'mistakes'];
 
 export default function Notes() {
-  const { t, notes, addNote, updateNote, deleteNote, PAIRS } = useApp();
+  const { t, notes, addNote, updateNote, deleteNote } = useApp();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [filters, setFilters] = useState({ pair: '', category: '' });
+  const [filterCategory, setFilterCategory] = useState('');
   
   const [formData, setFormData] = useState({
-    pair: 'EURUSD',
     category: 'analysis',
     content: ''
   });
 
   const filteredNotes = useMemo(() => {
     return notes.filter(note => {
-      if (filters.pair && note.pair !== filters.pair) return false;
-      if (filters.category && note.category !== filters.category) return false;
+      if (filterCategory && note.category !== filterCategory) return false;
       return true;
     }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  }, [notes, filters]);
+  }, [notes, filterCategory]);
 
   const handleSubmit = () => {
     if (!formData.content.trim()) return;
@@ -36,13 +33,13 @@ export default function Notes() {
       addNote(formData);
     }
     
-    setFormData({ pair: 'EURUSD', category: 'analysis', content: '' });
+    setFormData({ category: 'analysis', content: '' });
     setEditingId(null);
     setShowForm(false);
   };
 
   const handleEdit = (note) => {
-    setFormData({ pair: note.pair, category: note.category, content: note.content });
+    setFormData({ category: note.category, content: note.content });
     setEditingId(note.id);
     setShowForm(true);
   };
@@ -62,27 +59,29 @@ export default function Notes() {
     }
   };
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+  };
+
   return (
     <motion.div 
       className="notes-page"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
-      <div className="page-header">
+      <header className="page-header">
         <h2>{t('marketNotes')}</h2>
         <button className="btn-primary" onClick={() => setShowForm(true)}>
           <FaPlus /> {t('addNote')}
         </button>
-      </div>
+      </header>
 
       <div className="notes-filters">
-        <PairSelector 
-          value={filters.pair} 
-          onChange={(pair) => setFilters(f => ({ ...f, pair }))} 
-        />
         <select 
-          value={filters.category}
-          onChange={(e) => setFilters(f => ({ ...f, category: e.target.value }))}
+          value={filterCategory}
+          onChange={(e) => setFilterCategory(e.target.value)}
         >
           <option value="">{t('allCategories')}</option>
           {CATEGORIES.map(cat => (
@@ -107,25 +106,20 @@ export default function Notes() {
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={e => e.stopPropagation()}
             >
-              <h3>{editingId ? t('edit') : t('newNote')}</h3>
+              <div className="modal-header">
+                <h3>{editingId ? t('edit') : t('newNote')}</h3>
+              </div>
               
-              <div className="form-row">
-                <div className="form-group">
-                  <label>{t('pair')}</label>
-                  <PairSelector value={formData.pair} onChange={(pair) => setFormData(f => ({ ...f, pair }))} />
-                </div>
-
-                <div className="form-group">
-                  <label>{t('category')}</label>
-                  <select 
-                    value={formData.category}
-                    onChange={(e) => setFormData(f => ({ ...f, category: e.target.value }))}
-                  >
-                    {CATEGORIES.map(cat => (
-                      <option key={cat} value={cat}>{t(cat)}</option>
-                    ))}
-                  </select>
-                </div>
+              <div className="form-group">
+                <label>{t('category')}</label>
+                <select 
+                  value={formData.category}
+                  onChange={(e) => setFormData(f => ({ ...f, category: e.target.value }))}
+                >
+                  {CATEGORIES.map(cat => (
+                    <option key={cat} value={cat}>{t(cat)}</option>
+                  ))}
+                </select>
               </div>
 
               <div className="form-group">
@@ -133,7 +127,7 @@ export default function Notes() {
                 <textarea 
                   value={formData.content}
                   onChange={(e) => setFormData(f => ({ ...f, content: e.target.value }))}
-                  rows={5}
+                  rows={6}
                   placeholder="Votre note..."
                 />
               </div>
@@ -162,31 +156,29 @@ export default function Notes() {
               transition={{ delay: index * 0.05 }}
             >
               <div className="note-header">
-                <span className="note-pair">{note.pair}</span>
                 <span 
                   className="note-category"
                   style={{ background: getCategoryColor(note.category) + '20', color: getCategoryColor(note.category) }}
                 >
                   {t(note.category)}
                 </span>
+                <span className="note-date">{formatDate(note.createdAt)}</span>
               </div>
               
               <p className="note-content">{note.content}</p>
               
-              <div className="note-footer">
-                <span className="note-date">
-                  {new Date(note.createdAt).toLocaleDateString()}
-                </span>
-                <div className="note-actions">
-                  <button onClick={() => handleEdit(note)}><FaEdit /></button>
-                  <button onClick={() => handleDelete(note.id)}><FaTrash /></button>
-                </div>
+              <div className="note-actions">
+                <button onClick={() => handleEdit(note)}><FaEdit /></button>
+                <button onClick={() => handleDelete(note.id)}><FaTrash /></button>
               </div>
             </motion.div>
           ))
         ) : (
           <div className="empty-state">
             <p>{t('noNotes')}</p>
+            <button className="btn-primary" onClick={() => setShowForm(true)}>
+              <FaPlus /> {t('addNote')}
+            </button>
           </div>
         )}
       </div>

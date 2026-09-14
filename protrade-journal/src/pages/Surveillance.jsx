@@ -8,16 +8,16 @@ import './Surveillance.css';
 const DIRECTIONS = ['Buy', 'Sell'];
 
 const IMPORTANCE_STARS = [
-  { value: 1, label: '⭐', desc: 'Bas' },
-  { value: 2, label: '⭐⭐', desc: 'Moyen' },
-  { value: 3, label: '⭐⭐⭐', desc: 'Élevé' }
+  { value: 1, label: 'Low', stars: 1 },
+  { value: 2, label: 'Medium', stars: 2 },
+  { value: 3, label: 'High', stars: 3 }
 ];
 
 const DEFAULT_CONDITIONS = [
-  { id: 1, title: 'Structure du marché', note: '', importance: 3 },
-  { id: 2, title: 'Niveau clé identifié', note: '', importance: 3 },
-  { id: 3, title: 'FVG identifié', note: '', importance: 2 },
-  { id: 4, title: 'Confluence trouvée', note: '', importance: 2 },
+  { id: 1, title: 'Market structure', note: '', importance: 3 },
+  { id: 2, title: 'Key level identified', note: '', importance: 3 },
+  { id: 3, title: 'FVG identified', note: '', importance: 2 },
+  { id: 4, title: 'Confluence found', note: '', importance: 2 },
   { id: 5, title: 'Risk < 2%', note: '', importance: 3 },
   { id: 6, title: 'RR >= 1:3', note: '', importance: 3 }
 ];
@@ -45,6 +45,12 @@ export default function Surveillance() {
     if (!isLoading) setLoading(false);
   }, [isLoading]);
 
+  useEffect(() => {
+    if (formData.conditions.length === 0) {
+      setFormData(prev => ({ ...prev, conditions: [...DEFAULT_CONDITIONS] }));
+    }
+  }, []);
+
   const getCompletion = (surveillance) => {
     const allConditions = surveillance.conditions || [];
     if (allConditions.length === 0) return 0;
@@ -54,7 +60,12 @@ export default function Surveillance() {
     return Math.min(100, (checkedWeight / totalWeight) * 100);
   };
 
-  // Toggle condition from card (inline)
+  const getStatus = (completion) => {
+    if (completion >= 85) return 'ready';
+    if (completion >= 50) return 'progress';
+    return 'pending';
+  };
+
   const toggleConditionFromCard = (surveillanceId, conditionId) => {
     const surveillance = surveillances.find(s => s.id === surveillanceId);
     if (!surveillance) return;
@@ -181,33 +192,62 @@ export default function Surveillance() {
     navigate('/add-trade?from=surveillance');
   };
 
+  const stats = useMemo(() => ({
+    total: sortedSurveillances.length,
+    ready: sortedSurveillances.filter(s => getCompletion(s) >= 85).length,
+    inProgress: sortedSurveillances.filter(s => getCompletion(s) > 0 && getCompletion(s) < 85).length,
+    pending: sortedSurveillances.filter(s => getCompletion(s) === 0).length
+  }), [sortedSurveillances]);
+
   if (loading) {
-    return <div className="surveillance-page"><div className="loading-container"><div className="loading-spinner"></div></div></div>;
+    return (
+      <div className="surveillance-page loading">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading setups...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <motion.div className="surveillance-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <div className="page-header">
+      <header className="page-header">
         <div className="header-left">
           <h2>{t('trade')} {t('surveillance')}</h2>
-          <span className="header-count">{sortedSurveillances.length} setups</span>
+          <div className="stats-pills">
+            <span className={`stat-pill total`}>{stats.total} setups</span>
+            <span className={`stat-pill ready`}>{stats.ready} ready</span>
+            <span className={`stat-pill progress`}>{stats.inProgress} in progress</span>
+            <span className={`stat-pill pending`}>{stats.pending} pending</span>
+          </div>
         </div>
         <div className="header-controls">
           <div className="view-toggle">
-            <button className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`} onClick={() => setViewMode('grid')}>▦</button>
-            <button className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')}>☰</button>
+            <button className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`} onClick={() => setViewMode('grid')} title="Grid view">▦</button>
+            <button className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')} title="List view">☰</button>
           </div>
         </div>
-      </div>
-
-      <button className="floating-add-btn" onClick={() => { resetForm(); setShowForm(true); }}>+ {t('add')}</button>
+      </header>
 
       <AnimatePresence>
         {showForm && (
-          <motion.div className="setup-form-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => resetForm()}>
-            <motion.div className="setup-form-modal" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} onClick={e => e.stopPropagation()}>
+          <motion.div 
+            className="setup-form-overlay" 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            onClick={() => resetForm()}
+          >
+            <motion.div 
+              className="setup-form-modal" 
+              initial={{ scale: 0.9, opacity: 0 }} 
+              animate={{ scale: 1, opacity: 1 }} 
+              exit={{ scale: 0.9, opacity: 0 }} 
+              onClick={e => e.stopPropagation()}
+            >
               <div className="modal-header">
-                <h3>{editingId ? 'Modifier' : 'Nouvelle'} Surveillance</h3>
+                <h3>{editingId ? 'Edit' : 'New'} Surveillance</h3>
                 <span className="conditions-count">{formData.conditions.length}/10 conditions</span>
               </div>
               
@@ -220,7 +260,12 @@ export default function Surveillance() {
                   <label>{t('direction')}</label>
                   <div className="direction-selector">
                     {DIRECTIONS.map(dir => (
-                      <button key={dir} type="button" className={`dir-option ${formData.direction === dir ? 'active' : ''} ${dir.toLowerCase()}`} onClick={() => setFormData(f => ({ ...f, direction: dir }))}>
+                      <button 
+                        key={dir} 
+                        type="button" 
+                        className={`dir-option ${formData.direction === dir ? 'active' : ''} ${dir.toLowerCase()}`}
+                        onClick={() => setFormData(f => ({ ...f, direction: dir }))}
+                      >
                         {dir === 'Buy' ? '↑' : '↓'} {dir}
                       </button>
                     ))}
@@ -229,12 +274,19 @@ export default function Surveillance() {
               </div>
 
               <div className="form-group">
-                <label>Note / Idée</label>
-                <textarea value={formData.note} onChange={(e) => setFormData(f => ({ ...f, note: e.target.value }))} rows={2} placeholder="Décrivez votre idée..." />
+                <label>Note / Idea</label>
+                <textarea 
+                  value={formData.note} 
+                  onChange={(e) => setFormData(f => ({ ...f, note: e.target.value }))} 
+                  rows={2} 
+                  placeholder="Describe your setup idea..."
+                />
               </div>
 
-              <div className="conditions-section">
-                <label>Conditions ({formData.conditions.length}/10)</label>
+              <section className="conditions-section">
+                <div className="section-header">
+                  <label>Conditions ({formData.conditions.length}/10)</label>
+                </div>
                 <div className="conditions-list">
                   {formData.conditions.map(condition => (
                     <motion.div key={condition.id} className="condition-item" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
@@ -244,8 +296,9 @@ export default function Surveillance() {
                       </label>
                       <div className="condition-content">
                         <span className="condition-title">{condition.title}</span>
+                        {condition.note && <span className="condition-note">{condition.note}</span>}
                       </div>
-                      <span className="condition-stars">{'⭐'.repeat(condition.importance)}</span>
+                      <span className="condition-stars">{'★'.repeat(condition.importance)}</span>
                       <button type="button" className="btn-remove" onClick={() => removeCondition(condition.id)}>×</button>
                     </motion.div>
                   ))}
@@ -253,42 +306,65 @@ export default function Surveillance() {
 
                 {formData.conditions.length < 10 && (
                   <div className="add-condition-section">
-                    <input type="text" value={newCondition.title} onChange={(e) => setNewCondition(c => ({ ...c, title: e.target.value }))} placeholder="Nouvelle condition..." onKeyDown={(e) => e.key === 'Enter' && addCondition()} />
+                    <input 
+                      type="text" 
+                      value={newCondition.title} 
+                      onChange={(e) => setNewCondition(c => ({ ...c, title: e.target.value }))} 
+                      placeholder="New condition..." 
+                      onKeyDown={(e) => e.key === 'Enter' && addCondition()}
+                    />
                     <select value={newCondition.importance} onChange={(e) => setNewCondition(c => ({ ...c, importance: parseInt(e.target.value) }))}>
-                      {IMPORTANCE_STARS.map(star => <option key={star.value} value={star.value}>{star.label}</option>)}
+                      {IMPORTANCE_STARS.map(star => <option key={star.value} value={star.value}>{'★'.repeat(star.stars)} {star.label}</option>)}
                     </select>
-                    <button type="button" className="btn-add-condition" onClick={addCondition}>+</button>
+                    <button type="button" className="btn-add-condition" onClick={addCondition}>+ Add</button>
                   </div>
                 )}
+              </section>
 
-                {tags && tags.length > 0 && (
-                  <div className="tags-section">
-                    <label>Ajouter depuis les tags:</label>
-                    <div className="tags-list">
-                      {tags.map(tag => {
-                        const exists = formData.conditions.some(c => c.title === tag.name);
-                        return (
-                          <button key={tag.id} type="button" className={`tag-chip ${exists ? 'used' : ''}`} style={{ borderColor: tag.color, color: tag.color }} onClick={() => !exists && addTagAsCondition(tag)} disabled={exists}>
-                            {tag.name} ⭐⭐
-                          </button>
-                        );
-                      })}
-                    </div>
+              {tags && tags.length > 0 && (
+                <section className="tags-section">
+                  <div className="section-header">
+                    <label>Add from tags:</label>
                   </div>
-                )}
-              </div>
+                  <div className="tags-list">
+                    {tags.map(tag => {
+                      const exists = formData.conditions.some(c => c.title === tag.name);
+                      return (
+                        <button 
+                          key={tag.id} 
+                          type="button" 
+                          className={`tag-chip ${exists ? 'used' : ''}`}
+                          style={{ borderColor: tag.color, color: tag.color }}
+                          onClick={() => !exists && addTagAsCondition(tag)}
+                          disabled={exists}
+                        >
+                          {tag.name} {'★★'}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+              )}
 
-              <div className="screenshots-section">
-                <label>{t('screenshots')} ({formData.screenshots.length}/3)</label>
+              <section className="screenshots-section">
+                <div className="section-header">
+                  <label>{t('screenshots')} ({formData.screenshots.length}/3)</label>
+                </div>
                 <div className="screenshot-grid">
                   {formData.screenshots.map((img, i) => (
-                    <div key={i} className="screenshot-thumb"><img src={img} alt="" /><button type="button" onClick={() => removeScreenshot(i)}>×</button></div>
+                    <div key={i} className="screenshot-thumb">
+                      <img src={img} alt="" />
+                      <button type="button" onClick={() => removeScreenshot(i)}>×</button>
+                    </div>
                   ))}
                   {formData.screenshots.length < 3 && (
-                    <label className="screenshot-add"><input type="file" accept="image/*" onChange={handleScreenshotUpload} />+</label>
+                    <label className="screenshot-add">
+                      <input type="file" accept="image/*" onChange={handleScreenshotUpload} />
+                      <span>+</span>
+                    </label>
                   )}
                 </div>
-              </div>
+              </section>
 
               <div className="form-actions">
                 <button type="button" className="btn-secondary" onClick={resetForm}>{t('cancel')}</button>
@@ -302,15 +378,25 @@ export default function Surveillance() {
       <div className={`surveillance-grid ${viewMode}`}>
         {sortedSurveillances.length > 0 ? sortedSurveillances.map((surveillance, index) => {
           const completion = getCompletion(surveillance);
+          const status = getStatus(completion);
           const conditions = surveillance.conditions || [];
           const visibleConditions = conditions.slice(0, 4);
           const hiddenCount = conditions.length - 4;
           
           return (
-            <motion.div key={surveillance.id} className={`surveillance-card ${completion >= 85 ? 'ready complete' : ''}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
+            <motion.div 
+              key={surveillance.id} 
+              className={`surveillance-card ${status}`}
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              transition={{ delay: index * 0.05 }}
+            >
               <div className="card-header">
                 <div className="card-pair">{surveillance.pair}</div>
                 <span className={`card-direction ${surveillance.direction?.toLowerCase()}`}>{surveillance.direction}</span>
+                <span className={`status-badge ${status}`}>
+                  {status === 'ready' ? '✓ Ready' : status === 'progress' ? '⏳ In Progress' : '○ Pending'}
+                </span>
               </div>
 
               {surveillance.note && (
@@ -332,19 +418,32 @@ export default function Surveillance() {
                   <span className="progress-value">{completion.toFixed(0)}%</span>
                 </div>
                 <div className="progress-bar">
-                  <motion.div className={`progress-fill ${completion < 40 ? 'low' : completion < 85 ? 'medium' : 'high'}`} initial={{ width: 0 }} animate={{ width: `${completion}%` }} transition={{ duration: 0.5 }} />
+                  <motion.div 
+                    className={`progress-fill ${status}`} 
+                    initial={{ width: 0 }} 
+                    animate={{ width: `${completion}%` }} 
+                    transition={{ duration: 0.5 }}
+                  />
                 </div>
               </div>
 
-              <div className="inline-conditions">
+              <section className="inline-conditions">
                 {(expandedCards[surveillance.id] ? conditions : visibleConditions).map(condition => (
-                  <motion.div key={condition.id} className={`inline-condition ${condition.checked ? 'checked' : ''}`} whileTap={{ scale: 0.95 }}>
+                  <motion.div 
+                    key={condition.id} 
+                    className={`inline-condition ${condition.checked ? 'checked' : ''}`}
+                    whileTap={{ scale: 0.95 }}
+                  >
                     <label className="inline-checkbox">
-                      <input type="checkbox" checked={condition.checked || false} onChange={() => toggleConditionFromCard(surveillance.id, condition.id)} />
+                      <input 
+                        type="checkbox" 
+                        checked={condition.checked || false} 
+                        onChange={() => toggleConditionFromCard(surveillance.id, condition.id)} 
+                      />
                       <span className="inline-checkmark">{condition.checked ? '✓' : ''}</span>
                     </label>
                     <span className="inline-title">{condition.title}</span>
-                    <span className="inline-stars">{'⭐'.repeat(condition.importance)}</span>
+                    <span className="inline-stars">{'★'.repeat(condition.importance)}</span>
                   </motion.div>
                 ))}
                 {hiddenCount > 0 && (
@@ -356,10 +455,17 @@ export default function Surveillance() {
                     {expandedCards[surveillance.id] ? '− Show less' : `+ Show all (${conditions.length})`}
                   </button>
                 )}
-              </div>
+              </section>
 
               <div className="card-actions">
-                <button type="button" className="btn-action take-trade" onClick={() => takeTrade(surveillance)} disabled={completion < 85}>🎯 Trade</button>
+                <button 
+                  type="button" 
+                  className="btn-action take-trade" 
+                  onClick={() => takeTrade(surveillance)} 
+                  disabled={completion < 85}
+                >
+                  🎯 Trade
+                </button>
                 <button type="button" className="btn-action edit" onClick={() => openEdit(surveillance)}>✏️</button>
                 <button type="button" className="btn-action delete" onClick={() => deleteSurveillance(surveillance.id)}>🗑️</button>
               </div>
@@ -368,8 +474,8 @@ export default function Surveillance() {
         }) : (
           <div className="empty-state">
             <div className="empty-icon">📊</div>
-            <p>Aucun setup en surveillance</p>
-            <button className="btn-primary" onClick={() => { resetForm(); setShowForm(true); }}>+ Créer</button>
+            <p>No setups in surveillance</p>
+            <button className="btn-primary" onClick={() => { resetForm(); setShowForm(true); }}>+ Create</button>
           </div>
         )}
       </div>

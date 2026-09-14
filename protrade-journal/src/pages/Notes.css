@@ -37,7 +37,7 @@
 
 .notes-filters {
   display: flex;
-  gap: var(--space-md);
+  justify-content: flex-end;
 }
 
 .notes-filters select {
@@ -46,7 +46,7 @@
   border: 1px solid var(--bg-glass-border);
   border-radius: var(--radius-md);
   color: var(--text-primary);
-  min-width: 150px;
+  min-width: 180px;
 }
 
 .notes-filters select:focus {
@@ -79,13 +79,6 @@
   margin-bottom: var(--space-lg);
 }
 
-.note-form-modal .form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-md);
-  margin-bottom: var(--space-md);
-}
-
 .note-form-modal .form-group {
   margin-bottom: var(--space-md);
 }
@@ -110,7 +103,7 @@
 
 .note-form-modal textarea {
   resize: vertical;
-  min-height: 120px;
+  min-height: 140px;
 }
 
 .form-actions {
@@ -144,7 +137,7 @@
 
 .notes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: var(--space-lg);
 }
 
@@ -170,16 +163,16 @@
   margin-bottom: var(--space-md);
 }
 
-.note-pair {
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-
 .note-category {
   padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-full);
   font-size: 0.75rem;
   font-weight: 600;
+}
+
+.note-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
 
 .note-content {
@@ -192,22 +185,12 @@
   overflow: hidden;
 }
 
-.note-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: var(--space-md);
-  border-top: 1px solid var(--bg-glass-border);
-}
-
-.note-date {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
 .note-actions {
   display: flex;
+  justify-content: flex-end;
   gap: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--bg-glass-border);
 }
 
 .note-actions button {
@@ -230,22 +213,20 @@
 .empty-state {
   grid-column: 1 / -1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: var(--space-2xl);
   color: var(--text-muted);
+  gap: var(--space-md);
 }
 
 @media (max-width: 768px) {
-  .notes-filters {
-    flex-direction: column;
-  }
-
-  .notes-filters select {
-    width: 100%;
-  }
-
   .note-form-modal .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .notes-grid {
     grid-template-columns: 1fr;
   }
 }
