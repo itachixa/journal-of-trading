@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -32,6 +32,8 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 export default function Dashboard() {
   const { t, trades, calculateStats, settings, accountBalance } = useApp();
   const navigate = useNavigate();
+  const [calMonth, setCalMonth] = useState(new Date().getMonth());
+  const [calYear, setCalYear] = useState(new Date().getFullYear());
 
   const stats = useMemo(() => calculateStats(trades), [trades, calculateStats]);
 
@@ -148,9 +150,8 @@ export default function Dashboard() {
   }, [trades, stats, settings.initialCapital]);
 
   const calendarData = useMemo(() => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth();
+    const year = calYear;
+    const month = calMonth;
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const prevMonthDays = new Date(year, month, 0).getDate();
@@ -181,7 +182,7 @@ export default function Dashboard() {
     }
     if (week.length) weeks.push(week);
     return { weeks, monthName: MONTHS[month], year };
-  }, [trades]);
+  }, [trades, calMonth, calYear]);
 
   const performanceInsight = useMemo(() => {
     if (!trades.length) return { label: t('noTrades') || 'No trades yet', value: '—', type: 'neutral' };
@@ -435,8 +436,24 @@ export default function Dashboard() {
                 <p className="calendar-month">{calendarData.monthName} {calendarData.year}</p>
               </div>
               <div className="calendar-nav">
-                <button className="nav-btn" aria-label="Previous month"><FaChevronLeft /></button>
-                <button className="nav-btn" aria-label="Next month"><FaChevronRight /></button>
+                <button className="nav-btn" aria-label="Previous month" onClick={() => {
+                  setCalMonth(prev => {
+                    if (prev === 0) {
+                      setCalYear(y => y - 1);
+                      return 11;
+                    }
+                    return prev - 1;
+                  });
+                }}><FaChevronLeft /></button>
+                <button className="nav-btn" aria-label="Next month" onClick={() => {
+                  setCalMonth(prev => {
+                    if (prev === 11) {
+                      setCalYear(y => y + 1);
+                      return 0;
+                    }
+                    return prev + 1;
+                  });
+                }}><FaChevronRight /></button>
               </div>
             </div>
             <div className="calendar-grid">

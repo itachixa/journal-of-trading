@@ -29,6 +29,16 @@ class ApiClient {
     this.token = null
   }
 
+  async getCurrentUserId() {
+    if (!supabase) return null
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      return user?.id || null
+    } catch {
+      return null
+    }
+  }
+
   setToken(token) {
     this.token = token
   }
@@ -129,8 +139,9 @@ class ApiClient {
             const confBySurv = {}
             confirmations.forEach(c => {
               const mapped = this.mapFromSupabase('surveillance_confirmations', c)
-              if (!confBySurv[mapped.surveillance_id]) confBySurv[mapped.surveillance_id] = []
-              confBySurv[mapped.surveillance_id].push(mapped)
+              const survId = mapped._surveillanceId
+              if (!confBySurv[survId]) confBySurv[survId] = []
+              confBySurv[survId].push(mapped)
             })
             items.forEach(s => {
               s.conditions = confBySurv[s.id] || []
@@ -172,7 +183,8 @@ class ApiClient {
       if (method === 'POST' && !id) {
         const body = options.body ? JSON.parse(options.body) : {}
         const conditions = body.conditions || []
-        const mapped = this.mapToSupabase(table, body)
+        const userId = await this.getCurrentUserId()
+        const mapped = this.mapToSupabase(table, { ...body, user_id: userId })
         const { data, error } = await supabase.from(table).insert(mapped).select().single()
         if (error) return { error: error.message }
         const item = this.mapFromSupabase(table, data)
@@ -198,7 +210,8 @@ class ApiClient {
       if (method === 'PUT' && id && !subResource) {
         const body = options.body ? JSON.parse(options.body) : {}
         const conditions = body.conditions || []
-        const mapped = this.mapToSupabase(table, body)
+        const userId = await this.getCurrentUserId()
+        const mapped = this.mapToSupabase(table, { ...body, user_id: userId })
         const { data, error } = await supabase.from(table).update(mapped).eq('id', id).select().single()
         if (error) return { error: error.message }
         const item = this.mapFromSupabase(table, data)
@@ -297,7 +310,8 @@ class ApiClient {
       return mapped
     }
     if (table === 'tags') {
-      return body
+      const mapped = { ...body }
+      return mapped
     }
     if (table === 'surveillances') {
       const mapped = { ...body }
@@ -347,8 +361,9 @@ class ApiClient {
     }
     if (table === 'surveillance_confirmations') {
       const mapped = { ...item }
+      const surveillanceId = mapped.surveillance_id
       if ('surveillance_id' in mapped) { delete mapped.surveillance_id }
-      return mapped
+      return { ...mapped, _surveillanceId: surveillanceId }
     }
     return item
   }

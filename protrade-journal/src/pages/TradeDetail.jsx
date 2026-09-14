@@ -11,7 +11,7 @@ export default function TradeDetail() {
   const navigate = useNavigate();
   const { t, trades, deleteTrade, settings, accountBalance } = useApp();
 
-  const trade = useMemo(() => trades.find(t => t.id === parseInt(id)), [trades, id]);
+  const trade = useMemo(() => trades.find(t => t.id === id), [trades, id]);
 
   if (!trade) {
     return (

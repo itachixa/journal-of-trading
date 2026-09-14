@@ -25,7 +25,7 @@ export default function AddTrade() {
   const editId = searchParams.get('id');
   const fromSource = searchParams.get('from');
   
-  const existingTrade = editId ? trades.find(t => t.id === parseInt(editId)) : null;
+  const existingTrade = editId ? trades.find(t => t.id === editId) : null;
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -184,7 +184,7 @@ export default function AddTrade() {
     try {
       setSubmitting(true);
       if (editId) {
-        await updateTrade(parseInt(editId), tradeData);
+        await updateTrade(editId, tradeData);
       } else {
         await addTrade(tradeData);
       }

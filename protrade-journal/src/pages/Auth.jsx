@@ -1,7 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { PAIRS } from '../context/AppContext';
 import './Auth.css';
+
+const DEVICE_OPTIONS = [
+  { id: 'mobile', label: 'Mobile', icon: '📱', desc: 'Smartphone / Petite tablette' },
+  { id: 'tablet', label: 'Tablette', icon: '📲', desc: 'iPad / Tablette Android' },
+  { id: 'desktop', label: 'Desktop', icon: '🖥️', desc: 'Ordinateur / MacBook' }
+];
 
 export default function Auth() {
   const [mode, setMode] = useState('login');
@@ -10,6 +17,8 @@ export default function Auth() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showReset, setShowReset] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [device, setDevice] = useState('desktop');
+  const [capital, setCapital] = useState(10000);
   const { signIn, signUp, resetPassword, error, message, loading, setError, setMessage } = useAuth();
   const navigate = useNavigate();
 
@@ -36,7 +45,7 @@ export default function Auth() {
       if (password !== confirmPassword || password.length < 6) {
         return;
       }
-      await signUp(email, password);
+      await signUp(email, password, { device, initialCapital: capital });
       return;
     }
     if (mode === 'login') {
@@ -192,21 +201,53 @@ export default function Auth() {
             />
           </div>
           {mode === 'signup' && (
-            <div className="input-group">
-              <label htmlFor="confirmPassword">Confirmer le mot de passe</label>
-              <input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                minLength={6}
-              />
-              {confirmPassword && password !== confirmPassword && (
-                <span className="input-error">Les mots de passe ne correspondent pas</span>
-              )}
-            </div>
+            <>
+              <div className="input-group">
+                <label htmlFor="confirmPassword">Confirmer le mot de passe</label>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  minLength={6}
+                />
+                {confirmPassword && password !== confirmPassword && (
+                  <span className="input-error">Les mots de passe ne correspondent pas</span>
+                )}
+              </div>
+              <div className="input-group">
+                <label>Appareil</label>
+                <div className="device-options">
+                  {DEVICE_OPTIONS.map(d => (
+                    <button
+                      key={d.id}
+                      className={`device-btn ${device === d.id ? 'active' : ''}`}
+                      type="button"
+                      onClick={() => setDevice(d.id)}
+                    >
+                      <span>{d.icon}</span>
+                      <span>{d.label}</span>
+                      <span className="device-desc">{d.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="input-group">
+                <label>Capital initial ($)</label>
+                <input
+                  type="number"
+                  id="capital"
+                  value={capital}
+                  onChange={(e) => setCapital(parseFloat(e.target.value) || 0)}
+                  min="5"
+                  step="100"
+                  required
+                />
+                <span className="input-hint">Minimum 5$</span>
+              </div>
+            </>
           )}
           <button type="submit" className="auth-btn" disabled={loading}>
             {loading ? 'Chargement...' : (mode === 'login' ? 'Se connecter' : "S'inscrire")}

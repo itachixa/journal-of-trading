@@ -40,9 +40,10 @@ export function AuthProvider({ children }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email, password) => {
+  const signUp = async (email, password, options = {}) => {
     setError(null);
     setMessage(null);
+    const { device, initialCapital } = options;
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -55,6 +56,23 @@ export function AuthProvider({ children }) {
     if (data.session?.access_token) {
       api.setToken(data.session.access_token);
     }
+    
+    // Initialize user settings if we have device/capital
+    if (data.user && (device || initialCapital)) {
+      try {
+        await api.updateSettings({
+          device: device || 'desktop',
+          initialCapital: initialCapital || 10000,
+          defaultRisk: 2,
+          currency: 'USD',
+          language: 'en',
+          theme: 'dark'
+        });
+      } catch (e) {
+        console.error('Failed to init settings:', e);
+      }
+    }
+    
     setMessage('Vérifiez votre email pour confirmer votre compte');
     return { user: data.user, session: data.session };
   };

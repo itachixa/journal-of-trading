@@ -149,13 +149,15 @@ function mapFromSupabase(table, item) {
   }
   if (table === 'surveillance_confirmations') {
     const mapped = { ...item }
+    const surveillanceId = mapped.surveillance_id
     if ('surveillance_id' in mapped) { delete mapped.surveillance_id }
-    return mapped
+    return { ...mapped, _surveillanceId: surveillanceId }
   }
   if (table === 'surveillance_screenshots') {
     const mapped = { ...item }
+    const surveillanceId = mapped.surveillance_id
     if ('surveillance_id' in mapped) { delete mapped.surveillance_id }
-    return mapped
+    return { ...mapped, _surveillanceId: surveillanceId }
   }
   return item
 }
@@ -418,8 +420,8 @@ app.get('/api/surveillances', authMiddleware, async (req, res) => {
       const confBySurv = {};
       confirmations.forEach(c => {
         const mapped = mapFromSupabase('surveillance_confirmations', c);
-        if (!confBySurv[mapped.surveillance_id]) confBySurv[mapped.surveillance_id] = [];
-        confBySurv[mapped.surveillance_id].push(mapped);
+        if (!confBySurv[mapped._surveillanceId]) confBySurv[mapped._surveillanceId] = [];
+        confBySurv[mapped._surveillanceId].push(mapped);
       });
       surveillances.forEach(s => {
         s.conditions = confBySurv[s.id] || [];

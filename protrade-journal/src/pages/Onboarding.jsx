@@ -189,37 +189,6 @@ export default function Onboarding() {
               </div>
             )}
 
-            {currentStep === 2 && (
-              <div className="onboarding-pairs">
-                <div className="pairs-selection">
-                  <p className="pairs-hint">Sélectionnez 4 paires que vous tradez régulièrement</p>
-                  <div className="pairs-grid">
-                    {PAIRS.map(pair => (
-                      <button
-                        key={pair}
-                        className={`pair-option ${selectedPairs.includes(pair) ? 'selected' : ''}`}
-                        onClick={() => {
-                          setSelectedPairs(prev => {
-                            if (prev.includes(pair)) {
-                              return prev.filter(p => p !== pair);
-                            }
-                            if (prev.length >= 4) return prev;
-                            return [...prev, pair];
-                          });
-                        }}
-                      >
-                        {pair}
-                        {selectedPairs.includes(pair) && <span className="pair-check">✓</span>}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="pairs-count">
-                    {selectedPairs.length}/4 sélectionnées
-                  </div>
-                </div>
-              </div>
-            )}
-
             {currentStep === 3 && (
               <div className="onboarding-capital">
                 <div className="capital-display">
