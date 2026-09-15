@@ -52,7 +52,29 @@ export function AppProvider({ children }) {
       setNotes(notesRes || []);
       setTags(tagsRes.length > 0 ? tagsRes : DEFAULT_TAGS);
       setSurveillances(survRes || []);
-      setChecklistItems(checklistRes || []);
+      
+      // Seed default checklist to DB if empty (so defaults persist and new items append to them)
+      if (!checklistRes || checklistRes.length === 0) {
+        try {
+          const defaults = DEFAULT_CHECKLIST.map(item => ({
+            category: item.category,
+            text: item.text,
+            checked: item.checked
+          }));
+          for (const item of defaults) {
+            await api.createChecklistItem(item);
+          }
+          // Reload after seeding
+          const fresh = await api.getChecklist();
+          setChecklistItems(fresh || []);
+        } catch (e) {
+          console.error('Failed to seed checklist:', e);
+          setChecklistItems([]);
+        }
+      } else {
+        setChecklistItems(checklistRes);
+      }
+      
       if (settingsRes && Object.keys(settingsRes).length > 0) {
         setSettings(normalizeSettings(settingsRes));
       }

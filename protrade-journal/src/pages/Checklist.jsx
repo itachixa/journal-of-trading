@@ -39,7 +39,7 @@ export default function Checklist() {
   const [editItemId, setEditItemId] = useState(null);
   const [editText, setEditText] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
-  const [initialized, setInitialized] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const items = checklistItems.length > 0 ? checklistItems : DEFAULT_CHECKLIST;
 
@@ -55,16 +55,21 @@ export default function Checklist() {
   };
 
   const addItem = async () => {
-    if (!newItemText.trim()) return;
+    if (!newItemText.trim() || submitting) return;
     
-    await addChecklistItem({
-      category: selectedCategory,
-      text: newItemText.trim(),
-      checked: false
-    });
-    
-    setNewItemText('');
-    setShowAddForm(false);
+    setSubmitting(true);
+    try {
+      await addChecklistItem({
+        category: selectedCategory,
+        text: newItemText.trim(),
+        checked: false
+      });
+      
+      setNewItemText('');
+      setShowAddForm(false);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const startEdit = (item) => {
@@ -296,8 +301,8 @@ export default function Checklist() {
                 <button className="btn-secondary" onClick={() => setShowAddForm(false)}>
                   Annuler
                 </button>
-                <button className="btn-primary" onClick={addItem}>
-                  Ajouter
+                <button className="btn-primary" onClick={addItem} disabled={submitting}>
+                  {submitting ? 'Ajout...' : 'Ajouter'}
                 </button>
               </div>
             </motion.div>
