@@ -31,7 +31,8 @@ export default function Checklist() {
     isLoading, 
     addChecklistItem, 
     updateChecklistItem, 
-    deleteChecklistItem 
+    deleteChecklistItem,
+    resetChecklistToDefaults
   } = useApp();
   
   const [newItemText, setNewItemText] = useState('');
@@ -152,7 +153,10 @@ export default function Checklist() {
         </div>
         <div className="header-actions">
           <button className="btn-secondary" onClick={resetChecklist}>
-            ↺ Réinitialiser
+            ↺ Réinitialiser (uncheck)
+          </button>
+          <button className="btn-secondary" onClick={resetChecklistToDefaults} style={{ marginLeft: '8px' }}>
+            ↻ Restaurer défauts
           </button>
         </div>
       </div>

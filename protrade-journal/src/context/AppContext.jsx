@@ -55,6 +55,7 @@ export function AppProvider({ children }) {
       
       // Seed default checklist to DB if empty (so defaults persist and new items append to them)
       if (!checklistRes || checklistRes.length === 0) {
+        console.log('Checklist empty, seeding defaults...');
         try {
           const defaults = DEFAULT_CHECKLIST.map(item => ({
             category: item.category,
@@ -62,23 +63,31 @@ export function AppProvider({ children }) {
             checked: item.checked
           }));
           for (const item of defaults) {
-            await api.createChecklistItem(item);
+            const result = await api.createChecklistItem(item);
+            if (result?.error) {
+              console.error('Failed to create checklist item:', result.error);
+            }
           }
           // Reload after seeding
           const fresh = await api.getChecklist();
+          console.log('Seeded checklist, reloaded:', fresh?.length || 0, 'items');
           setChecklistItems(fresh || []);
         } catch (e) {
           console.error('Failed to seed checklist:', e);
           setChecklistItems([]);
         }
       } else {
+        console.log('Checklist loaded from DB:', checklistRes.length, 'items');
         setChecklistItems(checklistRes);
       }
       
       if (settingsRes && Object.keys(settingsRes).length > 0) {
         setSettings(normalizeSettings(settingsRes));
       }
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+      console.error('loadData error:', e); 
+      setChecklistItems([]);
+    }
     setIsLoading(false);
   };
 
@@ -320,6 +329,29 @@ export function AppProvider({ children }) {
     deleteChecklistItem: async (id) => {
       await api.deleteChecklistItem(id);
       setChecklistItems(p => p.filter(x => x.id !== id));
+    },
+    resetChecklistToDefaults: async () => {
+      try {
+        // Delete all existing items
+        const currentItems = checklistItems;
+        for (const item of currentItems) {
+          await api.deleteChecklistItem(item.id);
+        }
+        // Seed defaults
+        const defaults = DEFAULT_CHECKLIST.map(item => ({
+          category: item.category,
+          text: item.text,
+          checked: item.checked
+        }));
+        for (const item of defaults) {
+          await api.createChecklistItem(item);
+        }
+        // Reload
+        const fresh = await api.getChecklist();
+        setChecklistItems(fresh || []);
+      } catch (e) {
+        console.error('Failed to reset checklist:', e);
+      }
     },
     reset,
     calculateStats: (ts = trades) => {
