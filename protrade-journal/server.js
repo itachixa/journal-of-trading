@@ -408,9 +408,11 @@ app.get('/api/surveillances', authMiddleware, async (req, res) => {
 
   const surveillances = (data || []).map(item => mapFromSupabase('surveillances', item));
 
-  // Fetch confirmations for all surveillances
+  // Fetch confirmations and screenshots for all surveillances
   if (surveillances.length > 0) {
     const ids = surveillances.map(s => s.id);
+    
+    // Fetch confirmations
     const { data: confirmations, error: confError } = await supabase
       .from('surveillance_confirmations')
       .select('*')
@@ -427,6 +429,24 @@ app.get('/api/surveillances', authMiddleware, async (req, res) => {
         s.conditions = confBySurv[s.id] || [];
       });
     }
+
+    // Fetch screenshots
+    const { data: screenshots, error: scrError } = await supabase
+      .from('surveillance_screenshots')
+      .select('*')
+      .in('surveillance_id', ids)
+      .order('created_at');
+    if (!scrError && screenshots) {
+      const scrBySurv = {};
+      screenshots.forEach(c => {
+        const mapped = mapFromSupabase('surveillance_screenshots', c);
+        if (!scrBySurv[mapped._surveillanceId]) scrBySurv[mapped._surveillanceId] = [];
+        scrBySurv[mapped._surveillanceId].push(mapped);
+      });
+      surveillances.forEach(s => {
+        s.screenshots = scrBySurv[s.id] || [];
+      });
+    }
   }
 
   res.json(surveillances);
@@ -435,6 +455,7 @@ app.get('/api/surveillances', authMiddleware, async (req, res) => {
 app.post('/api/surveillances', authMiddleware, async (req, res) => {
   const userId = getUserId(req);
   const conditions = req.body.conditions || [];
+  const screenshots = req.body.screenshots || [];
   const mapped = mapToSupabase('surveillances', { ...req.body, user_id: userId })
   const { data, error } = await supabase
     .from('surveillances')
@@ -464,6 +485,23 @@ app.post('/api/surveillances', authMiddleware, async (req, res) => {
     surveillance.conditions = [];
   }
 
+  // Insert screenshots
+  if (screenshots.length > 0) {
+    const scr = screenshots.slice(0, 3).map((url, idx) => ({
+      surveillance_id: surveillance.id,
+      url,
+      created_at: new Date(Date.now() + idx).toISOString()
+    }));
+    const { data: insertedScrs, error: scrError } = await supabase
+      .from('surveillance_screenshots')
+      .insert(scr)
+      .select();
+    if (scrError) return res.status(400).json({ error: scrError.message });
+    surveillance.screenshots = (insertedScrs || []).map(c => mapFromSupabase('surveillance_screenshots', c));
+  } else {
+    surveillance.screenshots = [];
+  }
+
   res.json(surveillance);
 });
 
@@ -491,12 +529,25 @@ app.get('/api/surveillances/:id', authMiddleware, async (req, res) => {
     surveillance.conditions = [];
   }
 
+  // Fetch screenshots
+  const { data: screenshots, error: scrError } = await supabase
+    .from('surveillance_screenshots')
+    .select('*')
+    .eq('surveillance_id', req.params.id)
+    .order('created_at');
+  if (!scrError && screenshots) {
+    surveillance.screenshots = screenshots.map(c => mapFromSupabase('surveillance_screenshots', c));
+  } else {
+    surveillance.screenshots = [];
+  }
+
   res.json(surveillance);
 });
 
 app.put('/api/surveillances/:id', authMiddleware, async (req, res) => {
   const userId = getUserId(req);
   const conditions = req.body.conditions || [];
+  const screenshots = req.body.screenshots || [];
   const mapped = mapToSupabase('surveillances', req.body)
   const { data, error } = await supabase
     .from('surveillances')
@@ -527,6 +578,24 @@ app.put('/api/surveillances/:id', authMiddleware, async (req, res) => {
     surveillance.conditions = (insertedConfs || []).map(c => mapFromSupabase('surveillance_confirmations', c));
   } else {
     surveillance.conditions = [];
+  }
+
+  // Sync screenshots: delete existing and insert new
+  await supabase.from('surveillance_screenshots').delete().eq('surveillance_id', req.params.id);
+  if (screenshots.length > 0) {
+    const scr = screenshots.slice(0, 3).map((url, idx) => ({
+      surveillance_id: surveillance.id,
+      url,
+      created_at: new Date(Date.now() + idx).toISOString()
+    }));
+    const { data: insertedScrs, error: scrError } = await supabase
+      .from('surveillance_screenshots')
+      .insert(scr)
+      .select();
+    if (scrError) return res.status(400).json({ error: scrError.message });
+    surveillance.screenshots = (insertedScrs || []).map(c => mapFromSupabase('surveillance_screenshots', c));
+  } else {
+    surveillance.screenshots = [];
   }
 
   res.json(surveillance);

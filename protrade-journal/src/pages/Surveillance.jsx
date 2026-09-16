@@ -402,63 +402,71 @@ export default function Surveillance() {
                 </span>
               </div>
 
-              {surveillance.note && (
-                <div className="card-notes-section">
-                  <span className="notes-label">📝</span>
-                  <p className="notes-text">{surveillance.note}</p>
-                </div>
-              )}
+              <div className="card-body">
+                <div className="card-main">
+                  {surveillance.note && (
+                    <div className="card-notes-section">
+                      <span className="notes-label">📝</span>
+                      <p className="notes-text">{surveillance.note}</p>
+                    </div>
+                  )}
 
-              {surveillance.screenshots?.length > 0 && (
-                <div className="card-screenshots">
-                  {surveillance.screenshots.slice(0, 3).map((img, i) => <div key={i} className="screenshot-preview"><img src={img} alt="" /></div>)}
-                </div>
-              )}
-
-              <div className="card-progress">
-                <div className="progress-header">
-                  <span className="progress-label">{t('completion')}</span>
-                  <span className="progress-value">{completion.toFixed(0)}%</span>
-                </div>
-                <div className="progress-bar">
-                  <motion.div 
-                    className={`progress-fill ${status}`} 
-                    initial={{ width: 0 }} 
-                    animate={{ width: `${completion}%` }} 
-                    transition={{ duration: 0.5 }}
-                  />
-                </div>
-              </div>
-
-              <section className="inline-conditions">
-                {(expandedCards[surveillance.id] ? conditions : visibleConditions).map(condition => (
-                  <motion.div 
-                    key={condition.id} 
-                    className={`inline-condition ${condition.checked ? 'checked' : ''}`}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <label className="inline-checkbox">
-                      <input 
-                        type="checkbox" 
-                        checked={condition.checked || false} 
-                        onChange={() => toggleConditionFromCard(surveillance.id, condition.id)} 
+                  <div className="card-progress">
+                    <div className="progress-header">
+                      <span className="progress-label">{t('completion')}</span>
+                      <span className="progress-value">{completion.toFixed(0)}%</span>
+                    </div>
+                    <div className="progress-bar">
+                      <motion.div 
+                        className={`progress-fill ${status}`} 
+                        initial={{ width: 0 }} 
+                        animate={{ width: `${completion}%` }} 
+                        transition={{ duration: 0.5 }}
                       />
-                      <span className="inline-checkmark">{condition.checked ? '✓' : ''}</span>
-                    </label>
-                    <span className="inline-title">{condition.title}</span>
-                    <span className="inline-stars">{'★'.repeat(condition.importance)}</span>
-                  </motion.div>
-                ))}
-                {hiddenCount > 0 && (
-                  <button 
-                    type="button" 
-                    className="expand-conditions-btn"
-                    onClick={() => toggleExpandCard(surveillance.id)}
-                  >
-                    {expandedCards[surveillance.id] ? '− Show less' : `+ Show all (${conditions.length})`}
-                  </button>
+                    </div>
+                  </div>
+
+                  <section className="inline-conditions">
+                    {(expandedCards[surveillance.id] ? conditions : visibleConditions).map(condition => (
+                      <motion.div 
+                        key={condition.id} 
+                        className={`inline-condition ${condition.checked ? 'checked' : ''}`}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <label className="inline-checkbox">
+                          <input 
+                            type="checkbox" 
+                            checked={condition.checked || false} 
+                            onChange={() => toggleConditionFromCard(surveillance.id, condition.id)} 
+                          />
+                          <span className="inline-checkmark">{condition.checked ? '✓' : ''}</span>
+                        </label>
+                        <span className="inline-title">{condition.title}</span>
+                        <span className="inline-stars">{'★'.repeat(condition.importance)}</span>
+                      </motion.div>
+                    ))}
+                    {hiddenCount > 0 && (
+                      <button 
+                        type="button" 
+                        className="expand-conditions-btn"
+                        onClick={() => toggleExpandCard(surveillance.id)}
+                      >
+                        {expandedCards[surveillance.id] ? '− Show less' : `+ Show all (${conditions.length})`}
+                      </button>
+                    )}
+                  </section>
+                </div>
+
+                {surveillance.screenshots?.length > 0 && (
+                  <div className="card-screenshots">
+                    {surveillance.screenshots.slice(0, 3).map((img, i) => (
+                      <div key={i} className="screenshot-preview">
+                        <img src={img.url || img} alt={`Screenshot ${i + 1}`} />
+                      </div>
+                    ))}
+                  </div>
                 )}
-              </section>
+              </div>
 
               <div className="card-actions">
                 <button 
