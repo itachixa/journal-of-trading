@@ -24,6 +24,21 @@ const normalizeSettings = (s = {}) => ({
   language: s.language || 'fr'
 });
 
+const DEFAULT_CHECKLIST = [
+  { category: 'analysis', text: 'Identify market structure (trend/range)', checked: false },
+  { category: 'analysis', text: 'Find key support/resistance levels', checked: false },
+  { category: 'analysis', text: 'Look for fair value gaps (FVG)', checked: false },
+  { category: 'analysis', text: 'Check for order block zones', checked: false },
+  { category: 'risk', text: 'Risk < 2% per trade', checked: false },
+  { category: 'risk', text: 'RR ratio >= 1:3', checked: false },
+  { category: 'risk', text: 'Defined stop loss level', checked: false },
+  { category: 'risk', text: 'Calculate position size', checked: false },
+  { category: 'psychology', text: 'Emotionally stable', checked: false },
+  { category: 'psychology', text: 'Following trading plan', checked: false },
+  { category: 'psychology', text: 'Not revenge trading', checked: false },
+  { category: 'psychology', text: 'Patient for setup', checked: false }
+];
+
 export function AppProvider({ children }) {
   const [trades, setTrades] = useState([]);
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
@@ -31,27 +46,21 @@ export function AppProvider({ children }) {
   const [tags, setTags] = useState(DEFAULT_TAGS);
   const [surveillances, setSurveillances] = useState([]);
   const [checklistItems, setChecklistItems] = useState([]);
+  const [userPairs, setUserPairs] = useState([]);
   const [language, setLanguage] = useState('fr');
   const [theme, setTheme] = useState('dark');
   const [isLoading, setIsLoading] = useState(true);
-  const [userPairs, setUserPairs] = useState(() => {
-    try {
-      const saved = localStorage.getItem('protrade_user_pairs');
-      return saved ? JSON.parse(saved) : SETUP_PAIRS;
-    } catch {
-      return SETUP_PAIRS;
-    }
-  });
 
   const loadData = async () => {
     try {
-      const [tradesRes, notesRes, tagsRes, survRes, settingsRes, checklistRes] = await Promise.all([
-        api.getTrades(), api.getNotes(), api.getTags(), api.getSurveillances(), api.getSettings(), api.getChecklist()
+      const [tradesRes, notesRes, tagsRes, survRes, settingsRes, checklistRes, userPairsRes] = await Promise.all([
+        api.getTrades(), api.getNotes(), api.getTags(), api.getSurveillances(), api.getSettings(), api.getChecklist(), api.getUserPairs()
       ]);
       setTrades(tradesRes || []);
       setNotes(notesRes || []);
       setTags(tagsRes.length > 0 ? tagsRes : DEFAULT_TAGS);
       setSurveillances(survRes || []);
+      setUserPairs(userPairsRes.length > 0 ? userPairsRes.map(p => p.pair) : SETUP_PAIRS);
       
       // Seed default checklist to DB if empty (so defaults persist and new items append to them)
       if (!checklistRes || checklistRes.length === 0) {
@@ -80,7 +89,7 @@ export function AppProvider({ children }) {
         console.log('Checklist loaded from DB:', checklistRes.length, 'items');
         setChecklistItems(checklistRes);
       }
-      
+
       if (settingsRes && Object.keys(settingsRes).length > 0) {
         setSettings(normalizeSettings(settingsRes));
       }
@@ -351,6 +360,47 @@ export function AppProvider({ children }) {
         setChecklistItems(fresh || []);
       } catch (e) {
         console.error('Failed to reset checklist:', e);
+      }
+    },
+    addUserPair: async (pair) => {
+      const r = await api.createUserPair({ pair: pair.toUpperCase() });
+      if (r && r.error) {
+        console.error('Failed to add user pair:', r.error);
+        throw new Error(r.error);
+      }
+      setUserPairs(p => [...p, r.pair]);
+    },
+    replaceUserPairs: async (pairs) => {
+      try {
+        // Delete all existing pairs
+        const currentPairs = await api.getUserPairs();
+        for (const p of currentPairs) {
+          await api.deleteUserPair(p.id);
+        }
+        // Create new pairs
+        const newPairs = [];
+        for (const pair of pairs) {
+          const r = await api.createUserPair({ pair: pair.toUpperCase() });
+          if (r && !r.error) newPairs.push(r.pair);
+        }
+        setUserPairs(newPairs);
+      } catch (e) {
+        console.error('Failed to set user pairs:', e);
+      }
+    },
+    removeUserPair: async (pair) => {
+      const pairData = await api.getUserPairs();
+      const item = pairData.find(p => p.pair === pair.toUpperCase());
+      if (item) {
+        await api.deleteUserPair(item.id);
+        setUserPairs(p => p.filter(x => x !== pair.toUpperCase()));
+      }
+    },
+    updateUserPair: async (pair, isDefault) => {
+      const pairData = await api.getUserPairs();
+      const item = pairData.find(p => p.pair === pair.toUpperCase());
+      if (item) {
+        await api.updateUserPair(item.id, { is_default: isDefault });
       }
     },
     reset,

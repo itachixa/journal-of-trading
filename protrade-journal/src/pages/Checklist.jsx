@@ -3,21 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import './Checklist.css';
 
-const DEFAULT_CHECKLIST = [
-  { id: 1, category: 'analysis', text: 'Identify market structure (trend/range)', checked: false },
-  { id: 2, category: 'analysis', text: 'Find key support/resistance levels', checked: false },
-  { id: 3, category: 'analysis', text: 'Look for fair value gaps (FVG)', checked: false },
-  { id: 4, category: 'analysis', text: 'Check for order block zones', checked: false },
-  { id: 5, category: 'risk', text: 'Risk < 2% per trade', checked: false },
-  { id: 6, category: 'risk', text: 'RR ratio >= 1:3', checked: false },
-  { id: 7, category: 'risk', text: 'Defined stop loss level', checked: false },
-  { id: 8, category: 'risk', text: 'Calculate position size', checked: false },
-  { id: 9, category: 'psychology', text: 'Emotionally stable', checked: false },
-  { id: 10, category: 'psychology', text: 'Following trading plan', checked: false },
-  { id: 11, category: 'psychology', text: 'Not revenge trading', checked: false },
-  { id: 12, category: 'psychology', text: 'Patient for setup', checked: false }
-];
-
 const CATEGORIES = [
   { key: 'analysis', icon: '📊', label: 'Analyse' },
   { key: 'risk', icon: '🛡️', label: 'Risk Management' },
@@ -42,7 +27,7 @@ export default function Checklist() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const items = checklistItems.length > 0 ? checklistItems : DEFAULT_CHECKLIST;
+  const items = checklistItems;
 
   const toggleItem = async (id) => {
     const item = items.find(i => i.id === id);

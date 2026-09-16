@@ -151,7 +151,7 @@ function mapFromSupabase(table, item) {
     const mapped = { ...item }
     const surveillanceId = mapped.surveillance_id
     if ('surveillance_id' in mapped) { delete mapped.surveillance_id }
-    return { ...mapped, _surveillanceId: surveillanceId }
+    return { ...mapped, _surveillanceId: surveillanceId, id: mapped.id }
   }
   if (table === 'surveillance_screenshots') {
     const mapped = { ...item }
@@ -772,6 +772,60 @@ app.delete('/api/checklist/:id', authMiddleware, async (req, res) => {
   const userId = getUserId(req);
   const { error } = await supabase
     .from('checklist_items')
+    .delete()
+    .eq('id', req.params.id)
+    .eq('user_id', userId);
+  if (error) return res.status(400).json({ error: error.message });
+  res.json({ success: true });
+});
+
+// User Pairs
+app.get('/api/user-pairs', authMiddleware, async (req, res) => {
+  const userId = getUserId(req);
+  const { data, error } = await supabase
+    .from('user_pairs')
+    .select('*')
+    .eq('user_id', userId)
+    .order('is_default', { ascending: false })
+    .order('created_at');
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data || []);
+});
+
+app.post('/api/user-pairs', authMiddleware, async (req, res) => {
+  const userId = getUserId(req);
+  const { pair, is_default } = req.body;
+  if (!pair) return res.status(400).json({ error: 'Pair required' });
+  const { data, error } = await supabase
+    .from('user_pairs')
+    .insert({ user_id: userId, pair: pair.toUpperCase(), is_default: is_default || false })
+    .select()
+    .single();
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data);
+});
+
+app.put('/api/user-pairs/:id', authMiddleware, async (req, res) => {
+  const userId = getUserId(req);
+  const { pair, is_default } = req.body;
+  const updates = {};
+  if (pair !== undefined) updates.pair = pair.toUpperCase();
+  if (is_default !== undefined) updates.is_default = is_default;
+  const { data, error } = await supabase
+    .from('user_pairs')
+    .update(updates)
+    .eq('id', req.params.id)
+    .eq('user_id', userId)
+    .select()
+    .single();
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data);
+});
+
+app.delete('/api/user-pairs/:id', authMiddleware, async (req, res) => {
+  const userId = getUserId(req);
+  const { error } = await supabase
+    .from('user_pairs')
     .delete()
     .eq('id', req.params.id)
     .eq('user_id', userId);

@@ -363,7 +363,7 @@ class ApiClient {
       const mapped = { ...item }
       const surveillanceId = mapped.surveillance_id
       if ('surveillance_id' in mapped) { delete mapped.surveillance_id }
-      return { ...mapped, _surveillanceId: surveillanceId }
+      return { ...mapped, _surveillanceId: surveillanceId, id: mapped.id }
     }
     return item
   }
@@ -401,6 +401,11 @@ class ApiClient {
   createChecklistItem(data) { return this.request('/checklist', { method: 'POST', body: JSON.stringify(data) }) }
   updateChecklistItem(id, data) { return this.request(`/checklist/${id}`, { method: 'PUT', body: JSON.stringify(data) }) }
   deleteChecklistItem(id) { return this.request(`/checklist/${id}`, { method: 'DELETE' }) }
+
+  getUserPairs() { return this.request('/user-pairs') }
+  createUserPair(data) { return this.request('/user-pairs', { method: 'POST', body: JSON.stringify(data) }) }
+  updateUserPair(id, data) { return this.request(`/user-pairs/${id}`, { method: 'PUT', body: JSON.stringify(data) }) }
+  deleteUserPair(id) { return this.request(`/user-pairs/${id}`, { method: 'DELETE' }) }
 
   getSettings() { return this.request('/settings') }
   updateSettings(data) { return this.request('/settings', { method: 'PUT', body: JSON.stringify(data) }) }

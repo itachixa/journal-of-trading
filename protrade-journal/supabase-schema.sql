@@ -103,6 +103,15 @@ create table checklist_items (
   updated_at timestamp with time zone default now()
 );
 
+-- User trading pairs table
+create table user_pairs (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid references auth.users on delete cascade,
+  pair text not null,
+  is_default boolean default false,
+  created_at timestamp with time zone default now()
+);
+
 -- Indexes for performance
 create index idx_trades_user_id on trades(user_id);
 create index idx_trades_date on trades(date);
@@ -110,6 +119,7 @@ create index idx_notes_user_id on notes(user_id);
 create index idx_surveillances_user_id on surveillances(user_id);
 create index idx_tags_user_id on tags(user_id);
 create index idx_checklist_user_id on checklist_items(user_id);
+create index idx_user_pairs_user_id on user_pairs(user_id);
 
 -- Row Level Security policies
 alter table settings enable row level security;
@@ -119,6 +129,8 @@ alter table notes enable row level security;
 alter table surveillances enable row level security;
 alter table surveillance_confirmations enable row level security;
 alter table surveillance_screenshots enable row level security;
+alter table checklist_items enable row level security;
+alter table user_pairs enable row level security;
 
 -- Policies
 create policy "Users can view their own settings" on settings for select using (auth.uid() = user_id);
@@ -163,3 +175,8 @@ create policy "Users can view their own checklist items" on checklist_items for 
 create policy "Users can insert their own checklist items" on checklist_items for insert with check (auth.uid() = user_id);
 create policy "Users can update their own checklist items" on checklist_items for update using (auth.uid() = user_id);
 create policy "Users can delete their own checklist items" on checklist_items for delete using (auth.uid() = user_id);
+
+create policy "Users can view their own pairs" on user_pairs for select using (auth.uid() = user_id);
+create policy "Users can insert their own pairs" on user_pairs for insert with check (auth.uid() = user_id);
+create policy "Users can update their own pairs" on user_pairs for update using (auth.uid() = user_id);
+create policy "Users can delete their own pairs" on user_pairs for delete using (auth.uid() = user_id);

@@ -26,7 +26,7 @@ export default function Onboarding() {
   const [device, setDevice] = useState('desktop');
   const [currency, setCurrency] = useState('EUR');
   const [selectedPairs, setSelectedPairs] = useState(['EURUSD', 'GBPUSD', 'USDJPY', 'GBPJPY']);
-  const { updateSettings, settings, setUserPairs } = useApp();
+  const { updateSettings, settings, replaceUserPairs } = useApp();
   const { user, completeOnboarding } = useAuth();
   const navigate = useNavigate();
 
@@ -40,7 +40,7 @@ export default function Onboarding() {
     if (currentStep === STEPS.length - 2) {
       saveSettings();
     } else if (currentStep === 2) {
-      setUserPairs(selectedPairs);
+      replaceUserPairs(selectedPairs);
     }
     setCurrentStep(s => Math.min(s + 1, STEPS.length - 1));
   };
@@ -58,7 +58,7 @@ export default function Onboarding() {
       device,
       currency
     });
-    setUserPairs(selectedPairs);
+    replaceUserPairs(selectedPairs);
   };
 
   const finish = async () => {

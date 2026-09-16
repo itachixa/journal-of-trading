@@ -4,6 +4,8 @@ import './PairSelector.css';
 const DEFAULT_PAIRS = PAIRS;
 
 export default function PairSelector({ value, onChange, pairs = DEFAULT_PAIRS }) {
+  // Ensure current value is in options even if not in pairs list
+  const options = pairs.includes(value) ? pairs : [value, ...pairs];
   return (
     <div className="pair-selector">
       <select 
@@ -12,7 +14,7 @@ export default function PairSelector({ value, onChange, pairs = DEFAULT_PAIRS })
         className="pair-select"
       >
         <option value="">Sélectionner une paire...</option>
-        {pairs.map(pair => (
+        {options.map(pair => (
           <option key={pair} value={pair}>{pair}</option>
         ))}
       </select>

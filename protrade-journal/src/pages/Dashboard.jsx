@@ -184,6 +184,60 @@ export default function Dashboard() {
     return { weeks, monthName: MONTHS[month], year };
   }, [trades, calMonth, calYear]);
 
+  const yearlyComparison = useMemo(() => {
+    const years = {};
+    trades.forEach(trade => {
+      const date = new Date(trade.date);
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      if (!years[year]) {
+        years[year] = { trades: 0, profit: 0, wins: 0, monthly: {} };
+      }
+      years[year].trades++;
+      years[year].profit += toNumber(trade.result);
+      if (toNumber(trade.result) > 0) years[year].wins++;
+      if (!years[year].monthly[month]) years[year].monthly[month] = { profit: 0, trades: 0, wins: 0 };
+      years[year].monthly[month].profit += toNumber(trade.result);
+      years[year].monthly[month].trades++;
+      if (toNumber(trade.result) > 0) years[year].monthly[month].wins++;
+    });
+    
+    return Object.keys(years).sort((a, b) => b - a).map(year => {
+      const y = years[year];
+      const months = Object.values(y.monthly);
+      const profits = months.map(m => m.profit);
+      return {
+        year: parseInt(year),
+        totalTrades: y.trades,
+        totalProfit: y.profit,
+        winRate: y.trades > 0 ? ((y.wins / y.trades) * 100).toFixed(1) : 0,
+        bestMonth: profits.length > 0 ? Math.max(...profits) : 0,
+        worstMonth: profits.length > 0 ? Math.min(...profits) : 0
+      };
+    });
+  }, [trades]);
+
+  const monthlyYearData = useMemo(() => {
+    const year = calYear;
+    const months = {};
+    trades.forEach(trade => {
+      const date = new Date(trade.date);
+      if (date.getFullYear() === year) {
+        const month = date.getMonth();
+        if (!months[month]) months[month] = { profit: 0, trades: 0, wins: 0 };
+        months[month].profit += toNumber(trade.result);
+        months[month].trades++;
+        if (toNumber(trade.result) > 0) months[month].wins++;
+      }
+    });
+    return MONTHS.map((monthName, i) => ({
+      month: monthName,
+      profit: months[i]?.profit || 0,
+      trades: months[i]?.trades || 0,
+      winRate: months[i]?.trades ? ((months[i].wins / months[i].trades) * 100).toFixed(1) : 0
+    }));
+  }, [trades, calYear]);
+
   const performanceInsight = useMemo(() => {
     if (!trades.length) return { label: t('noTrades') || 'No trades yet', value: '—', type: 'neutral' };
     const weeklyR = [];
@@ -436,6 +490,16 @@ export default function Dashboard() {
                 <p className="calendar-month">{calendarData.monthName} {calendarData.year}</p>
               </div>
               <div className="calendar-nav">
+                <select 
+                  value={calYear} 
+                  onChange={(e) => setCalYear(parseInt(e.target.value))}
+                  className="year-select"
+                  aria-label="Select year"
+                >
+                  {Array.from({ length: 6 }, (_, i) => new Date().getFullYear() - i).map(y => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
                 <button className="nav-btn" aria-label="Previous month" onClick={() => {
                   setCalMonth(prev => {
                     if (prev === 0) {
@@ -491,6 +555,56 @@ export default function Dashboard() {
               <span className="legend-item"><span className="legend-dot profit"></span> Profitable</span>
               <span className="legend-item"><span className="legend-dot loss"></span> Loss</span>
               <span className="legend-item"><span className="legend-dot neutral"></span> No trades</span>
+            </div>
+
+            {/* Yearly Performance Comparison */}
+            <div className="yearly-performance">
+              <h3>Performance par Année</h3>
+              <div className="yearly-table-container">
+                <table className="yearly-table">
+                  <thead>
+                    <tr>
+                      <th>Année</th>
+                      <th>Trades</th>
+                      <th>Profit Total</th>
+                      <th>Win Rate</th>
+                      <th>Best Month</th>
+                      <th>Worst Month</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {yearlyComparison.map(y => (
+                      <tr key={y.year}>
+                        <td><strong>{y.year}</strong></td>
+                        <td>{y.totalTrades}</td>
+                        <td className={y.totalProfit >= 0 ? 'positive' : 'negative'}>
+                          {y.totalProfit >= 0 ? '+' : ''}{formatNumber(y.totalProfit, 2)}
+                        </td>
+                        <td>{y.winRate}%</td>
+                        <td className="positive">{y.bestMonth >= 0 ? '+' : ''}{formatNumber(y.bestMonth, 2)}</td>
+                        <td className="negative">{y.worstMonth <= 0 ? '' : '+'}{formatNumber(y.worstMonth, 2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Monthly Performance for Selected Year */}
+            <div className="monthly-performance-year">
+              <h3>Performance Mensuelle {calYear}</h3>
+              <div className="monthly-grid">
+                {monthlyYearData.map(m => (
+                  <div key={m.month} className={`month-card ${m.profit >= 0 ? 'profit' : m.profit < 0 ? 'loss' : 'neutral'}`}>
+                    <div className="month-name">{m.month}</div>
+                    <div className="month-trades">{m.trades} trades</div>
+                    <div className={`month-pnl ${m.profit >= 0 ? 'positive' : 'negative'}`}>
+                      {m.profit >= 0 ? '+' : ''}{formatNumber(m.profit, 2)}
+                    </div>
+                    <div className="month-winrate">WR: {m.winRate}%</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
         </div>
