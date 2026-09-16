@@ -454,8 +454,12 @@ app.post('/api/surveillances', authMiddleware, async (req, res) => {
       checked: c.checked || false,
       created_at: new Date(Date.now() + idx).toISOString()
     }));
-    await supabase.from('surveillance_confirmations').insert(confs);
-    surveillance.conditions = confs.map(c => mapFromSupabase('surveillance_confirmations', c));
+    const { data: insertedConfs, error: confError } = await supabase
+      .from('surveillance_confirmations')
+      .insert(confs)
+      .select();
+    if (confError) return res.status(400).json({ error: confError.message });
+    surveillance.conditions = (insertedConfs || []).map(c => mapFromSupabase('surveillance_confirmations', c));
   } else {
     surveillance.conditions = [];
   }
@@ -515,8 +519,12 @@ app.put('/api/surveillances/:id', authMiddleware, async (req, res) => {
       checked: c.checked || false,
       created_at: new Date(Date.now() + idx).toISOString()
     }));
-    await supabase.from('surveillance_confirmations').insert(confs);
-    surveillance.conditions = confs.map(c => mapFromSupabase('surveillance_confirmations', c));
+    const { data: insertedConfs, error: confError } = await supabase
+      .from('surveillance_confirmations')
+      .insert(confs)
+      .select();
+    if (confError) return res.status(400).json({ error: confError.message });
+    surveillance.conditions = (insertedConfs || []).map(c => mapFromSupabase('surveillance_confirmations', c));
   } else {
     surveillance.conditions = [];
   }
