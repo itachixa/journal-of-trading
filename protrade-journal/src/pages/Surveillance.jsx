@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
@@ -22,6 +22,112 @@ const DEFAULT_CONDITIONS = [
   { id: 6, title: 'RR >= 1:3', note: '', importance: 3 }
 ];
 
+function ImageGallery({ images, onClose }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const imgRef = useRef(null);
+
+  const goPrev = useCallback(() => {
+    setCurrentIndex(prev => (prev === 0 ? images.length - 1 : prev - 1));
+  }, [images.length]);
+
+  const goNext = useCallback(() => {
+    setCurrentIndex(prev => (prev === images.length - 1 ? 0 : prev + 1));
+  }, [images.length]);
+
+  const handleKeyDown = useCallback((e) => {
+    if (e.key === 'ArrowLeft') goPrev();
+    else if (e.key === 'ArrowRight') goNext();
+    else if (e.key === 'Escape') onClose();
+  }, [goPrev, goNext, onClose]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
+
+  if (!images.length) return null;
+
+  const currentImage = images[currentIndex].url || images[currentIndex];
+
+  return (
+    <motion.div
+      className="image-gallery-overlay"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Image gallery"
+    >
+      <motion.div
+        className="image-gallery-modal"
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        onClick={e => e.stopPropagation()}
+        ref={imgRef}
+      >
+        <button
+          className="gallery-close"
+          onClick={onClose}
+          aria-label="Close gallery"
+        >
+          ✕
+        </button>
+
+        <button
+          className="gallery-nav gallery-prev"
+          onClick={goPrev}
+          aria-label="Previous image"
+          disabled={images.length <= 1}
+        >
+          ‹
+        </button>
+
+        <div className="gallery-image-container">
+          <img
+            src={currentImage}
+            alt={`Screenshot ${currentIndex + 1} of ${images.length}`}
+            className="gallery-image"
+            onLoad={() => imgRef.current?.classList.add('loaded')}
+          />
+          {images.length > 1 && (
+            <div className="gallery-counter">
+              {currentIndex + 1} / {images.length}
+            </div>
+          )}
+        </div>
+
+        <button
+          className="gallery-nav gallery-next"
+          onClick={goNext}
+          aria-label="Next image"
+          disabled={images.length <= 1}
+        >
+          ›
+        </button>
+
+        {images.length > 1 && (
+          <div className="gallery-thumbs">
+            {images.map((img, i) => (
+              <button
+                key={img.id || i}
+                className={`gallery-thumb ${i === currentIndex ? 'active' : ''}`}
+                onClick={() => setCurrentIndex(i)}
+                aria-label={`Go to image ${i + 1}`}
+                aria-current={i === currentIndex ? 'true' : 'false'}
+              >
+                <img src={img.url || img} alt="" />
+              </button>
+            ))}
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
+
 export default function Surveillance() {
   const navigate = useNavigate();
   const { t, surveillances, addSurveillance, deleteSurveillance, updateSurveillance, tags, SETUP_PAIRS, isLoading } = useApp();
@@ -30,6 +136,18 @@ export default function Surveillance() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [expandedCards, setExpandedCards] = useState({});
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+
+  const openGallery = useCallback((images) => {
+    setGalleryImages(images);
+    setGalleryOpen(true);
+  }, []);
+
+  const closeGallery = useCallback(() => {
+    setGalleryOpen(false);
+    setGalleryImages([]);
+  }, []);
 
   const [formData, setFormData] = useState({
     pair: 'EURUSD',
@@ -211,6 +329,7 @@ export default function Surveillance() {
   }
 
   return (
+    <div>
     <motion.div className="surveillance-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <header className="page-header">
         <div className="header-left">
@@ -434,7 +553,7 @@ export default function Surveillance() {
                         whileTap={{ scale: 0.95 }}
                       >
                         <label className="inline-checkbox">
-                          <input 
+<input 
                             type="checkbox" 
                             checked={condition.checked || false} 
                             onChange={() => toggleConditionFromCard(surveillance.id, condition.id)} 
@@ -458,12 +577,20 @@ export default function Surveillance() {
                 </div>
 
                 {surveillance.screenshots?.length > 0 && (
-                  <div className="card-screenshots">
-                    {surveillance.screenshots.slice(0, 3).map((img, i) => (
-                      <div key={i} className="screenshot-preview">
-                        <img src={img.url || img} alt={`Screenshot ${i + 1}`} />
+                  <div className="card-screenshots" onClick={() => openGallery(surveillance.screenshots)}>
+                    <div className="screenshot-main">
+                      <img src={surveillance.screenshots[0].url || surveillance.screenshots[0]} alt="Screenshot 1" />
+                      {surveillance.screenshots.length > 1 && (
+                        <span className="screenshot-count-badge">+{surveillance.screenshots.length - 1}</span>
+                      )}
+                    </div>
+                    {surveillance.screenshots.length > 1 && (
+                      <div className="screenshot-thumbs">
+                        {surveillance.screenshots.slice(1, 4).map((img, i) => (
+                          <img key={i} src={img.url || img} alt={`Screenshot ${i + 2}`} />
+                        ))}
                       </div>
-                    ))}
+                    )}
                   </div>
                 )}
               </div>
@@ -490,6 +617,10 @@ export default function Surveillance() {
           </div>
         )}
       </div>
-    </motion.div>
+    <AnimatePresence>
+      {galleryOpen && <ImageGallery images={galleryImages} onClose={closeGallery} />}
+    </AnimatePresence>
+  </motion.div>
+</div>
   );
 }
