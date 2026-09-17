@@ -311,3 +311,99 @@
   font-size: 0.9rem;
   margin: 0;
 }
+/* ====================== TECHNOLOGICAL THEME AUTH ====================== */
+[data-theme-style="technological"] .auth-background {
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(34, 211, 238, 0.1) 0%, transparent 40%),
+    radial-gradient(ellipse at 80% 90%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 50%, rgba(167, 139, 250, 0.05) 0%, transparent 50%),
+    var(--bg-primary);
+}
+
+[data-theme-style="technological"] .auth-orb-1 {
+  background: var(--accent-cyan);
+  filter: blur(100px);
+  opacity: 0.3;
+}
+
+[data-theme-style="technological"] .auth-orb-2 {
+  background: var(--accent-blue);
+  filter: blur(100px);
+  opacity: 0.25;
+}
+
+[data-theme-style="technological"] .auth-orb-3 {
+  background: var(--accent-purple);
+  filter: blur(100px);
+  opacity: 0.2;
+}
+
+[data-theme-style="technological"] .auth-card {
+  background: linear-gradient(135deg, rgba(4, 12, 28, 0.95), rgba(6, 20, 44, 0.95));
+  border-color: rgba(34, 211, 238, 0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(34, 211, 238, 0.1);
+}
+
+[data-theme-style="technological"] .auth-logo {
+  background: linear-gradient(135deg, #22d3ee, #3b82f6);
+  box-shadow: 0 8px 24px rgba(34, 211, 238, 0.4), 0 0 30px rgba(34, 211, 238, 0.2);
+}
+
+[data-theme-style="technological"] .auth-card h1 {
+  background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme-style="technological"] .input-group input {
+  background: rgba(6, 20, 44, 0.6);
+  border-color: rgba(34, 211, 238, 0.15);
+}
+
+[data-theme-style="technological"] .input-group input:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
+}
+
+[data-theme-style="technological"] .auth-btn {
+  background: linear-gradient(135deg, #22d3ee, #3b82f6);
+  box-shadow: 0 4px 12px rgba(34, 211, 238, 0.3);
+}
+
+[data-theme-style="technological"] .auth-btn:hover:not(:disabled) {
+  box-shadow: 0 6px 20px rgba(34, 211, 238, 0.4), 0 0 30px rgba(34, 211, 238, 0.2);
+}
+
+[data-theme-style="technological"] .auth-link {
+  color: var(--accent-cyan);
+}
+
+[data-theme-style="technological"] .auth-link:hover {
+  opacity: 0.8;
+}
+
+[data-theme-style="technological"] .auth-success-card {
+  background: rgba(34, 211, 238, 0.08);
+  border-color: rgba(34, 211, 238, 0.2);
+}
+
+[data-theme-style="technological"] .verify-step-num {
+  background: linear-gradient(135deg, #22d3ee, #3b82f6);
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.3);
+}
+
+[data-theme-style="technological"] .verify-step {
+  background: rgba(6, 20, 44, 0.6);
+  border-color: rgba(34, 211, 238, 0.12);
+}
+
+[data-theme-style="technological"] .auth-error {
+  background: rgba(248, 113, 113, 0.08);
+  border-color: rgba(248, 113, 113, 0.2);
+}
+
+[data-theme-style="technological"] .auth-message {
+  background: rgba(52, 211, 153, 0.08);
+  border-color: rgba(52, 211, 153, 0.2);
+}

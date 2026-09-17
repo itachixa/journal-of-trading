@@ -271,4 +271,72 @@
   .calculator-layout {
     grid-template-columns: 1fr;
   }
+}/* ====================== TECHNOLOGICAL THEME CALCULATOR ====================== */
+[data-theme-style="technological"] .calculator-page {
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(34, 211, 238, 0.03) 0%, transparent 50%),
+    var(--bg-primary);
+}
+
+[data-theme-style="technological"] .formula-banner {
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.08), rgba(167, 139, 250, 0.06));
+  border-color: rgba(34, 211, 238, 0.2);
+}
+
+[data-theme-style="technological"] .formula-icon {
+  background: linear-gradient(135deg, #22d3ee, #3b82f6);
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
+}
+
+[data-theme-style="technological"] .calc-card {
+  background: linear-gradient(135deg, rgba(4, 12, 28, 0.9), rgba(6, 20, 44, 0.85));
+  border-color: rgba(34, 211, 238, 0.12);
+}
+
+[data-theme-style="technological"] .calc-card input,
+[data-theme-style="technological"] .calc-card select {
+  background: rgba(6, 20, 44, 0.6);
+  border-color: rgba(34, 211, 238, 0.15);
+}
+
+[data-theme-style="technological"] .calc-card input:focus,
+[data-theme-style="technological"] .calc-card select:focus {
+  border-color: var(--accent-cyan);
+}
+
+[data-theme-style="technological"] .risk-preset.active {
+  background: linear-gradient(135deg, #22d3ee, #3b82f6);
+  box-shadow: 0 0 15px rgba(34, 211, 238, 0.3);
+}
+
+[data-theme-style="technological"] .result-card {
+  background: linear-gradient(135deg, rgba(4, 12, 28, 0.9), rgba(6, 20, 44, 0.85));
+  border-color: rgba(34, 211, 238, 0.12);
+}
+
+[data-theme-style="technological"] .result-card.main-result {
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.1), rgba(59, 130, 246, 0.08));
+  border-color: rgba(34, 211, 238, 0.2);
+}
+
+[data-theme-style="technological"] .result-value.positive {
+  color: var(--success);
+  text-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
+  -webkit-text-fill-color: var(--success);
+}
+
+[data-theme-style="technological"] .risk-value {
+  color: var(--danger);
+  text-shadow: 0 0 10px rgba(248, 113, 113, 0.4);
+}
+
+[data-theme-style="technological"] .risk-amount-display {
+  background: rgba(6, 20, 44, 0.6);
+  border-color: rgba(34, 211, 238, 0.12);
+}
+
+[data-theme-style="technological"] .btn-calc:hover {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.2);
 }

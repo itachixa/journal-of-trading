@@ -8,7 +8,7 @@ import {
   FaThLarge, FaList, FaEye, FaPlusCircle, FaCalculator, 
   FaChartPie, FaCheckSquare, FaStickyNote, FaTags, FaCog,
   FaSignOutAlt, FaGlobe, FaMoon, FaSun, FaBars, FaTimes,
-  FaChartLine, FaShieldAlt
+  FaChartLine, FaShieldAlt, FaCircle, FaDesktop, FaServer
 } from 'react-icons/fa';
 import './Layout.css';
 
@@ -27,10 +27,11 @@ const navItems = [
 ];
 
 export default function Layout({ children }) {
-  const { t, language, toggleLanguage, toggleTheme, theme, settings, accountBalance } = useApp();
+  const { t, language, toggleLanguage, toggleTheme, theme, themeStyle, setThemeStyle, settings, accountBalance } = useApp();
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showThemeMenu, setShowThemeMenu] = useState(false);
   const location = useLocation();
 
 
@@ -84,10 +85,55 @@ export default function Layout({ children }) {
               <FaGlobe />
               <span>{language.toUpperCase()}</span>
             </button>
-            <button className="action-btn" onClick={toggleTheme} title={theme === 'dark' ? t('lightMode') : t('darkMode')}>
-              {theme === 'dark' ? <FaMoon /> : <FaSun />}
-              <span>{theme === 'dark' ? '🌙' : '☀️'}</span>
-            </button>
+            <div className="theme-selector">
+              <button 
+                className="action-btn theme-toggle" 
+                onClick={() => setShowThemeMenu(!showThemeMenu)}
+                title={theme === 'dark' ? t('lightMode') : t('darkMode')}
+              >
+                {theme === 'dark' ? <FaMoon /> : <FaSun />}
+                <span>{theme === 'dark' ? '🌙' : '☀️'}</span>
+              </button>
+              {showThemeMenu && (
+                <div className="theme-dropdown">
+                  <div className="theme-dropdown-header">
+                    <span>Appearance</span>
+                  </div>
+                  <div className="theme-dropdown-options">
+                    <button
+                      className={`theme-dropdown-opt ${theme === 'dark' ? 'active' : ''}`}
+                      onClick={() => { toggleTheme(); setShowThemeMenu(false); }}
+                    >
+                      <FaMoon /> Dark
+                    </button>
+                    <button
+                      className={`theme-dropdown-opt ${theme === 'light' ? 'active' : ''}`}
+                      onClick={() => { toggleTheme(); setShowThemeMenu(false); }}
+                    >
+                      <FaSun /> Light
+                    </button>
+                  </div>
+                  <div className="theme-dropdown-divider"></div>
+                  <div className="theme-dropdown-header">
+                    <span>Style</span>
+                  </div>
+                  <div className="theme-dropdown-options">
+                    <button
+                      className={`theme-dropdown-opt ${themeStyle === 'classic' ? 'active' : ''}`}
+                      onClick={() => { setThemeStyle('classic'); setShowThemeMenu(false); }}
+                    >
+                      <FaDesktop /> Classic
+                    </button>
+                    <button
+                      className={`theme-dropdown-opt ${themeStyle === 'technological' ? 'active' : ''}`}
+                      onClick={() => { setThemeStyle('technological'); setShowThemeMenu(false); }}
+                    >
+                      <FaServer /> Technological
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           <button className="logout-btn" onClick={handleLogout}>
             <FaSignOutAlt />

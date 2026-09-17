@@ -411,4 +411,97 @@
   .filters-bar input[type="date"] {
     width: 100%;
   }
+}/* ====================== TECHNOLOGICAL THEME TRADES ====================== */
+[data-theme-style="technological"] .trades-page {
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(34, 211, 238, 0.03) 0%, transparent 50%),
+    var(--bg-primary);
+}
+
+[data-theme-style="technological"] .trade-card {
+  background: linear-gradient(135deg, rgba(4, 12, 28, 0.9), rgba(6, 20, 44, 0.85));
+  border-color: rgba(34, 211, 238, 0.12);
+}
+
+[data-theme-style="technological"] .trade-card:hover {
+  border-color: rgba(34, 211, 238, 0.4);
+  box-shadow: 0 0 30px rgba(34, 211, 238, 0.12);
+}
+
+[data-theme-style="technological"] .trade-direction.buy {
+  background: rgba(52, 211, 153, 0.12);
+  color: var(--success);
+}
+
+[data-theme-style="technological"] .trade-direction.sell {
+  background: rgba(248, 113, 113, 0.12);
+  color: var(--danger);
+}
+
+[data-theme-style="technological"] .trade-result-badge.win {
+  background: rgba(52, 211, 153, 0.1);
+  color: var(--success);
+}
+
+[data-theme-style="technological"] .trade-result-badge.loss {
+  background: rgba(248, 113, 113, 0.1);
+  color: var(--danger);
+}
+
+[data-theme-style="technological"] .filters-bar select,
+[data-theme-style="technological"] .filters-bar input[type="date"] {
+  background: rgba(6, 20, 44, 0.6);
+  border-color: rgba(34, 211, 238, 0.15);
+}
+
+[data-theme-style="technological"] .filters-bar select:focus,
+[data-theme-style="technological"] .filters-bar input:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
+}
+
+[data-theme-style="technological"] .view-toggle {
+  background: rgba(4, 12, 28, 0.6);
+  border-color: rgba(34, 211, 238, 0.15);
+}
+
+[data-theme-style="technological"] .view-toggle-btn.active {
+  background: linear-gradient(135deg, #22d3ee, #3b82f6);
+  color: #02060f;
+  box-shadow: 0 0 15px rgba(34, 211, 238, 0.3);
+}
+
+[data-theme-style="technological"] .search-box input {
+  background: rgba(6, 20, 44, 0.6);
+  border-color: rgba(34, 211, 238, 0.15);
+}
+
+[data-theme-style="technological"] .search-box input:focus {
+  border-color: var(--accent-cyan);
+}
+
+[data-theme-style="technological"] .trades-table th {
+  background: linear-gradient(90deg, rgba(34, 211, 238, 0.08), rgba(34, 211, 238, 0.02));
+  border-bottom-color: rgba(34, 211, 238, 0.12);
+  color: var(--accent-cyan);
+}
+
+[data-theme-style="technological"] .trades-table td {
+  border-bottom-color: rgba(34, 211, 238, 0.06);
+}
+
+[data-theme-style="technological"] .trades-table tr:hover {
+  background: rgba(34, 211, 238, 0.05);
+}
+
+[data-theme-style="technological"] .action-icon:hover {
+  background: rgba(34, 211, 238, 0.15);
+  color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+}
+
+[data-theme-style="technological"] .action-icon.danger:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: rgba(248, 113, 113, 0.1);
 }

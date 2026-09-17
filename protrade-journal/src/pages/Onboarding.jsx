@@ -6,25 +6,25 @@ import { PAIRS } from '../context/AppContext';
 import './Onboarding.css';
 
 const STEPS = [
-  { id: 'welcome', title: 'Bienvenue', subtitle: 'Configurons votre journal de trading' },
-  { id: 'device', title: 'Appareil', subtitle: 'Comment allez-vous utiliser l\'application ?' },
-  { id: 'pairs', title: 'Vos Paires', subtitle: 'Sélectionnez 4 paires que vous tradez le plus' },
-  { id: 'capital', title: 'Capital Initial', subtitle: 'Définissez votre balance de départ' },
-  { id: 'currency', title: 'Devise', subtitle: 'Choisissez votre devise principale' },
-  { id: 'language', title: 'Langue', subtitle: 'Choisissez votre langue préférée' },
-  { id: 'theme', title: 'Apparence', subtitle: 'Sélectionnez votre thème' },
-  { id: 'risk', title: 'Gestion du Risque', subtitle: 'Configurez votre risque par défaut' },
-  { id: 'complete', title: 'C\'est parti !', subtitle: 'Votre journal est prêt' }
+  { id: 'welcome', title: 'Welcome', subtitle: "Let's set up your trading journal" },
+  { id: 'device', title: 'Device', subtitle: 'How will you use the app?' },
+  { id: 'pairs', title: 'Your Pairs', subtitle: 'Select 4 pairs you trade the most' },
+  { id: 'capital', title: 'Initial Capital', subtitle: 'Set your starting balance' },
+  { id: 'currency', title: 'Currency', subtitle: 'Choose your primary currency' },
+  { id: 'language', title: 'Language', subtitle: 'Choose your preferred language' },
+  { id: 'theme', title: 'Appearance', subtitle: 'Select your theme' },
+  { id: 'risk', title: 'Risk Management', subtitle: 'Configure your default risk' },
+  { id: 'complete', title: "Let's Go!", subtitle: 'Your journal is ready' }
 ];
 
 export default function Onboarding() {
   const [currentStep, setCurrentStep] = useState(0);
   const [capital, setCapital] = useState(10000);
-  const [language, setLanguage] = useState('fr');
+  const [language, setLanguage] = useState('en');
   const [theme, setTheme] = useState('dark');
   const [defaultRisk, setDefaultRisk] = useState(2);
   const [device, setDevice] = useState('desktop');
-  const [currency, setCurrency] = useState('EUR');
+  const [currency, setCurrency] = useState('USD');
   const [selectedPairs, setSelectedPairs] = useState(['EURUSD', 'GBPUSD', 'USDJPY', 'GBPJPY']);
   const { updateSettings, settings, replaceUserPairs } = useApp();
   const { user, completeOnboarding } = useAuth();
@@ -112,24 +112,24 @@ export default function Onboarding() {
             {currentStep === 0 && (
               <div className="onboarding-welcome">
                 <div className="welcome-icon">📊</div>
-                <h3>Bienvenue {user?.email?.split('@')[0] || 'Trader'} !</h3>
-                <p>ProTrade Journal vous aide à suivre vos trades, analyser vos performances et améliorer votre stratégie.</p>
+                <h3>Welcome {user?.email?.split('@')[0] || 'Trader'} !</h3>
+                <p>ProTrade Journal helps you track your trades, analyze your performance, and improve your strategy.</p>
                 <div className="welcome-features">
                   <div className="feature">
                     <span className="feature-icon">📝</span>
-                    <span>Journal de trades</span>
+                    <span>Trade Journal</span>
                   </div>
                   <div className="feature">
                     <span className="feature-icon">📈</span>
-                    <span>Statistiques avancées</span>
+                    <span>Advanced Statistics</span>
                   </div>
                   <div className="feature">
                     <span className="feature-icon">🔍</span>
-                    <span>Surveillance de setups</span>
+                    <span>Setup Surveillance</span>
                   </div>
                   <div className="feature">
                     <span className="feature-icon">🧮</span>
-                    <span>Calculateur de position</span>
+                    <span>Position Calculator</span>
                   </div>
                 </div>
               </div>
@@ -139,9 +139,9 @@ export default function Onboarding() {
               <div className="onboarding-device">
                 <div className="device-options">
                   {[
-                    { id: 'mobile', label: 'Mobile', icon: '📱', desc: 'Smartphone / Petite tablette' },
-                    { id: 'tablet', label: 'Tablette', icon: '📲', desc: 'iPad / Tablette Android' },
-                    { id: 'desktop', label: 'Desktop', icon: '🖥️', desc: 'Ordinateur / MacBook' }
+                    { id: 'mobile', label: 'Mobile', icon: '📱', desc: 'Smartphone / Small tablet' },
+                    { id: 'tablet', label: 'Tablet', icon: '📲', desc: 'iPad / Android Tablet' },
+                    { id: 'desktop', label: 'Desktop', icon: '🖥️', desc: 'Computer / MacBook' }
                   ].map(d => (
                     <button
                       key={d.id}
@@ -161,7 +161,7 @@ export default function Onboarding() {
             {currentStep === 2 && (
               <div className="onboarding-pairs">
                 <div className="pairs-selection">
-                  <p className="pairs-hint">Sélectionnez 4 paires que vous tradez régulièrement</p>
+                  <p className="pairs-hint">Select 4 pairs you trade regularly</p>
                   <div className="pairs-grid">
                     {PAIRS.map(pair => (
                       <button
@@ -183,7 +183,7 @@ export default function Onboarding() {
                     ))}
                   </div>
                   <div className="pairs-count">
-                    {selectedPairs.length}/4 sélectionnées
+                    {selectedPairs.length}/4 selected
                   </div>
                 </div>
               </div>
@@ -215,7 +215,7 @@ export default function Onboarding() {
                     </button>
                   ))}
                 </div>
-                <p className="capital-hint">C'est votre capital de départ. Vous pourrez le modifier dans les paramètres.</p>
+                <p className="capital-hint">This is your starting capital. You can change it later in settings.</p>
               </div>
             )}
 
@@ -223,13 +223,13 @@ export default function Onboarding() {
               <div className="onboarding-currency">
                 <div className="currency-options">
                   {[
-                    { code: 'USD', symbol: '$', label: 'Dollar US', flag: '🇺🇸' },
+                    { code: 'USD', symbol: '$', label: 'US Dollar', flag: '🇺🇸' },
                     { code: 'EUR', symbol: '€', label: 'Euro', flag: '🇪🇺' },
-                    { code: 'GBP', symbol: '£', label: 'Livre Sterling', flag: '🇬🇧' },
-                    { code: 'CHF', symbol: 'Fr', label: 'Franc Suisse', flag: '🇨🇭' },
-                    { code: 'CAD', symbol: 'C$', label: 'Dollar Canadien', flag: '🇨🇦' },
-                    { code: 'AUD', symbol: 'A$', label: 'Dollar Australien', flag: '🇦🇺' },
-                    { code: 'JPY', symbol: '¥', label: 'Yen Japonais', flag: '🇯🇵' }
+                    { code: 'GBP', symbol: '£', label: 'British Pound', flag: '🇬🇧' },
+                    { code: 'CHF', symbol: 'Fr', label: 'Swiss Franc', flag: '🇨🇭' },
+                    { code: 'CAD', symbol: 'C$', label: 'Canadian Dollar', flag: '🇨🇦' },
+                    { code: 'AUD', symbol: 'A$', label: 'Australian Dollar', flag: '🇦🇺' },
+                    { code: 'JPY', symbol: '¥', label: 'Japanese Yen', flag: '🇯🇵' }
                   ].map(c => (
                     <button
                       key={c.code}
@@ -250,7 +250,7 @@ export default function Onboarding() {
               <div className="onboarding-language">
                 <div className="language-options">
                   {[
-                    { code: 'fr', label: 'Français', flag: '🇫🇷' },
+                    { code: 'fr', label: 'French', flag: '🇫🇷' },
                     { code: 'en', label: 'English', flag: '🇬🇧' }
                   ].map(lang => (
                     <button
@@ -271,8 +271,8 @@ export default function Onboarding() {
               <div className="onboarding-theme">
                 <div className="theme-options">
                   {[
-                    { id: 'dark', label: 'Sombre', icon: '🌙', desc: 'Confortable pour les yeux' },
-                    { id: 'light', label: 'Clair', icon: '☀️', desc: 'Lumineux et propre' }
+                    { id: 'dark', label: 'Dark', icon: '🌙', desc: 'Comfortable for eyes' },
+                    { id: 'light', label: 'Light', icon: '☀️', desc: 'Bright and clean' }
                   ].map(t => (
                     <button
                       key={t.id}
@@ -293,7 +293,7 @@ export default function Onboarding() {
               <div className="onboarding-risk">
                 <div className="risk-display">
                   <span className="risk-value">{defaultRisk}%</span>
-                  <span className="risk-label">risque par trade</span>
+                  <span className="risk-label">risk per trade</span>
                 </div>
                 <input
                   type="range"
@@ -316,23 +316,23 @@ export default function Onboarding() {
                   ))}
                 </div>
                 <p className="risk-hint">
-                  Nous recommandons 1-2% par trade. Le calculateur utilisera cette valeur par défaut.
+                  We recommend 1-2% per trade. The calculator will use this as the default value.
                 </p>
               </div>
             )}
 
             {currentStep === 8 && (
               <div className="onboarding-complete">
-                <div className="complete-icon">🚀</div>
-                <h3>Tout est prêt !</h3>
-                <p>Votre journal de trading est configuré. Vous pouvez commencer à enregistrer vos trades immédiatement.</p>
+<div className="complete-icon">🚀</div>
+                <h3>Everything is ready!</h3>
+                <p>Your trading journal is configured. You can start recording your trades immediately.</p>
                 <div className="complete-summary">
                   <div className="summary-item">
-                    <span className="summary-label">Appareil</span>
-                    <span className="summary-value">{device === 'mobile' ? '📱 Mobile' : device === 'tablet' ? '📲 Tablette' : '🖥️ Desktop'}</span>
+                    <span className="summary-label">Device</span>
+                    <span className="summary-value">{device === 'mobile' ? '📱 Mobile' : device === 'tablet' ? '📲 Tablet' : '🖥️ Desktop'}</span>
                   </div>
                   <div className="summary-item">
-                    <span className="summary-label">Devise</span>
+                    <span className="summary-label">Currency</span>
                     <span className="summary-value">{currency}</span>
                   </div>
                   <div className="summary-item">
@@ -340,15 +340,15 @@ export default function Onboarding() {
                     <span className="summary-value">{capital.toLocaleString()}{currency === 'USD' ? '$' : currency === 'GBP' ? '£' : currency === 'JPY' ? '¥' : '€'}</span>
                   </div>
                   <div className="summary-item">
-                    <span className="summary-label">Langue</span>
-                    <span className="summary-value">{language === 'fr' ? 'Français' : 'English'}</span>
+                    <span className="summary-label">Language</span>
+                    <span className="summary-value">{language === 'fr' ? 'French' : 'English'}</span>
                   </div>
                   <div className="summary-item">
-                    <span className="summary-label">Thème</span>
-                    <span className="summary-value">{theme === 'dark' ? 'Sombre' : 'Clair'}</span>
+                    <span className="summary-label">Theme</span>
+                    <span className="summary-value">{theme === 'dark' ? 'Dark' : 'Light'}</span>
                   </div>
                   <div className="summary-item">
-                    <span className="summary-label">Risque</span>
+                    <span className="summary-label">Risk</span>
                     <span className="summary-value">{defaultRisk}%</span>
                   </div>
                 </div>
@@ -359,17 +359,17 @@ export default function Onboarding() {
           <div className="onboarding-actions">
             {currentStep > 0 && currentStep < STEPS.length - 1 && (
               <button className="onboarding-btn secondary" onClick={prev}>
-                ← Retour
+                ← Back
               </button>
             )}
             <div className="spacer"></div>
             {currentStep < STEPS.length - 1 ? (
               <button className="onboarding-btn primary" onClick={next}>
-                {currentStep === STEPS.length - 2 ? 'Terminer' : 'Continuer →'}
+                {currentStep === STEPS.length - 2 ? 'Finish' : 'Next →'}
               </button>
             ) : (
               <button className="onboarding-btn primary" onClick={finish}>
-                Accéder au journal →
+                Go to Journal →
               </button>
             )}
           </div>

@@ -235,3 +235,58 @@
     font-size: 2rem;
   }
 }
+/* ====================== TECHNOLOGICAL THEME TRADE DETAIL ====================== */
+[data-theme-style="technological"] .trade-detail-page {
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(34, 211, 238, 0.03) 0%, transparent 50%),
+    var(--bg-primary);
+}
+
+[data-theme-style="technological"] .detail-card {
+  background: linear-gradient(135deg, rgba(4, 12, 28, 0.9), rgba(6, 20, 44, 0.85));
+  border-color: rgba(34, 211, 238, 0.12);
+}
+
+[data-theme-style="technological"] .detail-value.pair {
+  color: var(--accent-cyan);
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.3);
+}
+
+[data-theme-style="technological"] .detail-value.direction.buy {
+  color: var(--success);
+}
+
+[data-theme-style="technological"] .detail-value.direction.sell {
+  color: var(--danger);
+}
+
+[data-theme-style="technological"] .result-card {
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.06), rgba(59, 130, 246, 0.03));
+  border-color: rgba(34, 211, 238, 0.15);
+}
+
+[data-theme-style="technological"] .result-big.positive {
+  color: var(--success);
+  text-shadow: 0 0 20px rgba(52, 211, 153, 0.4);
+}
+
+[data-theme-style="technological"] .result-big.negative {
+  color: var(--danger);
+  text-shadow: 0 0 20px rgba(248, 113, 113, 0.4);
+}
+
+[data-theme-style="technological"] .screenshot-container {
+  border-color: rgba(34, 211, 238, 0.12);
+}
+
+[data-theme-style="technological"] .no-screenshot {
+  color: var(--text-muted);
+}
+
+[data-theme-style="technological"] .stat-row {
+  border-bottom-color: rgba(34, 211, 238, 0.06);
+}
+
+[data-theme-style="technological"] .stat-row span:first-child {
+  color: var(--text-secondary);
+}

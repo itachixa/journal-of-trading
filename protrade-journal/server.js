@@ -112,6 +112,7 @@ function mapToSupabase(table, body) {
     const mapped = {}
     if (body.initialCapital !== undefined) mapped.initial_capital = body.initialCapital
     if (body.theme !== undefined) mapped.theme = body.theme
+    if (body.themeStyle !== undefined) mapped.theme_style = body.themeStyle
     if (body.defaultRisk !== undefined) mapped.default_risk = body.defaultRisk
     if (body.device !== undefined) mapped.device = body.device
     if (body.currency !== undefined) mapped.currency = body.currency
@@ -744,7 +745,7 @@ app.delete('/api/surveillances/:id/screenshots/:screenshotId', authMiddleware, a
 });
 
 // Settings
-const ALLOWED_SETTINGS_COLUMNS = ['initial_capital', 'theme', 'default_risk', 'device', 'currency', 'language'];
+const ALLOWED_SETTINGS_COLUMNS = ['initial_capital', 'theme', 'theme_style', 'default_risk', 'device', 'currency', 'language'];
 
 app.get('/api/settings', authMiddleware, async (req, res) => {
   const userId = getUserId(req);

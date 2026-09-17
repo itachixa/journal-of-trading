@@ -229,4 +229,55 @@
   .notes-grid {
     grid-template-columns: 1fr;
   }
+}/* ====================== TECHNOLOGICAL THEME NOTES ====================== */
+[data-theme-style="technological"] .notes-page {
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(34, 211, 238, 0.03) 0%, transparent 50%),
+    var(--bg-primary);
+}
+
+[data-theme-style="technological"] .note-card {
+  background: linear-gradient(135deg, rgba(4, 12, 28, 0.9), rgba(6, 20, 44, 0.85));
+  border-color: rgba(34, 211, 238, 0.12);
+}
+
+[data-theme-style="technological"] .note-card:hover {
+  border-color: rgba(34, 211, 238, 0.4);
+  box-shadow: 0 0 25px rgba(34, 211, 238, 0.1);
+}
+
+[data-theme-style="technological"] .note-form-modal {
+  background: linear-gradient(135deg, rgba(4, 12, 28, 0.98), rgba(6, 20, 44, 0.98));
+  border-color: rgba(34, 211, 238, 0.2);
+}
+
+[data-theme-style="technological"] .note-form-modal select,
+[data-theme-style="technological"] .note-form-modal textarea {
+  background: rgba(6, 20, 44, 0.6);
+  border-color: rgba(34, 211, 238, 0.15);
+}
+
+[data-theme-style="technological"] .note-actions button:hover {
+  color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  background: rgba(34, 211, 238, 0.1);
+}
+
+[data-theme-style="technological"] .notes-filters select {
+  background: rgba(6, 20, 44, 0.6);
+  border-color: rgba(34, 211, 238, 0.15);
+}
+
+[data-theme-style="technological"] .notes-filters select:focus {
+  border-color: var(--accent-cyan);
+}
+
+[data-theme-style="technological"] .note-category {
+  background: rgba(34, 211, 238, 0.1);
+  color: var(--accent-cyan);
+}
+
+[data-theme-style="technological"] .empty-state {
+  background: linear-gradient(135deg, rgba(4, 12, 28, 0.9), rgba(6, 20, 44, 0.85));
+  border-color: rgba(34, 211, 238, 0.12);
 }

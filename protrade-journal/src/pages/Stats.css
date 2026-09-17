@@ -112,4 +112,43 @@
   .stats-detailed-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+}/* ====================== TECHNOLOGICAL THEME STATS ====================== */
+[data-theme-style="technological"] .stats-page {
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(34, 211, 238, 0.03) 0%, transparent 50%),
+    var(--bg-primary);
+}
+
+[data-theme-style="technological"] .stat-card.large {
+  background: linear-gradient(135deg, rgba(4, 12, 28, 0.9), rgba(6, 20, 44, 0.85));
+  border-color: rgba(34, 211, 238, 0.12);
+}
+
+[data-theme-style="technological"] .stat-header svg {
+  color: var(--accent-cyan);
+  filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.3));
+}
+
+[data-theme-style="technological"] .stat-big-value.profit {
+  color: var(--success);
+  text-shadow: 0 0 12px rgba(52, 211, 153, 0.4);
+}
+
+[data-theme-style="technological"] .stat-big-value.loss {
+  color: var(--danger);
+  text-shadow: 0 0 12px rgba(248, 113, 113, 0.4);
+}
+
+[data-theme-style="technological"] .chart-container {
+  background: linear-gradient(135deg, rgba(4, 12, 28, 0.9), rgba(6, 20, 44, 0.85));
+  border-color: rgba(34, 211, 238, 0.12);
+}
+
+[data-theme-style="technological"] .chart-container:hover {
+  border-color: rgba(34, 211, 238, 0.3);
+  box-shadow: 0 0 25px rgba(34, 211, 238, 0.08);
+}
+
+[data-theme-style="technological"] .chart-header h2 {
+  color: var(--accent-cyan);
 }

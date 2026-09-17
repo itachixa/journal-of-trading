@@ -16,6 +16,7 @@ create table settings (
   user_id uuid references auth.users on delete cascade unique,
   initial_capital numeric default 10000,
   theme text default 'dark',
+  theme_style text default 'classic',
   default_risk numeric default 2,
   device text default 'desktop',
   currency text default 'EUR',

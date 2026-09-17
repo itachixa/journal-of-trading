@@ -336,3 +336,213 @@
     font-size: 1.4rem;
   }
 }
+
+/* ====================== TECHNOLOGICAL THEME LAYOUT ====================== */
+[data-theme-style="technological"] .sidebar {
+  background: linear-gradient(180deg, rgba(4, 12, 28, 0.95), rgba(6, 14, 30, 0.95));
+  border-right: 1px solid rgba(34, 211, 238, 0.15);
+  box-shadow: 2px 0 24px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme-style="technological"] .logo {
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.1), rgba(59, 130, 246, 0.05));
+  border-bottom: 1px solid rgba(34, 211, 238, 0.12);
+}
+
+[data-theme-style="technological"] .logo span {
+  background: linear-gradient(135deg, #22d3ee, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme-style="technological"] .logo-icon {
+  color: var(--accent-cyan);
+  filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.5));
+}
+
+[data-theme-style="technological"] .nav-item {
+  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+}
+
+[data-theme-style="technological"] .nav-item:hover {
+  background: rgba(34, 211, 238, 0.06);
+  color: var(--accent-cyan);
+  transform: translateX(4px);
+}
+
+[data-theme-style="technological"] .nav-item.active {
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.12), rgba(59, 130, 246, 0.06));
+  color: var(--accent-cyan);
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.1), inset 0 0 15px rgba(34, 211, 238, 0.05);
+}
+
+[data-theme-style="technological"] .nav-item.active::before {
+  background: linear-gradient(180deg, #22d3ee, #3b82f6);
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.4);
+}
+
+[data-theme-style="technological"] .nav-item.active svg,
+[data-theme-style="technological"] .nav-item:hover svg {
+  color: var(--accent-cyan);
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.4);
+}
+
+[data-theme-style="technological"] .sidebar-footer {
+  border-top: 1px solid rgba(34, 211, 238, 0.12);
+  background: rgba(2, 6, 15, 0.5);
+}
+
+[data-theme-style="technological"] .action-btn {
+  background: rgba(6, 20, 44, 0.6);
+  border-color: rgba(34, 211, 238, 0.15);
+  color: var(--text-secondary);
+}
+
+[data-theme-style="technological"] .action-btn:hover {
+  background: rgba(34, 211, 238, 0.1);
+  border-color: rgba(34, 211, 238, 0.5);
+  color: var(--accent-cyan);
+  box-shadow: 0 0 15px rgba(34, 211, 238, 0.2);
+}
+
+[data-theme-style="technological"] .logout-btn {
+  background: transparent;
+  border-color: rgba(34, 211, 238, 0.12);
+  color: var(--text-muted);
+}
+
+[data-theme-style="technological"] .logout-btn:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: rgba(248, 113, 113, 0.08);
+  box-shadow: 0 0 15px rgba(248, 113, 113, 0.2);
+}
+
+[data-theme-style="technological"] .header {
+  border-bottom: 1px solid rgba(34, 211, 238, 0.12);
+  background: linear-gradient(90deg, rgba(4, 12, 28, 0.9), transparent);
+}
+
+[data-theme-style="technological"] .header-title h1 {
+  background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme-style="technological"] .menu-toggle {
+  background: rgba(6, 20, 44, 0.6);
+  border-color: rgba(34, 211, 238, 0.15);
+  color: var(--accent-cyan);
+}
+
+[data-theme-style="technological"] .menu-toggle:hover {
+  background: rgba(34, 211, 238, 0.1);
+  border-color: rgba(34, 211, 238, 0.5);
+  box-shadow: 0 0 15px rgba(34, 211, 238, 0.2);
+}
+
+[data-theme-style="technological"] .capital-display {
+  background: linear-gradient(135deg, rgba(6, 20, 44, 0.8), rgba(4, 12, 28, 0.6));
+  border-color: rgba(34, 211, 238, 0.15);
+  box-shadow: inset 0 1px 0 rgba(34, 211, 238, 0.05);
+}
+
+[data-theme-style="technological"] .capital-value.positive {
+  color: var(--success);
+  text-shadow: 0 0 12px rgba(52, 211, 153, 0.4);
+}
+
+[data-theme-style="technological"] .capital-value.negative {
+  color: var(--danger);
+  text-shadow: 0 0 12px rgba(248, 113, 113, 0.4);
+}
+
+[data-theme-style="technological"] .sidebar-overlay {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(2px);
+}
+
+/* ====================== THEME DROPDOWN ====================== */
+.theme-selector {
+  position: relative;
+  width: 100%;
+}
+
+.theme-toggle {
+  width: 100%;
+}
+
+.theme-dropdown {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-elevated);
+  border: 1px solid var(--bg-glass-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  margin-bottom: var(--space-sm);
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.theme-dropdown-header {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.theme-dropdown-divider {
+  height: 1px;
+  background: var(--bg-glass-border);
+  margin: var(--space-xs) 0;
+}
+
+.theme-dropdown-opt {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-glass-light);
+  border: 1px solid var(--bg-glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.theme-dropdown-opt:hover {
+  background: var(--bg-glass-hover);
+  color: var(--text-primary);
+  border-color: var(--accent-cyan);
+}
+
+.theme-dropdown-opt.active {
+  background: rgba(34, 211, 238, 0.1);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+[data-theme-style="technological"] .theme-dropdown {
+  background: linear-gradient(135deg, rgba(6, 14, 30, 0.98), rgba(4, 12, 28, 0.98));
+  border-color: rgba(34, 211, 238, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(34, 211, 238, 0.1);
+}
+
+[data-theme-style="technological"] .theme-dropdown-opt.active {
+  background: rgba(34, 211, 238, 0.12);
+  border-color: rgba(34, 211, 238, 0.4);
+  color: #22d3ee;
+  box-shadow: 0 0 15px rgba(34, 211, 238, 0.2);
+}

@@ -13,15 +13,16 @@ const DEFAULT_TAGS = [
   { id: 'tag-3', name: 'Liquidity Grab', color: '#ef4444' }
 ];
 
-const DEFAULT_SETTINGS = { initialCapital: 10000, theme: 'dark', defaultRisk: 2 };
+const DEFAULT_SETTINGS = { initialCapital: 10000, theme: 'dark', themeStyle: 'classic', defaultRisk: 2 };
 
 const normalizeSettings = (s = {}) => ({
   initialCapital: s.initial_capital ?? s.initialCapital ?? 10000,
   theme: s.theme || 'dark',
+  themeStyle: s.themeStyle || s.theme_style || 'classic',
   defaultRisk: s.default_risk ?? s.defaultRisk ?? 2,
   device: s.device || 'desktop',
   currency: s.currency || 'EUR',
-  language: s.language || 'fr'
+  language: s.language || 'en'
 });
 
 const DEFAULT_CHECKLIST = [
@@ -47,8 +48,9 @@ export function AppProvider({ children }) {
   const [surveillances, setSurveillances] = useState([]);
   const [checklistItems, setChecklistItems] = useState([]);
   const [userPairs, setUserPairs] = useState([]);
-  const [language, setLanguage] = useState('fr');
+  const [language, setLanguage] = useState('en');
   const [theme, setTheme] = useState('dark');
+  const [themeStyle, setThemeStyle] = useState('classic');
   const [isLoading, setIsLoading] = useState(true);
 
   const loadData = async () => {
@@ -103,13 +105,18 @@ export function AppProvider({ children }) {
   const loadPrefs = () => {
     const lang = localStorage.getItem('protrade_language') || 'fr';
     const thm = localStorage.getItem('protrade_theme') || 'dark';
+    const thmStyle = localStorage.getItem('protrade_theme_style') || 'classic';
     setLanguage(lang);
     setTheme(thm);
+    setThemeStyle(thmStyle);
   };
 
   useEffect(() => { loadPrefs(); }, []);
   useEffect(() => { loadData(); }, []);
-  useEffect(() => { document.documentElement.setAttribute('data-theme', theme); }, [theme]);
+  useEffect(() => { 
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute('data-theme-style', themeStyle);
+  }, [theme, themeStyle]);
 
   const accountBalance = useMemo(() =>
     (settings.initialCapital || 10000) + trades.reduce((s, t) => s + (parseFloat(t.result) || 0), 0),
@@ -217,16 +224,18 @@ export function AppProvider({ children }) {
     setSurveillances([]);
     setLanguage('fr');
     setTheme('dark');
+    setThemeStyle('classic');
   };
 
   const value = {
-    trades, settings, notes, tags, surveillances, checklistItems, language, theme, isLoading, accountBalance, PAIRS, SETUP_PAIRS, userPairs,
+    trades, settings, notes, tags, surveillances, checklistItems, language, theme, themeStyle, isLoading, accountBalance, PAIRS, SETUP_PAIRS, userPairs,
     setUserPairs: (pairs) => {
       setUserPairs(pairs);
       localStorage.setItem('protrade_user_pairs', JSON.stringify(pairs));
     },
     toggleLanguage: () => setLanguage(p => { const n = p === 'fr' ? 'en' : 'fr'; localStorage.setItem('protrade_language', n); return n; }),
     toggleTheme: () => setTheme(p => { const n = p === 'dark' ? 'light' : 'dark'; localStorage.setItem('protrade_theme', n); return n; }),
+    setThemeStyle: (style) => { setThemeStyle(style); localStorage.setItem('protrade_theme_style', style); },
     t,
     calculateLotSize,
     updateSettings: async (newSettings) => {
@@ -237,6 +246,15 @@ export function AppProvider({ children }) {
       }
       if (r) {
         setSettings(normalizeSettings({ ...newSettings, ...r }));
+      }
+      // Persist themeStyle to localStorage if provided
+      if (newSettings.themeStyle !== undefined) {
+        setThemeStyle(newSettings.themeStyle);
+        localStorage.setItem('protrade_theme_style', newSettings.themeStyle);
+      }
+      if (newSettings.theme !== undefined) {
+        setTheme(newSettings.theme);
+        localStorage.setItem('protrade_theme', newSettings.theme);
       }
     },
     addTrade: async (tradeData) => {

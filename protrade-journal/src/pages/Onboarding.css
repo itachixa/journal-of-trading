@@ -650,3 +650,124 @@
   font-weight: 500;
 }
 
+/* ====================== TECHNOLOGICAL THEME ONBOARDING ====================== */
+[data-theme-style="technological"] .onboarding-background {
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(34, 211, 238, 0.08) 0%, transparent 40%),
+    radial-gradient(ellipse at 80% 90%, rgba(59, 130, 246, 0.06) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 50%, rgba(167, 139, 250, 0.04) 0%, transparent 50%),
+    var(--bg-primary);
+}
+
+[data-theme-style="technological"] .onboarding-container {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(34, 211, 238, 0.06) 0%, transparent 60%),
+    var(--bg-primary);
+}
+
+[data-theme-style="technological"] .onboarding-card {
+  background: linear-gradient(135deg, rgba(4, 12, 28, 0.95), rgba(6, 20, 44, 0.95));
+  border-color: rgba(34, 211, 238, 0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(34, 211, 238, 0.1);
+}
+
+[data-theme-style="technological"] .onboarding-logo {
+  background: linear-gradient(135deg, #22d3ee, #3b82f6);
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.4);
+}
+
+[data-theme-style="technological"] .onboarding-header h1 {
+  background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme-style="technological"] .progress-fill {
+  background: linear-gradient(90deg, #22d3ee, #3b82f6);
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.4);
+}
+
+[data-theme-style="technological"] .progress-dot.active,
+[data-theme-style="technological"] .progress-dot.current {
+  background: linear-gradient(135deg, #22d3ee, #3b82f6);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
+}
+
+[data-theme-style="technological"] .feature {
+  background: rgba(6, 20, 44, 0.6);
+  border-color: rgba(34, 211, 238, 0.1);
+  color: var(--text-secondary);
+}
+
+[data-theme-style="technological"] .preset-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.3);
+}
+
+[data-theme-style="technological"] .theme-card.active {
+  border-color: var(--accent);
+  background: rgba(34, 211, 238, 0.08);
+}
+
+[data-theme-style="technological"] .check-icon {
+  background: var(--accent);
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.3);
+}
+
+[data-theme-style="technological"] .device-card.active,
+[data-theme-style="technological"] .currency-card.active {
+  border-color: var(--accent);
+  background: rgba(34, 211, 238, 0.08);
+  box-shadow: 0 0 0 1px var(--accent-cyan), 0 4px 12px rgba(34, 211, 238, 0.2);
+}
+
+[data-theme-style="technological"] .device-card:hover,
+[data-theme-style="technological"] .currency-card:hover {
+  border-color: var(--accent-cyan);
+  background: rgba(34, 211, 238, 0.04);
+}
+
+[data-theme-style="technological"] .pair-option.selected {
+  border-color: var(--accent);
+  background: rgba(34, 211, 238, 0.08);
+  box-shadow: 0 0 0 1px var(--accent-cyan), 0 4px 12px rgba(34, 211, 238, 0.2);
+}
+
+[data-theme-style="technological"] .pair-option:hover {
+  border-color: var(--accent-cyan);
+  background: rgba(34, 211, 238, 0.04);
+}
+
+[data-theme-style="technological"] .pair-check {
+  background: var(--accent);
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.3);
+}
+
+[data-theme-style="technological"] .onboarding-btn.primary {
+  background: linear-gradient(135deg, #22d3ee, #3b82f6);
+  box-shadow: 0 4px 12px rgba(34, 211, 238, 0.3);
+}
+
+[data-theme-style="technological"] .onboarding-btn.primary:hover {
+  box-shadow: 0 6px 20px rgba(34, 211, 238, 0.4), 0 0 30px rgba(34, 211, 238, 0.2);
+}
+
+[data-theme-style="technological"] .onboarding-btn.secondary:hover {
+  background: rgba(34, 211, 238, 0.1);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+[data-theme-style="technological"] .summary-item {
+  background: rgba(6, 20, 44, 0.6);
+  border-color: rgba(34, 211, 238, 0.1);
+}
+
+[data-theme-style="technological"] .language-card.active,
+[data-theme-style="technological"] .theme-card.active {
+  border-color: var(--accent);
+  background: rgba(34, 211, 238, 0.08);
+}

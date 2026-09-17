@@ -436,4 +436,101 @@
   .form-actions button {
     width: 100%;
   }
+}/* ====================== TECHNOLOGICAL THEME ADD TRADE ====================== */
+[data-theme-style="technological"] .trade-form {
+  background: linear-gradient(135deg, rgba(4, 12, 28, 0.9), rgba(6, 20, 44, 0.85));
+  border-color: rgba(34, 211, 238, 0.12);
+}
+
+[data-theme-style="technological"] .form-group input,
+[data-theme-style="technological"] .form-group select,
+[data-theme-style="technological"] .form-group textarea {
+  background: rgba(6, 20, 44, 0.6);
+  border-color: rgba(34, 211, 238, 0.15);
+}
+
+[data-theme-style="technological"] .form-group input:focus,
+[data-theme-style="technological"] .form-group select:focus,
+[data-theme-style="technological"] .form-group textarea:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
+}
+
+[data-theme-style="technological"] .rr-value.good {
+  color: var(--success);
+  text-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
+}
+
+[data-theme-style="technological"] .tag-toggle {
+  background: rgba(6, 20, 44, 0.6);
+  border-color: rgba(34, 211, 238, 0.15);
+}
+
+[data-theme-style="technological"] .tag-toggle:hover {
+  border-color: var(--tag-color);
+  background: rgba(34, 211, 238, 0.08);
+}
+
+[data-theme-style="technological"] .tag-toggle.selected {
+  box-shadow: 0 0 15px var(--tag-color);
+}
+
+[data-theme-style="technological"] .file-upload-label {
+  background: rgba(6, 20, 44, 0.6);
+  border-color: rgba(34, 211, 238, 0.15);
+}
+
+[data-theme-style="technological"] .file-upload-label:hover {
+  border-color: var(--accent-cyan);
+  background: rgba(34, 211, 238, 0.08);
+  color: var(--accent-cyan);
+}
+
+[data-theme-style="technological"] .step-btn.active {
+  background: linear-gradient(135deg, #22d3ee, #3b82f6);
+  box-shadow: var(--shadow-glow-cyan);
+}
+
+[data-theme-style="technological"] .calc-card {
+  background: linear-gradient(135deg, rgba(4, 12, 28, 0.9), rgba(6, 20, 44, 0.85));
+  border-color: rgba(34, 211, 238, 0.12);
+}
+
+[data-theme-style="technological"] .result-value {
+  background: linear-gradient(135deg, #22d3ee, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme-style="technological"] .result-value.positive {
+  color: var(--success);
+  text-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
+  -webkit-text-fill-color: var(--success);
+}
+
+[data-theme-style="technological"] .result-value.risk {
+  color: var(--danger);
+}
+
+[data-theme-style="technological"] .btn-primary:hover {
+  box-shadow: 0 8px 25px rgba(34, 211, 238, 0.4), 0 0 30px rgba(34, 211, 238, 0.2);
+}
+
+[data-theme-style="technological"] .btn-secondary:hover {
+  background: rgba(34, 211, 238, 0.1);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+[data-theme-style="technological"] .form-message.success {
+  background: rgba(52, 211, 153, 0.08);
+  border-color: var(--success);
+  color: var(--success-light);
+}
+
+[data-theme-style="technological"] .form-message.error {
+  background: rgba(248, 113, 113, 0.08);
+  border-color: var(--danger);
+  color: var(--danger-light);
 }

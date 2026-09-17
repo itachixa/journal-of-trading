@@ -73,7 +73,7 @@ export function AuthProvider({ children }) {
       }
     }
     
-    setMessage('Vérifiez votre email pour confirmer votre compte');
+    setMessage('Check your email to confirm your account');
     return { user: data.user, session: data.session };
   };
 
@@ -136,7 +136,7 @@ export function AuthProvider({ children }) {
       setError(error.message);
       return { error: error.message };
     }
-    setMessage('Vérifiez votre email pour réinitialiser votre mot de passe');
+    setMessage('Check your email to reset your password');
     return { success: true };
   };
 

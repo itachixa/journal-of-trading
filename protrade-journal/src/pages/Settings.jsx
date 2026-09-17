@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
+import { FaPalette, FaDesktop, FaServer, FaCircle, FaCheckCircle } from 'react-icons/fa';
 import './Settings.css';
 
 export default function Settings() {
-  const { t, settings, updateSettings, trades, notes, tags, surveillances, deleteTrade, deleteNote, deleteTag, deleteSurveillance } = useApp();
+  const { t, settings, updateSettings, trades, notes, tags, surveillances, deleteTrade, deleteNote, deleteTag, deleteSurveillance, themeStyle, setThemeStyle } = useApp();
   const [capital, setCapital] = useState(settings.initialCapital || 10000);
   const [theme, setTheme] = useState(settings.theme || 'dark');
+  const [themeStyleState, setThemeStyleState] = useState(themeStyle || 'classic');
   const [defaultRisk, setDefaultRisk] = useState(settings.defaultRisk || 2);
   const [device, setDevice] = useState(settings.device || 'desktop');
   const [currency, setCurrency] = useState(settings.currency || 'EUR');
@@ -18,16 +20,18 @@ export default function Settings() {
   useEffect(() => {
     setCapital(settings.initialCapital || 10000);
     setTheme(settings.theme || 'dark');
+    setThemeStyleState(themeStyle || 'classic');
     setDefaultRisk(settings.defaultRisk || 2);
     setDevice(settings.device || 'desktop');
     setCurrency(settings.currency || 'EUR');
     setLanguage(settings.language || 'fr');
-  }, [settings.initialCapital, settings.theme, settings.defaultRisk, settings.device, settings.currency, settings.language]);
+  }, [settings.initialCapital, settings.theme, settings.defaultRisk, settings.device, settings.currency, settings.language, themeStyle]);
 
   const handleSave = async () => {
     await updateSettings({
       initialCapital: capital,
       theme,
+      themeStyle: themeStyleState,
       defaultRisk,
       device,
       currency,
@@ -192,6 +196,36 @@ export default function Settings() {
               onClick={() => setTheme('light')}
             >
               ☀️ Clair
+            </button>
+          </div>
+        </div>
+
+        <div className="settings-card">
+          <h3> ¬† {t('style') || 'Style'}</h3>
+          <div className="theme-style-options">
+            <button
+              className={`theme-style-btn ${themeStyleState === 'classic' ? 'active' : ''}`}
+              onClick={() => setThemeStyleState('classic')}
+            >
+              <div className="style-preview classic-preview">
+                <div className="style-swatch" style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)' }}></div>
+                <div className="style-swatch" style={{ background: 'linear-gradient(135deg, #0d1321, #131c31)' }}></div>
+              </div>
+              <span className="style-label">Classic</span>
+              <span className="style-desc">Current application design</span>
+              {themeStyleState === 'classic' && <FaCheckCircle className="style-check" />}
+            </button>
+            <button
+              className={`theme-style-btn ${themeStyleState === 'technological' ? 'active' : ''}`}
+              onClick={() => setThemeStyleState('technological')}
+            >
+              <div className="style-preview tech-preview">
+                <div className="style-swatch" style={{ background: 'linear-gradient(135deg, #22d3ee, #3b82f6)' }}></div>
+                <div className="style-swatch" style={{ background: 'linear-gradient(135deg, #02060f, #060d1f)' }}></div>
+              </div>
+              <span className="style-label">Technological</span>
+              <span className="style-desc">Futuristic trading interface</span>
+              {themeStyleState === 'technological' && <FaCheckCircle className="style-check" />}
             </button>
           </div>
         </div>

@@ -5,9 +5,9 @@ import { PAIRS } from '../context/AppContext';
 import './Auth.css';
 
 const DEVICE_OPTIONS = [
-  { id: 'mobile', label: 'Mobile', icon: '📱', desc: 'Smartphone / Petite tablette' },
-  { id: 'tablet', label: 'Tablette', icon: '📲', desc: 'iPad / Tablette Android' },
-  { id: 'desktop', label: 'Desktop', icon: '🖥️', desc: 'Ordinateur / MacBook' }
+  { id: 'mobile', label: 'Mobile', icon: '📱', desc: 'Smartphone / Small tablet' },
+  { id: 'tablet', label: 'Tablet', icon: '📲', desc: 'iPad / Android Tablet' },
+  { id: 'desktop', label: 'Desktop', icon: '🖥️', desc: 'Computer / MacBook' }
 ];
 
 export default function Auth() {
@@ -71,8 +71,8 @@ export default function Auth() {
               <path d="M7 16l4-8 4 4 6-8"/>
             </svg>
           </div>
-          <h1>Réinitialisation du mot de passe</h1>
-          <p className="auth-subtitle">Entrez votre email pour recevoir un lien de réinitialisation</p>
+          <h1>Reset Password</h1>
+          <p className="auth-subtitle">Enter your email to receive a reset link</p>
           {error && <div className="auth-error">{error}</div>}
           {message && <div className="auth-message">{message}</div>}
           {resetSent && (
@@ -95,12 +95,12 @@ export default function Auth() {
                 />
               </div>
               <button type="submit" className="auth-btn" disabled={loading || resetSent}>
-                {loading ? 'Envoi...' : 'Envoyer le lien'}
+                {loading ? 'Sending...' : 'Send Link'}
               </button>
             </form>
           )}
           <button className="auth-link" onClick={() => { setShowReset(false); setResetSent(false); switchMode('login'); }}>
-            ← Retour à la connexion
+            ← Back to Login
           </button>
         </div>
       </div>
@@ -123,31 +123,31 @@ export default function Auth() {
             </svg>
           </div>
           <div className="verify-icon">📧</div>
-          <h1>Vérifiez votre email</h1>
+          <h1>Verify Your Email</h1>
           <p className="auth-subtitle">
-            Nous avons envoyé un lien de confirmation à<br/>
+            We sent a confirmation link to<br/>
             <strong>{email}</strong>
           </p>
           <div className="auth-success-card">
             <div className="auth-success-icon">✅</div>
-            <p>Cliquez sur le lien dans l'email pour activer votre compte.</p>
+            <p>Click the link in the email to activate your account.</p>
           </div>
           <div className="verify-steps">
             <div className="verify-step">
               <span className="verify-step-num">1</span>
-              <span>Ouvrez votre boîte mail</span>
+              <span>Open your email inbox</span>
             </div>
             <div className="verify-step">
               <span className="verify-step-num">2</span>
-              <span>Cherchez l'email de ProTrade Journal</span>
+              <span>Look for the ProTrade Journal email</span>
             </div>
             <div className="verify-step">
               <span className="verify-step-num">3</span>
-              <span>Cliquez sur le lien de confirmation</span>
+              <span>Click the confirmation link</span>
             </div>
           </div>
           <button className="auth-link" onClick={() => switchMode('login')}>
-            ← Retour à la connexion
+            ← Back to Login
           </button>
         </div>
       </div>
@@ -168,11 +168,11 @@ export default function Auth() {
             <path d="M7 16l4-8 4 4 6-8"/>
           </svg>
         </div>
-        <h1>{mode === 'login' ? 'Connexion' : 'Créer un compte'}</h1>
+        <h1>{mode === 'login' ? 'Login' : 'Create Account'}</h1>
         <p className="auth-subtitle">
           {mode === 'login'
-            ? 'Content de vous revoir ! Connectez-vous à votre journal.'
-            : 'Rejoignez ProTrade Journal et maîtrisez votre trading.'}
+            ? 'Welcome back! Sign in to your journal.'
+            : 'Join ProTrade Journal and master your trading.'}
         </p>
         {error && <div className="auth-error">{error}</div>}
         {message && <div className="auth-message">{message}</div>}
@@ -188,83 +188,83 @@ export default function Auth() {
               required
             />
           </div>
-          <div className="input-group">
-            <label htmlFor="password">Mot de passe</label>
-            <input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-            />
-          </div>
-          {mode === 'signup' && (
-            <>
-              <div className="input-group">
-                <label htmlFor="confirmPassword">Confirmer le mot de passe</label>
+<div className="input-group">
+                <label htmlFor="password">Password</label>
                 <input
-                  id="confirmPassword"
+                  id="password"
                   type="password"
                   placeholder="••••••••"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
                 />
-                {confirmPassword && password !== confirmPassword && (
-                  <span className="input-error">Les mots de passe ne correspondent pas</span>
-                )}
               </div>
-              <div className="input-group">
-                <label>Appareil</label>
-                <div className="device-options">
-                  {DEVICE_OPTIONS.map(d => (
-                    <button
-                      key={d.id}
-                      className={`device-btn ${device === d.id ? 'active' : ''}`}
-                      type="button"
-                      onClick={() => setDevice(d.id)}
-                    >
-                      <span>{d.icon}</span>
-                      <span>{d.label}</span>
-                      <span className="device-desc">{d.desc}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="input-group">
-                <label>Capital initial ($)</label>
-                <input
-                  type="number"
-                  id="capital"
-                  value={capital}
-                  onChange={(e) => setCapital(parseFloat(e.target.value) || 0)}
-                  min="5"
-                  step="100"
-                  required
-                />
-                <span className="input-hint">Minimum 5$</span>
-              </div>
-            </>
-          )}
-          <button type="submit" className="auth-btn" disabled={loading}>
-            {loading ? 'Chargement...' : (mode === 'login' ? 'Se connecter' : "S'inscrire")}
-          </button>
-        </form>
-        <div className="auth-footer">
-          <button className="auth-link" onClick={() => switchMode(mode === 'login' ? 'signup' : 'login')}>
-            {mode === 'login'
-              ? "Pas encore de compte ? S'inscrire"
-              : 'Déjà un compte ? Se connecter'}
-          </button>
-          {mode === 'login' && (
-            <button className="auth-link auth-link-secondary" onClick={() => { setShowReset(true); setResetSent(false); switchMode('reset'); }}>
-              Mot de passe oublié ?
-            </button>
-          )}
-        </div>
+              {mode === 'signup' && (
+                <>
+                  <div className="input-group">
+                    <label htmlFor="confirmPassword">Confirm Password</label>
+                    <input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="••••••••"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                    {confirmPassword && password !== confirmPassword && (
+                      <span className="input-error">Passwords do not match</span>
+                    )}
+                  </div>
+                  <div className="input-group">
+                    <label>Device</label>
+                    <div className="device-options">
+                      {DEVICE_OPTIONS.map(d => (
+                        <button
+                          key={d.id}
+                          className={`device-btn ${device === d.id ? 'active' : ''}`}
+                          type="button"
+                          onClick={() => setDevice(d.id)}
+                        >
+                          <span>{d.icon}</span>
+                          <span>{d.label}</span>
+                          <span className="device-desc">{d.desc}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="input-group">
+                    <label>Initial Capital ($)</label>
+                    <input
+                      type="number"
+                      id="capital"
+                      value={capital}
+                      onChange={(e) => setCapital(parseFloat(e.target.value) || 0)}
+                      min="5"
+                      step="100"
+                      required
+                    />
+                    <span className="input-hint">Minimum $5</span>
+                  </div>
+                </>
+              )}
+              <button type="submit" className="auth-btn" disabled={loading}>
+                {loading ? 'Loading...' : (mode === 'login' ? 'Sign In' : 'Sign Up')}
+              </button>
+            </form>
+            <div className="auth-footer">
+              <button className="auth-link" onClick={() => switchMode(mode === 'login' ? 'signup' : 'login')}>
+                {mode === 'login'
+                  ? "Don't have an account? Sign Up"
+                  : 'Already have an account? Sign In'}
+              </button>
+              {mode === 'login' && (
+                <button className="auth-link auth-link-secondary" onClick={() => { setShowReset(true); setResetSent(false); switchMode('reset'); }}>
+                  Forgot Password?
+                </button>
+              )}
+            </div>
       </div>
     </div>
   );

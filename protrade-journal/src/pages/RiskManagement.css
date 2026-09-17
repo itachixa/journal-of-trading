@@ -245,3 +245,90 @@
     gap: var(--space-sm);
   }
 }
+/* ====================== TECHNOLOGICAL THEME RISK MANAGEMENT ====================== */
+[data-theme-style="technological"] .risk-page {
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(34, 211, 238, 0.03) 0%, transparent 50%),
+    var(--bg-primary);
+}
+
+[data-theme-style="technological"] .risk-card {
+  background: linear-gradient(135deg, rgba(4, 12, 28, 0.9), rgba(6, 20, 44, 0.85));
+  border-color: rgba(34, 211, 238, 0.12);
+}
+
+[data-theme-style="technological"] .risk-stat {
+  background: rgba(6, 20, 44, 0.6);
+  border-color: rgba(34, 211, 238, 0.1);
+}
+
+[data-theme-style="technological"] .risk-stat-value.success {
+  color: var(--success);
+  text-shadow: 0 0 8px rgba(52, 211, 153, 0.3);
+}
+
+[data-theme-style="technological"] .risk-stat-value.warning {
+  color: var(--warning);
+}
+
+[data-theme-style="technological"] .risk-stat-value.danger {
+  color: var(--danger);
+  text-shadow: 0 0 8px rgba(248, 113, 113, 0.3);
+}
+
+[data-theme-style="technological"] .risk-setting input {
+  background: rgba(6, 20, 44, 0.6);
+  border-color: rgba(34, 211, 238, 0.15);
+}
+
+[data-theme-style="technological"] .risk-setting input:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
+}
+
+[data-theme-style="technological"] .rule-item {
+  background: rgba(6, 20, 44, 0.6);
+  border-color: rgba(34, 211, 238, 0.1);
+}
+
+[data-theme-style="technological"] .rule-item.success {
+  border-color: rgba(52, 211, 153, 0.2);
+  background: rgba(52, 211, 153, 0.04);
+}
+
+[data-theme-style="technological"] .rule-item.warning {
+  border-color: rgba(251, 191, 36, 0.2);
+  background: rgba(251, 191, 36, 0.04);
+}
+
+[data-theme-style="technological"] .rule-item.danger {
+  border-color: rgba(248, 113, 113, 0.2);
+  background: rgba(248, 113, 113, 0.04);
+}
+
+[data-theme-style="technological"] .rule-badge.success {
+  background: rgba(52, 211, 153, 0.12);
+  color: var(--success-light);
+}
+
+[data-theme-style="technological"] .rule-badge.warning {
+  background: rgba(251, 191, 36, 0.12);
+  color: var(--warning-light);
+}
+
+[data-theme-style="technological"] .rule-badge.danger {
+  background: rgba(248, 113, 113, 0.12);
+  color: var(--danger-light);
+}
+
+[data-theme-style="technological"] .tip-icon.success {
+  color: var(--success);
+}
+
+[data-theme-style="technological"] .tip-icon.info {
+  color: var(--accent-cyan);
+}
+
+[data-theme-style="technological"] .tip-icon.warning {
+  color: var(--warning);
+}

@@ -1287,4 +1287,145 @@
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}/* ====================== TECHNOLOGICAL THEME SURVEILLANCE ====================== */
+[data-theme-style="technological"] .surveillance-page {
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(34, 211, 238, 0.03) 0%, transparent 50%),
+    var(--bg-primary);
+}
+
+[data-theme-style="technological"] .surveillance-card {
+  background: linear-gradient(135deg, rgba(4, 12, 28, 0.9), rgba(6, 20, 44, 0.85));
+  border-color: rgba(34, 211, 238, 0.12);
+}
+
+[data-theme-style="technological"] .surveillance-card:hover {
+  border-color: rgba(34, 211, 238, 0.4);
+  box-shadow: 0 0 30px rgba(34, 211, 238, 0.12);
+}
+
+[data-theme-style="technological"] .surveillance-card.ready {
+  border-color: var(--success);
+}
+
+[data-theme-style="technological"] .surveillance-card.ready::before {
+  background: linear-gradient(90deg, var(--success), #22d3ee);
+}
+
+[data-theme-style="technological"] .stat-pill {
+  background: linear-gradient(135deg, rgba(4, 12, 28, 0.9), rgba(6, 20, 44, 0.85));
+  border-color: rgba(34, 211, 238, 0.15);
+}
+
+[data-theme-style="technological"] .stat-pill:hover {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+[data-theme-style="technological"] .view-toggle {
+  background: rgba(4, 12, 28, 0.6);
+  border-color: rgba(34, 211, 238, 0.15);
+}
+
+[data-theme-style="technological"] .view-toggle-btn.active {
+  background: linear-gradient(135deg, #22d3ee, #3b82f6);
+  color: #02060f;
+  box-shadow: 0 0 15px rgba(34, 211, 238, 0.3);
+}
+
+[data-theme-style="technological"] .setup-form-modal {
+  background: linear-gradient(135deg, rgba(4, 12, 28, 0.98), rgba(6, 20, 44, 0.98));
+  border-color: rgba(34, 211, 238, 0.2);
+}
+
+[data-theme-style="technological"] .dir-option.active {
+  box-shadow: 0 4px 15px rgba(34, 211, 238, 0.3);
+}
+
+[data-theme-style="technological"] .condition-item:hover {
+  border-color: var(--accent-cyan);
+  background: rgba(34, 211, 238, 0.06);
+}
+
+[data-theme-style="technological"] .card-notes-section {
+  background: rgba(167, 139, 250, 0.08);
+  border-left-color: var(--accent-purple);
+}
+
+[data-theme-style="technological"] .notes-label {
+  color: var(--accent-purple);
+}
+
+[data-theme-style="technological"] .progress-value {
+  color: var(--accent-cyan);
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.3);
+}
+
+[data-theme-style="technological"] .progress-fill.ready {
+  background: linear-gradient(90deg, var(--success), #22d3ee);
+}
+
+[data-theme-style="technological"] .inline-condition.checked {
+  background: rgba(52, 211, 153, 0.08);
+  border-color: var(--success);
+}
+
+[data-theme-style="technological"] .inline-condition.checked .inline-title {
+  color: var(--success);
+}
+
+[data-theme-style="technological"] .btn-action.take-trade {
+  background: linear-gradient(135deg, #22d3ee, #3b82f6);
+  box-shadow: 0 4px 15px rgba(34, 211, 238, 0.3);
+}
+
+[data-theme-style="technological"] .btn-action.take-trade:hover:not(:disabled) {
+  box-shadow: 0 6px 20px rgba(34, 211, 238, 0.4);
+}
+
+[data-theme-style="technological"] .btn-action.edit:hover {
+  background: rgba(34, 211, 238, 0.1);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+[data-theme-style="technological"] .btn-action.delete:hover {
+  background: var(--danger);
+  color: white;
+  box-shadow: 0 0 20px rgba(248, 113, 113, 0.3);
+}
+
+[data-theme-style="technological"] .empty-state {
+  background: linear-gradient(135deg, rgba(4, 12, 28, 0.9), rgba(6, 20, 44, 0.85));
+  border-color: rgba(34, 211, 238, 0.12);
+}
+
+[data-theme-style="technological"] .gallery-close:hover {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+[data-theme-style="technological"] .gallery-nav:hover:not(:disabled) {
+  background: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  color: #02060f;
+}
+
+[data-theme-style="technological"] .gallery-thumb.active {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 15px rgba(34, 211, 238, 0.3);
+}
+
+[data-theme-style="technological"] .screenshot-thumb button:hover {
+  background: var(--danger);
+}
+
+[data-theme-style="technological"] .screenshot-add:hover {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  background: rgba(34, 211, 238, 0.08);
+}
+
+[data-theme-style="technological"] .screenshot-thumb img:hover {
+  opacity: 1;
 }

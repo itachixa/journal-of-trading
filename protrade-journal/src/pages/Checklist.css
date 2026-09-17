@@ -409,4 +409,106 @@
   .item-actions {
     opacity: 1;
   }
+}/* ====================== TECHNOLOGICAL THEME CHECKLIST ====================== */
+[data-theme-style="technological"] .checklist-page {
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(34, 211, 238, 0.03) 0%, transparent 50%),
+    var(--bg-primary);
+}
+
+[data-theme-style="technological"] .checklist-card {
+  background: linear-gradient(135deg, rgba(4, 12, 28, 0.9), rgba(6, 20, 44, 0.85));
+  border-color: rgba(34, 211, 238, 0.12);
+}
+
+[data-theme-style="technological"] .card-header {
+  border-bottom-color: rgba(34, 211, 238, 0.12);
+}
+
+[data-theme-style="technological"] .category-badge {
+  background: rgba(34, 211, 238, 0.1);
+  color: var(--accent-cyan);
+}
+
+[data-theme-style="technological"] .category-badge.complete {
+  background: rgba(52, 211, 153, 0.12);
+  color: var(--success);
+}
+
+[data-theme-style="technological"] .checklist-item {
+  background: rgba(6, 20, 44, 0.6);
+  border-color: rgba(34, 211, 238, 0.08);
+}
+
+[data-theme-style="technological"] .checklist-item:hover {
+  background: rgba(34, 211, 238, 0.06);
+}
+
+[data-theme-style="technological"] .checkmark {
+  background: var(--bg-secondary);
+  border-color: rgba(34, 211, 238, 0.2);
+}
+
+[data-theme-style="technological"] .item-checkbox input:checked + .checkmark {
+  background: var(--success);
+  border-color: var(--success);
+}
+
+[data-theme-style="technological"] .item-edit input {
+  background: rgba(4, 12, 28, 0.8);
+  border-color: var(--accent-cyan);
+}
+
+[data-theme-style="technological"] .btn-save {
+  background: var(--success);
+}
+
+[data-theme-style="technological"] .btn-save:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.3);
+}
+
+[data-theme-style="technological"] .btn-cancel {
+  background: var(--danger);
+}
+
+[data-theme-style="technological"] .btn-cancel:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(248, 113, 113, 0.3);
+}
+
+[data-theme-style="technological"] .btn-edit:hover {
+  color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+}
+
+[data-theme-style="technological"] .btn-delete:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+[data-theme-style="technological"] .add-item-btn:hover {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+[data-theme-style="technological"] .progress-value {
+  color: var(--accent-cyan);
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.3);
+}
+
+[data-theme-style="technological"] .progress-bar-fill {
+  background: linear-gradient(90deg, #22d3ee, #3b82f6);
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.3);
+}
+
+[data-theme-style="technological"] .add-form-modal {
+  background: linear-gradient(135deg, rgba(4, 12, 28, 0.98), rgba(6, 20, 44, 0.98));
+  border-color: rgba(34, 211, 238, 0.2);
+}
+
+[data-theme-style="technological"] .add-form-modal input,
+[data-theme-style="technological"] .add-form-modal select {
+  background: rgba(6, 20, 44, 0.6);
+  border-color: rgba(34, 211, 238, 0.15);
 }
